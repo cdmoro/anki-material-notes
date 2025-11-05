@@ -1,0 +1,135 @@
+/*** REPLAY BUTTON (ANDROID MOBILE APP) ***/
+
+.note .replaybutton span {
+  height: 32px;
+  padding: 0;
+}
+
+.nightMode .note .replaybutton span svg polygon {
+  fill: #fff;
+}
+
+.note.back[class*="-base"] > .body .replaybutton span svg polygon {
+  fill: var(--accent-color);
+  align-self: center;
+}
+
+.note.back[class*="-filled"] > .body .replaybutton span svg polygon {
+  fill: #000;
+}
+
+.nightMode .note.back[class*="-filled"] > .body .replaybutton span svg polygon {
+  fill: #fff;
+}
+
+.note.back.note-white > .body .replaybutton span svg polygon {
+  fill: #000;
+}
+
+.nightMode .note.back.note-white > .body .replaybutton span svg polygon {
+  fill: #fff;
+}
+
+.note.front[class*="-base"] .replaybutton svg polygon {
+  fill: #fff;
+}
+
+.nightMode .note.front[class*="-base"] .replaybutton svg polygon {
+  fill: #000;
+}
+
+.note.front[class*="-filled"] .replaybutton svg polygon {
+  fill: #000;
+}
+
+.nightMode .note.front[class*="-filled"] .replaybutton svg polygon {
+  fill: #fff;
+}
+
+.note.front.note-white .replaybutton svg polygon {
+  fill: #000;
+}
+
+/*** REPLY BUTTON (DESKTOP APP) ***/
+
+.note .replay-button {
+  margin: 0;
+}
+
+.note .replay-button svg {
+  width: 32px;
+  height: 32px;
+}
+
+.note .replay-button svg circle {
+  fill: transparent;
+  stroke: transparent;
+}
+
+.note .replay-button svg path {
+  transform: scale(0.9);
+  transform-origin: center;
+  fill: #000;
+}
+
+.nightMode .note .replay-button svg path {
+  fill: #fff;
+}
+
+.note.front[class*="-base"] .replay-button svg path {
+  fill: #fff;
+}
+
+.nightMode .note.front[class*="-base"] .replay-button svg path {
+  fill: #000;
+}
+
+.note.front[class*="-filled"] .replay-button svg path {
+  fill: #000;
+}
+
+.nightMode .note.front[class*="-filled"] .replay-button svg path {
+  fill: #fff;
+}
+
+.note.back[class*="-base"] > .body .replay-button svg path {
+  fill: var(--accent-color);
+}
+
+.note.back[class*="-outlined"] > .body .replay-button svg path {
+  fill: var(--border-color);
+}
+
+.note.back[class*="-filled"] > .body .replay-button svg path {
+  fill: #000;
+}
+
+.nightMode .note.back[class*="-filled"] > .body .replay-button svg path {
+  fill: #fff;
+}
+
+.note.back.note-white .body .replay-button svg path {
+  fill: #000;
+}
+
+.nightMode .note.back.note-white .body .replay-button svg path {
+  fill: #fff;
+}
+
+.note.back .note.front.note-white .replay-button svg path {
+  fill: #000;
+}
+
+/*** REPLAY BUTTON (FIREFOX) ***/
+
+.note .gecko audio {
+  width: 48px;
+  height: 32px;
+}
+
+/*** REPLAY BUTTON (CHROME) ***/
+
+.note .chrome audio {
+  width: 143px;
+  height: 32px;
+}

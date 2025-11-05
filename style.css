@@ -1,0 +1,535 @@
+/*
+ * Name: Anki Material Flashcard
+ * Author: Carlos Bonadeo
+ * Version: 1.0.0
+ * Repo: https://github.com/cdmoro/anki-material-flashcard
+*/
+
+body.card {
+  --light-font-color: #010101;
+  --dark-font-color: #e9e9e9;
+  --border-radius: 12px;
+  --front-font-size: 21px;
+  --border: none;
+
+  --background: #FEFEFE;
+  --accent-color: #FFF;
+  --note-background: #FEFEFE;
+  --font-color: var(--light-font-color);
+  --hr-color: #ddd;
+}
+
+body.card.nightMode {
+  --background: #121212;
+  --accent-color: #1d1d1d;
+  --note-background: #1d1d1d;
+  --font-color: var(--dark-font-color);
+  --hr-color: #333;
+}
+
+body.card {
+  font-family: arial;
+  font-size: 19px;
+  color: var(--font-color);
+  background: var(--background);
+  padding: 0.5rem;
+}
+
+body.card a {
+  color: var(--font-color);
+}
+
+body.card .note.front,
+body.card .note.back {
+  max-width: 500px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  border-radius: var(--border-radius);
+  margin: 0 auto;
+  overflow: hidden;
+  color: var(--font-color);
+  background: var(--note-background);
+  border: var(--border);
+  position: relative;
+}
+
+body.card .note.back .note.front {
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  box-shadow: none !important;
+}
+
+body.card .note.front {
+	font-size: var(--front-font-size);
+  background: var(--accent-color);
+  text-align: center;
+  color: var(--front-color, --font-color);
+}
+
+.note.front .header {
+  font-size: 14px;
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+body.card .note.front .body,
+body.card .note.back .text-block {
+  padding: 16px;
+}
+
+body.card .note.back hr {
+	margin: 0;
+	border: none;
+	border-top: var(--hr-color) solid 1px;
+	background: none;
+}
+
+.note.back > .body > img.cover,
+.note.front > img.cover {
+	width: 100%;
+	object-fit: cover;
+	max-height: 200px;
+	display: block;
+}
+
+.note[class*="note-"] {
+ --front-color: var(--dark-font-color);
+}
+
+.nightMode .note[class*="note-"] {
+ --front-color: var(--light-font-color);
+}
+
+.note.Material\:\:note-white,
+.nightMode .note.Material\:\:note-white {
+  --front-color: var(--light-font-color);
+  --accent-color: #FFF;
+}
+
+.note.Material\:\:note-blue {
+  --accent-color: #1976d2;
+}
+.nightMode .note.Material\:\:note-blue {
+  --accent-color: #42a5f5;
+}
+
+.note.Material\:\:note-purple {
+  --accent-color: #6200ee;
+}
+.nightMode .note.Material\:\:note-purple {
+  --accent-color: #bb86fc;
+}
+
+.note.Material\:\:note-pink {
+  --accent-color: #e91e63;
+}
+.nigthMode .note.Material\:\:note-pink {
+  --accent-color: #f06292;
+}
+
+.note.Material\:\:note-teal {
+  --accent-color: #00796b;
+}
+.nightMode .note.Material\:\:note-teal {
+  --accent-color: #4db6ac;
+}
+
+.note.Material\:\:note-green {
+  --accent-color: #388e3c;
+}
+.nightMode .note.Material\:\:note-green {
+  --accent-color: #81c784;
+}
+
+.note.Material\:\:note-orange {
+  --accent-color: #ef6c00;
+}
+.nightMode .note.Material\:\:note-orange {
+  --accent-color: #ffb74d;
+}
+
+.note.Material\:\:note-indigo {
+  --accent-color: #3949ab;
+}
+.nightMode .note.Material\:\:note-indigo {
+  --accent-color: #9fa8da;
+}
+
+.note.Material\:\:note-brown {
+  --accent-color: #6d4c41;
+}
+.nightMode .note.Material\:\:note-brown {
+  --accent-color: #a1887f;
+}
+
+.note.Material\:\:note-lime {
+  --accent-color: #9e9d24;
+}
+.nightMode .note.Material\:\:note-lime {
+  --accent-color: #cddc39;
+}
+
+.note.Material\:\:note-red {
+  --accent-color: #d32f2f;
+}
+.nightMode .note.Material\:\:note-red {
+  --accent-color: #e57373;
+}
+
+body.card .note[class*="-filled"] {
+	--front-color: #000;
+	background: var(--accent-color);
+	box-shadow: none;
+}
+
+.nightMode .note[class*="-filled"] {
+  --front-color: #FFF;
+}
+
+.note.back[class*="-filled"] > hr {
+	border-top-color: #55555533;
+}
+
+.nightMode .note.back[class*="-filled"] > hr {
+	border-top-color: #55555555;
+}
+
+.note.Material\:\:note-blue-filled {
+  --accent-color: #cbdef1;
+}
+.nightMode .note.Material\:\:note-blue-filled {
+  --accent-color: #243a4c;
+}
+
+.note.Material\:\:note-purple-filled {
+	--accent-color: #ccb1ec;
+}
+.nightMode .note.Material\:\:note-purple-filled {
+	--accent-color: #383042;
+}
+
+.note.Material\:\:note-pink-filled {
+	--accent-color: #f4dddc;
+}
+.nightMode .note.Material\:\:note-pink-filled {
+	--accent-color: #5A1B39;
+}
+
+.note.Material\:\:note-teal-filled {
+	--accent-color: #C3FFFF;
+}
+.nightMode .note.Material\:\:note-teal-filled {
+	--accent-color: #004646;
+}
+
+.note.Material\:\:note-green-filled {
+	--accent-color: #b8edba;
+}
+.nightMode .note.Material\:\:note-green-filled {
+	--accent-color: #1c241c;
+}
+
+.note.Material\:\:note-orange-filled {
+	--accent-color: #ffd8b8;
+}
+.nightMode .note.Material\:\:note-orange-filled {
+	--accent-color: #372406;
+}
+
+.note.Material\:\:note-indigo-filled {
+	--accent-color: #ccb1ec;
+}
+.nightMode .note.Material\:\:note-indigo-filled {
+	--accent-color: #383042;
+}
+
+.note.Material\:\:note-brown-filled {
+	--accent-color: #ccb1ec;
+}
+.nightMode .note.Material\:\:note-brown-filled {
+	--accent-color: #383042;
+}
+
+.note.Material\:\:note-lime-filled {
+	--accent-color: #ccb1ec;
+}
+.nightMode .note.Material\:\:note-lime-filled {
+	--accent-color: #383042;
+}
+
+.note.Material\:\:note-red-filled {
+	--accent-color: #ccb1ec;
+}
+.nightMode .note.Material\:\:note-red-filled {
+	--accent-color: #383042;
+}
+
+.note[class*="-outlined"] {
+ --front-color: var(--light-font-color);
+}
+
+.nightMode .note[class*="-outlined"] {
+ --front-color: var(--dark-font-color);
+}
+
+body.card .note[class*="-outlined"] {
+  border: var(--border-color) 2px solid;
+  box-shadow: none;
+  --hr-color: rgb(from var(--border-color) r g b / 40%);
+}
+
+body.card .note[class*="-outlined"] .front {
+  border: none;
+}
+
+.note.Material\:\:note-base-outlined {
+  --border-color: #d9d3de;
+}
+.nightMode .note.Material\:\:note-base-outlined {
+  --border-color: #3d3a43;
+}
+
+.note.Material\:\:note-blue-outlined {
+  --border-color: #1976d2;
+}
+.nightMode .note.Material\:\:note-blue-outlined {
+  --border-color: #42a5f5;
+}
+
+/* HINT */
+
+.hint {
+  font-size: 16px;
+  font-style: italic;
+  color: inherit;
+}
+
+.note.front.symbol .body,
+.note.front .body .symbol {
+  font-size: 4rem;
+}
+
+.note.front .body .emoji {
+  font-size: 4rem;
+}
+
+.note.front .subheader {
+  margin-top: 0.5rem;
+  font-size: 16px;
+}
+
+.note.back .subtitle {
+  font-size: 16px;
+  margin-bottom: 0.6rem;
+  opacity: 0.6;
+  margin-top: 1rem;
+}
+
+.note.back .subtitle:first-child {
+  margin-top: 0;
+}
+
+#_mark,
+#_flag {
+  display: none;
+}
+
+#_mark:not([hidden]) + #_flag + #qa .note.front::before {
+	content: "★";
+	position: absolute;
+	left: 9px;
+	top: -9px;
+	color: var(--note-background);
+	font-size: 21px;
+  border-radius: 0px 0px 6px 6px;
+  padding: 0px 1px 0px 2px;
+  border: 3px solid var(--background);
+  background: #FFCC00;
+}
+
+#_flag:not([hidden]) + #qa .note.front::after {
+	content: "⚑";
+	position: absolute;
+	right: 9px;
+	top: -5px;
+	font-size: 14px;
+	border-radius: 0px 0px 6px 6px;
+	color: var(--note-background);
+	padding: 3px 3px 2px 4px;
+	border: 3px solid var(--background);
+}
+
+#_flag[style*="flag-1"] + #qa .note.front::after {
+  background: var(--flag-1);
+}
+
+#_flag[style*="flag-2"] + #qa .note.front::after {
+  background: var(--flag-2);
+}
+
+#_flag[style*="flag-3"] + #qa .note.front::after {
+  background: var(--flag-3);
+}
+
+#_flag[style*="flag-4"] + #qa .note.front::after {
+  background: var(--flag-4);
+}
+
+#_flag[style*="flag-5"] + #qa .note.front::after {
+  background: var(--flag-5);
+}
+
+#_flag[style*="flag-6"] + #qa .note.front::after {
+  background: var(--flag-6);
+}
+
+#_flag[style*="flag-7"] + #qa .note.front::after {
+  background: var(--flag-7);
+}
+
+/*** REPLAY BUTTON (ANDROID MOBILE APP) ***/
+
+.note .replaybutton span {
+  height: 32px;
+  padding: 0;
+}
+
+.nightMode .note .replaybutton span svg polygon {
+  fill: #fff;
+}
+
+.note.back[class*="note-"]:not([class*="outlined"]):not([class*="-flag-"])
+  > .body
+  .replaybutton
+  span
+  svg
+  polygon {
+  fill: var(--accent-color);
+  align-self: center;
+}
+
+.note.back[class*="-filled"] > .body .replaybutton span svg polygon {
+  fill: #000;
+}
+
+.nightMode .note.back[class*="-filled"] > .body .replaybutton span svg polygon {
+  fill: #fff;
+}
+
+.note.back.note-white > .body .replaybutton span svg polygon {
+  fill: #000;
+}
+
+.nightMode .note.back.note-white > .body .replaybutton span svg polygon {
+  fill: #fff;
+}
+
+.note.front[class*="note-"]:not([class*="outlined"]) .replaybutton svg polygon {
+  fill: #fff;
+}
+
+.nightMode
+  .note.front[class*="note-"]:not([class*="outlined"])
+  .replaybutton
+  svg
+  polygon {
+  fill: #000;
+}
+
+.note.front[class*="-filled"] .replaybutton svg polygon {
+  fill: #000;
+}
+
+.nightMode .note.front[class*="-filled"] .replaybutton svg polygon {
+  fill: #fff;
+}
+
+.note.front.note-white .replaybutton svg polygon {
+  fill: #000;
+}
+
+/*** REPLY BUTTON (DESKTOP APP) ***/
+
+.note .replay-button {
+  margin: 0;
+}
+
+.note .replay-button svg {
+  width: 32px;
+  height: 32px;
+}
+
+.note .replay-button svg circle {
+  fill: transparent;
+  stroke: transparent;
+}
+
+.note .replay-button svg path {
+  transform: scale(0.9);
+  transform-origin: center;
+  fill: #000;
+}
+
+.nightMode .note .replay-button svg path {
+  fill: #fff;
+}
+
+.note.front[class*="note-"]:not([class*="outlined"]) .replay-button svg path {
+  fill: #fff;
+}
+
+.nightMode
+  .note.front[class*="note-"]:not([class*="outlined"])
+  .replay-button
+  svg
+  path {
+  fill: #000;
+}
+
+.note.front[class*="-filled"] .replay-button svg path {
+  fill: #000;
+}
+
+.nightMode .note.front[class*="-filled"] .replay-button svg path {
+  fill: #fff;
+}
+
+.note.back[class*="note-"]:not([class*="outlined"]):not([class*="-flag-"])
+  > .body
+  .replay-button
+  svg
+  path {
+  fill: var(--accent-color);
+}
+
+.note.back[class*="-filled"] > .body .replay-button svg path {
+  fill: #000;
+}
+
+.nightMode .note.back[class*="-filled"] > .body .replay-button svg path {
+  fill: #fff;
+}
+
+.note.back.note-white .body .replay-button svg path {
+  fill: #000;
+}
+
+.nightMode .note.back.note-white .body .replay-button svg path {
+  fill: #fff;
+}
+
+.note.back .note.front.note-white .replay-button svg path {
+  fill: #000;
+}
+
+/*** REPLAY BUTTON (FIREFOX) ***/
+
+.note .gecko audio {
+  width: 48px;
+  height: 32px;
+}
+
+/*** REPLAY BUTTON (CHROME) ***/
+
+.note .chrome audio {
+  width: 143px;
+  height: 32px;
+}

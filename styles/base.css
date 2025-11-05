@@ -1,0 +1,140 @@
+/*
+ * Name: Anki Material Flashcard
+ * Author: Carlos Bonadeo
+ * Version: 1.0.0
+ * Repo: https://github.com/cdmoro/anki-material-flashcard
+*/
+
+.card {
+  --light-font-color: #010101;
+  --dark-font-color: #e9e9e9;
+  --border-radius: 8px;
+  --front-font-size: 21px;
+  --border: none;
+
+  --background: #fff;
+  --accent-color: #fff;
+  --note-background: #fefefe;
+  --font-color: var(--light-font-color);
+  --hr-color: #ddd;
+
+  background: #fefefe;
+}
+
+.card.nightMode {
+  --background: #121212;
+  --accent-color: #1d1d1d;
+  --note-background: #1d1d1d;
+  --font-color: var(--dark-font-color);
+  --hr-color: #333;
+
+  background: #121212;
+}
+
+.card {
+  font-family: arial;
+  font-size: 19px;
+  color: var(--font-color);
+  background: var(--background);
+  padding: 0.5rem;
+}
+
+.card a {
+  color: var(--font-color);
+}
+
+.card .note.front,
+.card .note.back {
+  max-width: 500px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  border-radius: var(--border-radius);
+  margin: 0 auto;
+  overflow: hidden;
+  color: var(--font-color);
+  background: var(--note-background);
+  border: var(--border);
+  position: relative;
+}
+
+.card .note.back .note.front {
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  box-shadow: none !important;
+}
+
+.card .note.front {
+  font-size: var(--front-font-size);
+  background: var(--accent-color);
+  text-align: center;
+  color: var(--front-color, --font-color);
+}
+
+.note.front .header {
+  font-size: 14px;
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.card .note.front .body,
+.card .note.back .body {
+  padding: 16px;
+}
+
+/* MARK & FLAG */
+
+/* #_mark,
+#_flag {
+  display: none;
+} */
+
+/*#_mark:not([hidden]) + #_flag + #qa .note.front::before {
+  content: "★";
+  position: absolute;
+  left: 9px;
+  top: -9px;
+  color: var(--note-background);
+  font-size: 21px;
+  border-radius: 0px 0px 6px 6px;
+  padding: 0px 1px 0px 2px;
+  border: 3px solid var(--background);
+  background: #ffcc00;
+}
+
+#_flag:not([hidden]) + #qa .note.front::after {
+  content: "⚑";
+  position: absolute;
+  right: 9px;
+  top: -5px;
+  font-size: 14px;
+  border-radius: 0px 0px 6px 6px;
+  color: var(--note-background);
+  padding: 3px 3px 2px 4px;
+  border: 3px solid var(--background);
+}
+
+#_flag[style*="flag-1"] + #qa .note.front::after {
+  background: var(--flag-1);
+}
+
+#_flag[style*="flag-2"] + #qa .note.front::after {
+  background: var(--flag-2);
+}
+
+#_flag[style*="flag-3"] + #qa .note.front::after {
+  background: var(--flag-3);
+}
+
+#_flag[style*="flag-4"] + #qa .note.front::after {
+  background: var(--flag-4);
+}
+
+#_flag[style*="flag-5"] + #qa .note.front::after {
+  background: var(--flag-5);
+}
+
+#_flag[style*="flag-6"] + #qa .note.front::after {
+  background: var(--flag-6);
+}
+
+#_flag[style*="flag-7"] + #qa .note.front::after {
+  background: var(--flag-7);
+} */

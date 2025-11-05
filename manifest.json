@@ -1,0 +1,9 @@
+{
+  "name": "Flashcard Styles",
+  "package": "flashcard_styles",
+  "version": "1.0.0",
+  "min_point_version": 45,
+  "author": "Carlos Bonadeo",
+  "homepage": "https://ankiweb.net/shared/",
+  "description": "Adds a Material-style note type and tools for managing styled flashcards."
+}

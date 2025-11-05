@@ -1,0 +1,266 @@
+:root {
+  --flag-1: #f87171;
+  --flag-2: #fdba74;
+  --flag-3: #86efac;
+  --flag-4: #60a5fa;
+  --flag-5: #f0abfc;
+  --flag-6: #5eead4;
+  --flag-7: #c084fc;
+}
+
+body {
+  margin: 0;
+  margin-bottom: 1.25rem;
+}
+
+.d-none {
+  display: none;
+}
+
+body.nightMode {
+  background: #121212;
+  color: #fff;
+}
+
+.card.nightMode > h1,
+.card.nightMode > label,
+.card.nightMode > .settings .footer a {
+  color: #fff;
+}
+
+.card > .form {
+  font-size: 75%;
+}
+
+.card > .settings .footer {
+  font-style: italic;
+  font-size: 70%;
+}
+
+.card > hr {
+  margin: 2rem -0.5rem;
+  border-top-color: #fff;
+  border-bottom: none;
+}
+.card.nightMode > hr {
+  border-top-color: #888;
+}
+
+.front-side .note.back hr,
+.front-side .note.back hr ~ * {
+  display: none !important;
+}
+
+.replaybutton {
+  text-decoration: none;
+}
+
+.replaybutton span {
+  display: inline-block;
+  vertical-align: middle;
+  padding: 5px;
+}
+
+.replaybutton span svg {
+  stroke: none;
+  fill: black;
+  display: inline;
+  height: 1em;
+  width: 1em;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.replaybutton span img {
+  display: inline;
+  height: 1em;
+  width: 1em;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.replay-button {
+  text-decoration: none;
+  display: inline-flex;
+  vertical-align: middle;
+  margin: 3px;
+}
+
+.replay-button svg {
+  width: 40px;
+  height: 40px;
+}
+
+.replay-button svg circle {
+  fill: #fff;
+  stroke: #414141;
+}
+
+.replay-button svg path {
+  fill: #414141;
+}
+
+.card > h1,
+.card > .form,
+.card > .settings .footer {
+  text-align: center;
+}
+
+h1 {
+  margin: .5rem auto;
+}
+
+h2 {
+  max-width: 500px;
+  margin: 4rem auto .5rem;
+  text-align: left;
+  font-size: 1.5rem;
+}
+
+.note {
+  transition: all .5s ease;
+}
+
+.input-group {
+	display: inline-flex;
+}
+
+.input-group > * {
+	border-radius: 0;
+	margin-left: -1px;
+}
+
+.input-group > :first-child {
+	border-end-start-radius: .25rem;
+	border-start-start-radius: .25rem;
+}
+
+.input-group > :last-child {
+	border-end-end-radius: .25rem;
+	border-start-end-radius: .25rem;
+}
+
+.input-group-text {
+	display: flex;
+	align-items: center;
+	padding: 0 .6rem;
+	font-weight: 400;
+	line-height: 1.5;
+	text-align: center;
+	white-space: nowrap;
+	background-color: var(--font-color);
+	border: var(--font-color) solid 1px;
+	color: var(--background);
+}
+
+select {
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: var(--background);
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%232f2e2c' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+	background-position: right .5rem center;
+	background-repeat: no-repeat;
+	background-size: 16px 12px;
+	border: 1px solid color-mix(in srgb,var(--font-color),transparent 20%);
+	border-radius: .25rem;
+	color: var(--font-color);
+	font-size: .85rem;
+	font-weight: 400;
+	line-height: 1.5;
+	max-height: 30px;
+	padding: .25rem 2rem .25rem .5rem;
+	transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.nightMode select {
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a3a29a' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+.settings {
+	display: flex;
+	flex-wrap: wrap;
+  flex-direction: column;
+	gap: 4px;
+	justify-content: center;
+  position: sticky;
+  top: 0px;
+  padding: .75rem;
+  z-index: 5;
+  background: color-mix(in srgb, var(--background), transparent 5%) !important;
+  border: none !important;
+  transition: all .5s ease, background 0s;
+  color: #2f2e2c;
+}
+
+.nightMode .settings {
+  color: #a3a29a;
+}
+
+.settings .form {
+  display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+  justify-content: center;
+}
+
+button {
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: var(--background);
+	border: 1px solid color-mix(in srgb, var(--font-color), transparent 20%);
+	border-radius: .25rem;
+	color: var(--font-color);
+	cursor: pointer;
+	font-size: .85rem;
+	font-weight: 400;
+	line-height: 1.5;
+	max-height: 30px;
+	padding: .25rem .5rem;
+	transition: box-shadow .15s ease-in-out;
+	white-space: nowrap;
+}
+
+.settings button.active,
+.settings button.active:hover {
+	background-color: var(--accent-color);
+	border-color: var(--accent-color);
+	color: var(--background);
+	z-index: 1;
+  transition: all .5s ease;
+}
+
+.settings[class*="-filled"] button.active,
+.settings[class*="-filled"] button.active:hover {
+  background-color: var(--note-background);
+  border-color: var(--note-background);
+  color: var(--front-color);
+}
+
+.settings[class*="-outlined"] button.active,
+.settings[class*="-outlined"] button.active:hover {
+  background-color: var(--border-color);
+  border-color: var(--border-color);
+  color: var(--background);
+}
+
+.settings .footer a {
+  transition: all .5s ease;
+}
+
+.settings[class*="-base"] .footer a {
+  color: var(--accent-color) !important;
+}
+
+.settings[class*="-filled"] .footer a {
+  color: var(--font-color) !important;
+}
+
+.settings[class*="-outlined"] .footer a {
+  color: var(--border-color) !important;
+}
+
+.settings[class*="base-outlined"] .footer a {
+  color: var(--font-color) !important;
+}

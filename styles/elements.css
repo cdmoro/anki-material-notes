@@ -1,0 +1,162 @@
+.card .note.back hr {
+  margin: 0;
+  border: none;
+  border-top: var(--hr-color) solid 1px;
+  background: none;
+}
+
+.note.back > img.cover,
+.note.front > img.cover {
+  width: 100%;
+  object-fit: cover;
+  max-height: 200px;
+  display: block;
+}
+
+/* HINT */
+
+.note.front.symbol .body,
+.note.front .body .symbol {
+  font-size: 4rem;
+}
+
+.note.front .body .emoji {
+  font-size: 4rem;
+}
+
+.note.front .subheader {
+  margin-top: 0.5rem;
+  font-size: 16px;
+}
+
+.note.back .subtitle {
+  font-size: 16px;
+  margin-bottom: 0.6rem;
+  opacity: 0.6;
+  margin-top: 1rem;
+}
+
+.note.back .body > .subtitle:first-child {
+  margin-top: 0;
+}
+
+/*** HINT STYLES ***/
+
+.hint {
+  font-size: 16px;
+  font-style: italic;
+  color: inherit;
+}
+
+.note a.hint {
+  text-decoration: underline;
+}
+
+.note .body .hint {
+  font-style: italic;
+  display: inline-block;
+}
+
+.note.back[class*="-base"] > .body .hint {
+  color: var(--accent-color);
+}
+
+.note.back[class*="-outlined"] > .body .hint {
+  color: var(--border-color);
+}
+
+.note.back[class*="-filled"] > .body .hint {
+  color: #000;
+}
+
+.nightMode .note[class*="-filled"] .body .hint {
+  color: #fff;
+}
+
+.note.note-white .body .hint {
+  color: #000;
+}
+
+.nightMode .note.back.note-white > .body .hint {
+  color: #fff;
+}
+
+.note.front .hint {
+  color: var(--front-font-color);
+  font-size: 16px;
+}
+
+/*** IMAGE STYLES ***/
+
+.note.front > img {
+  width: 100%;
+  object-fit: cover;
+  max-width: 500px;
+  max-height: 200px;
+  display: block;
+}
+
+.note.front .body img {
+  max-height: 200px;
+  max-width: 400px;
+  vertical-align: middle;
+}
+
+.note.back > .body > img {
+  width: 100%;
+  object-fit: cover;
+  max-height: 200px;
+  display: block;
+}
+
+/* Centered */
+
+.note.Material\:\:note-centered .body,
+.note.Material\:\:note-centered .body .flex {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* gap: 0.5rem; */
+  text-align: center;
+}
+
+/* .note.Material\:\:note-centered .header {
+  margin-bottom: 0.5rem;
+} */
+
+.note.Material\:\:note-centered .body em,
+.note.Material\:\:note-centered .body strong {
+  display: contents;
+}
+
+/* Utils */
+
+.flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/*** PILL STYLES ***/
+
+.note .text-block .pill {
+  font-size: 70%;
+  color: #000;
+  background: #dddddd99;
+  padding: 0.4rem 0.7rem;
+  border-radius: 1rem;
+  display: inline-block;
+}

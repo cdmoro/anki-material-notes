@@ -1,0 +1,266 @@
+.note[class*="-base"] {
+  --front-color: var(--dark-font-color);
+}
+
+.nightMode .note[class*="-base"] {
+  --front-color: var(--light-font-color);
+}
+
+.note.Material\:\:note-white-base,
+.nightMode .note.Material\:\:note-white-base {
+  --front-color: var(--light-font-color);
+  --accent-color: #fff;
+}
+
+.note.Material\:\:note-blue-base {
+  --accent-color: #1976d2;
+}
+.nightMode .note.Material\:\:note-blue-base {
+  --accent-color: #42a5f5;
+}
+
+.note.Material\:\:note-purple-base {
+  --accent-color: #6200ee;
+}
+.nightMode .note.Material\:\:note-purple-base {
+  --accent-color: #bb86fc;
+}
+
+.note.Material\:\:note-pink-base {
+  --accent-color: #e91e63;
+}
+.nigthMode .note.Material\:\:note-pink-base {
+  --accent-color: #f06292;
+}
+
+.note.Material\:\:note-teal-base {
+  --accent-color: #00796b;
+}
+.nightMode .note.Material\:\:note-teal-base {
+  --accent-color: #4db6ac;
+}
+
+.note.Material\:\:note-green-base {
+  --accent-color: #388e3c;
+}
+.nightMode .note.Material\:\:note-green-base {
+  --accent-color: #81c784;
+}
+
+.note.Material\:\:note-orange-base {
+  --accent-color: #ef6c00;
+}
+.nightMode .note.Material\:\:note-orange-base {
+  --accent-color: #ffb74d;
+}
+
+.note.Material\:\:note-indigo-base {
+  --accent-color: #3949ab;
+}
+.nightMode .note.Material\:\:note-indigo-base {
+  --accent-color: #9fa8da;
+}
+
+.note.Material\:\:note-brown-base {
+  --accent-color: #6d4c41;
+}
+.nightMode .note.Material\:\:note-brown-base {
+  --accent-color: #a1887f;
+}
+
+.note.Material\:\:note-lime-base {
+  --accent-color: #9e9d24;
+}
+.nightMode .note.Material\:\:note-lime-base {
+  --accent-color: #cddc39;
+}
+
+.note.Material\:\:note-red-base {
+  --accent-color: #d32f2f;
+}
+.nightMode .note.Material\:\:note-red-base {
+  --accent-color: #e57373;
+}
+
+.card .note[class*="-filled"] {
+  --front-color: #000;
+  background: var(--note-background);
+  box-shadow: none;
+}
+
+.nightMode .note[class*="-filled"] {
+  --front-color: #fff;
+}
+
+.note.back[class*="-filled"] > hr {
+  border-top-color: #55555533;
+}
+
+.nightMode .note.back[class*="-filled"] > hr {
+  border-top-color: #55555555;
+}
+
+.note.Material\:\:note-blue-filled {
+  --note-background: #cbdef1;
+}
+.nightMode .note.Material\:\:note-blue-filled {
+  --note-background: #243a4c;
+}
+
+.note.Material\:\:note-purple-filled {
+  --note-background: #ccb1ec;
+}
+.nightMode .note.Material\:\:note-purple-filled {
+  --note-background: #383042;
+}
+
+.note.Material\:\:note-pink-filled {
+  --note-background: #f4dddc;
+}
+.nightMode .note.Material\:\:note-pink-filled {
+  --note-background: #5a1b39;
+}
+
+.note.Material\:\:note-teal-filled {
+  --note-background: #c3ffff;
+}
+.nightMode .note.Material\:\:note-teal-filled {
+  --note-background: #004646;
+}
+
+.note.Material\:\:note-green-filled {
+  --note-background: #b8edba;
+}
+.nightMode .note.Material\:\:note-green-filled {
+  --note-background: #1c241c;
+}
+
+.note.Material\:\:note-orange-filled {
+  --note-background: #ffd8b8;
+}
+.nightMode .note.Material\:\:note-orange-filled {
+  --note-background: #372406;
+}
+
+.note.Material\:\:note-indigo-filled {
+  --note-background: #ccd4ff;
+}
+.nightMode .note.Material\:\:note-indigo-filled {
+  --note-background: #272938;
+}
+
+.note.Material\:\:note-brown-filled {
+  --note-background: #f9cfab;
+}
+.nightMode .note.Material\:\:note-brown-filled {
+  --note-background: #35211a;
+}
+
+.note.Material\:\:note-lime-filled {
+  --note-background: #f4f4a9;
+}
+.nightMode .note.Material\:\:note-lime-filled {
+  --note-background: #393300;
+}
+
+.note.Material\:\:note-red-filled {
+  --note-background: #f7bfbf;
+}
+.nightMode .note.Material\:\:note-red-filled {
+  --note-background: #371c1c;
+}
+
+.note[class*="-outlined"] {
+  --front-color: var(--light-font-color);
+}
+
+.nightMode .note[class*="-outlined"] {
+  --front-color: var(--dark-font-color);
+}
+
+.card .note[class*="-outlined"] {
+  border: var(--border-color) 2px solid;
+  box-shadow: none;
+  --hr-color: rgb(from var(--border-color) r g b / 40%);
+}
+
+.card .note[class*="-outlined"] .front {
+  border: none;
+}
+
+.note.Material\:\:note-base-outlined {
+  --border-color: #d9d3de;
+}
+.nightMode .note.Material\:\:note-base-outlined {
+  --border-color: #3d3a43;
+}
+
+.note.Material\:\:note-blue-outlined {
+  --border-color: #1976d2;
+}
+.nightMode .note.Material\:\:note-blue-outlined {
+  --border-color: #42a5f5;
+}
+
+.note.Material\:\:note-purple-outlined {
+  --border-color: #6200ee;
+}
+.nightMode .note.Material\:\:note-purple-outlined {
+  --border-color: #bb86fc;
+}
+
+.note.Material\:\:note-pink-outlined {
+  --border-color: #e91e63;
+}
+.nightMode .note.Material\:\:note-pink-outlined {
+  --border-color: #f06292;
+}
+
+.note.Material\:\:note-teal-outlined {
+  --border-color: #00796b;
+}
+.nightMode .note.Material\:\:note-teal-outlined {
+  --border-color: #4db6ac;
+}
+
+.note.Material\:\:note-green-outlined {
+  --border-color: #388e3c;
+}
+.nightMode .note.Material\:\:note-green-outlined {
+  --border-color: #81c784;
+}
+
+.note.Material\:\:note-orange-outlined {
+  --border-color: #ef6c00;
+}
+.nightMode .note.Material\:\:note-orange-outlined {
+  --border-color: #ffb74d;
+}
+
+.note.Material\:\:note-indigo-outlined {
+  --border-color: #3949ab;
+}
+.nightMode .note.Material\:\:note-indigo-outlined {
+  --border-color: #9fa8da;
+}
+
+.note.Material\:\:note-brown-outlined {
+  --border-color: #6d4c41;
+}
+.nightMode .note.Material\:\:note-brown-outlined {
+  --border-color: #a1887f;
+}
+
+.note.Material\:\:note-lime-outlined {
+  --border-color: #9e9d24;
+}
+.nightMode .note.Material\:\:note-lime-outlined {
+  --border-color: #cddc39;
+}
+
+.note.Material\:\:note-red-outlined {
+  --border-color: #d32f2f;
+}
+.nightMode .note.Material\:\:note-red-outlined {
+  --border-color: #e57373;
+}
