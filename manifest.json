@@ -1,9 +1,9 @@
 {
-  "name": "Flashcard Styles",
-  "package": "flashcard_styles",
+  "name": "Material Notes",
+  "package": "material_notes",
   "version": "1.0.0",
   "min_point_version": 45,
   "author": "Carlos Bonadeo",
-  "homepage": "https://ankiweb.net/shared/",
-  "description": "Adds a Material-style note type and tools for managing styled flashcards."
+  "homepage": "https://github.com/cdmoro/anki-material-flashcard",
+  "description": "Create and manage flashcards with a clean Material Design style. Includes a customizable note type and layout tools."
 }
