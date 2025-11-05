@@ -224,11 +224,25 @@ button {
 
 .settings button.active,
 .settings button.active:hover {
-	background-color: var(--accent-color);
-	border-color: var(--accent-color);
+  background-color: var(--font-color);
+	border-color: var(--font-color);
 	color: var(--background);
 	z-index: 1;
   transition: all .5s ease;
+}
+
+.settings[class*="-base"] button.active,
+.settings[class*="-base"] button.active:hover {
+	background-color: var(--accent-color);
+	border-color: var(--accent-color);
+	color: var(--background);
+}
+
+.settings[class*="white-base"] button.active,
+.settings[class*="white-base"] button.active:hover {
+  background-color: var(--font-color);
+	border-color: var(--font-color);
+	color: var(--background);
 }
 
 .settings[class*="-filled"] button.active,
@@ -251,6 +265,10 @@ button {
 
 .settings[class*="-base"] .footer a {
   color: var(--accent-color) !important;
+}
+
+.settings[class*="white-base"] .footer a {
+  color: var(--font-color) !important;
 }
 
 .settings[class*="-filled"] .footer a {
