@@ -31,5 +31,5 @@ You can customize styles or extend the templates through the add-on’s configur
 ---
 
 ## 🔗 Links
-- [Source code on GitHub](https://github.com/cdmoro/anki-material-flashcard)  
+- [Source code on GitHub](https://github.com/cdmoro/anki-material-notes)  
 - [Live demo on Netlify](https://anki-material-notes.netlify.app)

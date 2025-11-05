@@ -4,6 +4,6 @@
   "version": "1.0.0",
   "min_point_version": 45,
   "author": "Carlos Bonadeo",
-  "homepage": "https://github.com/cdmoro/anki-material-flashcard",
+  "homepage": "https://github.com/cdmoro/anki-material-notes",
   "description": "Create and manage flashcards with a clean Material Design style. Includes a customizable note type and layout tools."
 }
