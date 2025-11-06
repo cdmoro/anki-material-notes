@@ -1,8 +1,8 @@
-.note[class*="-base"] {
+.note[class$="-base"] {
   --front-color: var(--dark-font-color);
 }
 
-.nightMode .note[class*="-base"] {
+.nightMode .note[class$="-base"] {
   --front-color: var(--light-font-color);
 }
 

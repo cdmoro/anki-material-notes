@@ -235,8 +235,8 @@ button {
   transition: all .5s ease;
 }
 
-.settings[class*="-base"] button.active,
-.settings[class*="-base"] button.active:hover {
+.settings[class$="-base"] button.active,
+.settings[class$="-base"] button.active:hover {
 	background-color: var(--accent-color);
 	border-color: var(--accent-color);
 	color: var(--background);
@@ -263,11 +263,18 @@ button {
   color: var(--background);
 }
 
+.settings[class*="-base-outlined"] button.active,
+.settings[class*="-base-outlined"] button.active:hover {
+  background-color: var(--font-color);
+	border-color: var(--font-color);
+	color: var(--background);
+}
+
 .settings .footer a {
   transition: all .5s ease;
 }
 
-.settings[class*="-base"] .footer a {
+.settings[class$="-base"] .footer a {
   color: var(--accent-color) !important;
 }
 
