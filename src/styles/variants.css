@@ -82,21 +82,21 @@
   --accent-color: #e57373;
 }
 
-.card .note[class*="-filled"] {
+.card .note[class$="-filled"] {
   --front-color: #000;
   background: var(--note-background);
   box-shadow: none;
 }
 
-.nightMode .note[class*="-filled"] {
+.nightMode .note[class$="-filled"] {
   --front-color: #fff;
 }
 
-.note.back[class*="-filled"] > hr {
+.note.back[class$="-filled"] > hr {
   border-top-color: #55555533;
 }
 
-.nightMode .note.back[class*="-filled"] > hr {
+.nightMode .note.back[class$="-filled"] > hr {
   border-top-color: #55555555;
 }
 
@@ -170,21 +170,21 @@
   --note-background: #371c1c;
 }
 
-.note[class*="-outlined"] {
+.note[class$="-outlined"] {
   --front-color: var(--light-font-color);
 }
 
-.nightMode .note[class*="-outlined"] {
+.nightMode .note[class$="-outlined"] {
   --front-color: var(--dark-font-color);
 }
 
-.card .note[class*="-outlined"] {
+.card .note[class$="-outlined"] {
   border: var(--border-color) 2px solid;
   box-shadow: none;
   --hr-color: rgb(from var(--border-color) r g b / 40%);
 }
 
-.card .note[class*="-outlined"] .front {
+.card .note[class$="-outlined"] .front {
   border: none;
 }
 
@@ -263,4 +263,39 @@
 }
 .nightMode .note.Material\:\:note-red-outlined {
   --border-color: #e57373;
+}
+
+.note.Material\:\:note-flag-italy {
+  --front-color: #fff;
+  --accent-color: rgb(0, 140, 69);
+}
+
+.note.Material\:\:note-flag-brazil {
+  --front-color: rgba(254, 221, 0, 1);
+  --accent-color: rgba(0, 151, 57, 1);
+}
+
+.note.Material\:\:note-flag-greece {
+  --front-color: #FFF;
+  --accent-color: rgba(13, 94, 175, 1);
+}
+
+.note.Material\:\:note-flag-china {
+  --front-color: rgba(255, 255, 0, 0.8);
+  --accent-color: rgba(238, 28, 37, 1);
+}
+
+.note.Material\:\:note-flag-france {
+  --front-color: #FFF;
+  --accent-color: #000091;
+  --back-accent-color: var(--light-font-color);
+}
+
+.nightMode .note.Material\:\:note-flag-france {
+  --back-accent-color: var(--dark-font-color);
+}
+
+.note.Material\:\:note-flag-usa {
+  --front-color: #FFF;
+  --accent-color: #b31942;
 }

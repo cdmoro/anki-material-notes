@@ -57,36 +57,37 @@
   display: inline-block;
 }
 
-.note.back[class$="-base"] > .body .hint {
-  color: var(--accent-color);
+.note.back[class$="-base"] > .body .hint,
+.note.back[class*="-flag-"] > .body .hint {
+  color: var(--back-accent-color, var(--accent-color));
 }
 
-.note[class*="-outlined"] .body .hint {
+.note[class$="-outlined"] .body .hint {
   color: var(--border-color);
 }
 
-.note[class*="-base-outlined"] .body .hint {
+.note[class$="-base-outlined"] .body .hint {
   color: var(--font-color);
 }
 
-.note.back[class*="-filled"] > .body .hint {
+.note.back[class$="-filled"] > .body .hint {
   color: #000;
 }
 
-.nightMode .note[class*="-filled"] .body .hint {
+.nightMode .note[class$="-filled"] .body .hint {
   color: #fff;
 }
 
-.note.note-white .body .hint {
+.note.back.Material\:\:note-white-base > .body .hint {
   color: #000;
 }
 
-.nightMode .note.back.note-white > .body .hint {
+.nightMode .note.back.Material\:\:note-white-base > .body .hint {
   color: #fff;
 }
 
 .note.front .hint {
-  color: var(--front-font-color);
+  color: var(--front-color);
   font-size: 16px;
 }
 
@@ -163,4 +164,20 @@
   padding: 0.4rem 0.7rem;
   border-radius: 1rem;
   display: inline-block;
+}
+
+#qa .note a[href^="https://"]::after {
+  content: "";
+  width: 11px;
+  height: 11px;
+  margin-left: 4px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z'/%3E%3Cpath fill-rule='evenodd' d='M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  display: inline-block;
+}
+
+.nightMode #qa .note a[href^="https://"]::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23FFFFFF' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z'/%3E%3Cpath fill-rule='evenodd' d='M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z'/%3E%3C/svg%3E");
 }

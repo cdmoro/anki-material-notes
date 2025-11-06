@@ -242,29 +242,29 @@ button {
 	color: var(--background);
 }
 
-.settings[class*="white-base"] button.active,
-.settings[class*="white-base"] button.active:hover {
+.settings[class$="-white-base"] button.active,
+.settings[class$="-white-base"] button.active:hover {
   background-color: var(--font-color);
 	border-color: var(--font-color);
 	color: var(--background);
 }
 
-.settings[class*="-filled"] button.active,
-.settings[class*="-filled"] button.active:hover {
+.settings[class$="-filled"] button.active,
+.settings[class$="-filled"] button.active:hover {
   background-color: var(--note-background);
   border-color: var(--note-background);
   color: var(--front-color);
 }
 
-.settings[class*="-outlined"] button.active,
-.settings[class*="-outlined"] button.active:hover {
+.settings[class$="-outlined"] button.active,
+.settings[class$="-outlined"] button.active:hover {
   background-color: var(--border-color);
   border-color: var(--border-color);
   color: var(--background);
 }
 
-.settings[class*="-base-outlined"] button.active,
-.settings[class*="-base-outlined"] button.active:hover {
+.settings[class$="-base-outlined"] button.active,
+.settings[class$="-base-outlined"] button.active:hover {
   background-color: var(--font-color);
 	border-color: var(--font-color);
 	color: var(--background);
@@ -278,19 +278,19 @@ button {
   color: var(--accent-color) !important;
 }
 
-.settings[class*="white-base"] .footer a {
+.settings[class$="-white-base"] .footer a {
   color: var(--font-color) !important;
 }
 
-.settings[class*="-filled"] .footer a {
+.settings[class$="-filled"] .footer a {
   color: var(--font-color) !important;
 }
 
-.settings[class*="-outlined"] .footer a {
+.settings[class$="-outlined"] .footer a {
   color: var(--border-color) !important;
 }
 
-.settings[class*="base-outlined"] .footer a {
+.settings[class$="-base-outlined"] .footer a {
   color: var(--font-color) !important;
 }
 

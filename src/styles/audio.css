@@ -9,24 +9,25 @@
   fill: #fff;
 }
 
-.note.back[class$="-base"] > .body .replaybutton span svg polygon {
-  fill: var(--accent-color);
+.note.back[class$="-base"] > .body .replaybutton span svg polygon,
+.note.back[class*="-flag-"] > .body .replaybutton span svg polygon {
+  fill: var(--back-accent-color, var(--accent-color));
   align-self: center;
 }
 
-.note.back[class*="-filled"] > .body .replaybutton span svg polygon {
+.note.back[class$="-filled"] > .body .replaybutton span svg polygon {
   fill: #000;
 }
 
-.nightMode .note.back[class*="-filled"] > .body .replaybutton span svg polygon {
+.nightMode .note.back[class$="-filled"] > .body .replaybutton span svg polygon {
   fill: #fff;
 }
 
-.note.back.note-white > .body .replaybutton span svg polygon {
+.note.back.Material\:\:note-white-base > .body .replaybutton span svg polygon {
   fill: #000;
 }
 
-.nightMode .note.back.note-white > .body .replaybutton span svg polygon {
+.nightMode .note.back.Material\:\:note-white-base > .body .replaybutton span svg polygon {
   fill: #fff;
 }
 
@@ -34,29 +35,33 @@
   fill: #fff;
 }
 
+.note.front[class*="-flag-"] .replaybutton svg polygon {
+  fill: var(--front-color);
+}
+
 .nightMode .note.front[class$="-base"] .replaybutton svg polygon {
   fill: #000;
 }
 
-.note.front[class*="-filled"] .replaybutton svg polygon {
+.note.front[class$="-filled"] .replaybutton svg polygon {
   fill: #000;
 }
 
-.nightMode .note.front[class*="-filled"] .replaybutton svg polygon {
+.nightMode .note.front[class$="-filled"] .replaybutton svg polygon {
   fill: #fff;
 }
 
-.note[class*="-outlined"] .replaybutton span svg polygon,
-.nightMode .note[class*="-outlined"] .replaybutton span svg polygon {
+.note[class$="-outlined"] .replaybutton span svg polygon,
+.nightMode .note[class$="-outlined"] .replaybutton span svg polygon {
   fill: var(--border-color);
 }
 
-.note[class*="-base-outlined"] .replaybutton span svg polygon,
-.nightMode .note[class*="-base-outlined"] .replaybutton span svg polygon {
+.note[class$="-base-outlined"] .replaybutton span svg polygon,
+.nightMode .note[class$="-base-outlined"] .replaybutton span svg polygon {
   fill: var(--font-color);
 }
 
-.note.front.note-white .replaybutton svg polygon {
+.note.front.Material\:\:note-white-base .replaybutton svg polygon {
   fill: #000;
 }
 
@@ -94,43 +99,48 @@
   fill: #000;
 }
 
-.note.front[class*="-filled"] .replay-button svg path {
+.note.front[class$="-filled"] .replay-button svg path {
   fill: #000;
 }
 
-.nightMode .note.front[class*="-filled"] .replay-button svg path {
+.nightMode .note.front[class$="-filled"] .replay-button svg path {
   fill: #fff;
 }
 
-.note.back[class$="-base"] > .body .replay-button svg path {
-  fill: var(--accent-color);
+.note.front[class*="-flag-"] .replay-button svg path {
+  fill: var(--front-color);
 }
 
-.note[class*="-outlined"] .body .replay-button svg path {
+.note.back[class$="-base"] > .body .replay-button svg path,
+.note.back[class*="-flag-"] > .body .replay-button svg path {
+  fill: var(--back-accent-color, var(--accent-color));
+}
+
+.note[class$="-outlined"] .body .replay-button svg path {
   fill: var(--border-color);
 }
 
-.note[class*="-base-outlined"] .body .replay-button svg path {
+.note[class$="-base-outlined"] .body .replay-button svg path {
   fill: var(--font-color);
 }
 
-.note.back[class*="-filled"] > .body .replay-button svg path {
+.note.back[class$="-filled"] > .body .replay-button svg path {
   fill: #000;
 }
 
-.nightMode .note.back[class*="-filled"] > .body .replay-button svg path {
+.nightMode .note.back[class$="-filled"] > .body .replay-button svg path {
   fill: #fff;
 }
 
-.note.back.note-white .body .replay-button svg path {
+.note.back.Material\:\:note-white-base .body .replay-button svg path {
   fill: #000;
 }
 
-.nightMode .note.back.note-white .body .replay-button svg path {
+.nightMode .note.back.Material\:\:note-white-base .body .replay-button svg path {
   fill: #fff;
 }
 
-.note.back .note.front.note-white .replay-button svg path {
+.note.back .note.front.Material\:\:note-white-base .replay-button svg path {
   fill: #000;
 }
 
