@@ -9,8 +9,7 @@
 }
 
 body {
-  margin: 0;
-  margin-bottom: 1.25rem;
+  margin: .5rem;
 }
 
 .d-none {
@@ -222,6 +221,11 @@ button {
 	white-space: nowrap;
 }
 
+.btn-icon {
+  display: flex;
+  align-items: center;
+}
+
 .settings button.active,
 .settings button.active:hover {
   background-color: var(--font-color);
@@ -281,4 +285,8 @@ button {
 
 .settings[class*="base-outlined"] .footer a {
   color: var(--font-color) !important;
+}
+
+.settings #side svg {
+  transform: rotate(90deg);
 }
