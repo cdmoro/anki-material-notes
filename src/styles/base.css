@@ -1,10 +1,3 @@
-/*
- * Name: Anki Material Flashcard
- * Author: Carlos Bonadeo
- * Version: 1.0.0
- * Repo: https://github.com/cdmoro/anki-material-notes
-*/
-
 .card {
   --light-font-color: #010101;
   --dark-font-color: #e9e9e9;
@@ -87,6 +80,7 @@
 } */
 
 /*#_mark:not([hidden]) + #_flag + #qa .note.front::before {
+.note.front.Marked::before {
   content: "★";
   position: absolute;
   left: 9px;
@@ -100,6 +94,7 @@
 }
 
 #_flag:not([hidden]) + #qa .note.front::after {
+.note.front[class^=flag]::after {
   content: "⚑";
   position: absolute;
   right: 9px;
@@ -112,29 +107,36 @@
 }
 
 #_flag[style*="flag-1"] + #qa .note.front::after {
+.note.front.flag1::after {
   background: var(--flag-1);
 }
 
 #_flag[style*="flag-2"] + #qa .note.front::after {
+.note.front.flag2::after {
   background: var(--flag-2);
 }
 
 #_flag[style*="flag-3"] + #qa .note.front::after {
+.note.front.flag3::after {
   background: var(--flag-3);
 }
 
 #_flag[style*="flag-4"] + #qa .note.front::after {
+.note.front.flag4::after {
   background: var(--flag-4);
 }
 
 #_flag[style*="flag-5"] + #qa .note.front::after {
+.note.front.flag5::after {
   background: var(--flag-5);
 }
 
 #_flag[style*="flag-6"] + #qa .note.front::after {
+.note.front.flag6::after {
   background: var(--flag-6);
 }
 
 #_flag[style*="flag-7"] + #qa .note.front::after {
+.note.front.flag7::after {
   background: var(--flag-7);
 } */

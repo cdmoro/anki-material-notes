@@ -64,9 +64,9 @@ def create_new_version_model(models, css_code, css_hash):
     create_model(models, css_code, css_hash, model_name=new_name)
 
 
-def create_model(models, css_code, css_hash, name=MODEL_NAME):
+def create_model(models, css_code, css_hash, model_name=MODEL_NAME):
     """Create a new styled note type."""
-    model = models.new(name)
+    model = models.new(model_name)
     models.addField(model, models.newField("Front"))
     models.addField(model, models.newField("Back"))
 
@@ -81,7 +81,7 @@ def create_model(models, css_code, css_hash, name=MODEL_NAME):
     model["mfc_managed_by_addon"] = True
     models.add(model)
 
-    showInfo(f"Created new model: {name}")
+    showInfo(f"Created new model: {model_name}")
 
 
 def overwrite_model(model, css_code, css_hash):
@@ -117,7 +117,7 @@ def create_new_model(css_code, css_hash):
     """Ask for a name and create a new styled note type."""
     name, ok = QInputDialog.getText(mw, "New Model", "Enter a name for the new styled model:")
     if ok and name:
-        create_model(mw.col.models, css_code, css_hash, name)
+        create_model(mw.col.models, css_code, css_hash, model_name=name)
 
 
 # ---------- Migration ----------

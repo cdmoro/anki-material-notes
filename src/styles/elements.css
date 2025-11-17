@@ -40,7 +40,7 @@
   margin-top: 0;
 }
 
-/*** HINT STYLES ***/
+/* HINT STYLES */
 
 .hint {
   font-size: 16px;
@@ -91,7 +91,7 @@
   font-size: 16px;
 }
 
-/*** IMAGE STYLES ***/
+/* IMAGE STYLES */
 
 .note.front > img {
   width: 100%;
@@ -114,7 +114,7 @@
   display: block;
 }
 
-/* Centered */
+/* CENTERED */
 
 .note.Material\:\:note-centered .body,
 .note.Material\:\:note-centered .body .flex {
@@ -134,28 +134,7 @@
   display: contents;
 }
 
-/* Utils */
-
-.flex {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.flex-row {
-  flex-direction: row;
-}
-
-.flex-col {
-  flex-direction: column;
-}
-
-.text-center {
-  text-align: center;
-}
-
-/*** PILL STYLES ***/
+/* PILL STYLES */
 
 .note .text-block .pill {
   font-size: 70%;

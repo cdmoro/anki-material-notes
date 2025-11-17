@@ -1,4 +1,4 @@
-/*** REPLAY BUTTON (ANDROID MOBILE APP) ***/
+/* REPLAY BUTTON (ANDROID MOBILE APP) */
 
 .note .replaybutton span {
   height: 32px;
@@ -65,7 +65,7 @@
   fill: #000;
 }
 
-/*** REPLY BUTTON (DESKTOP APP) ***/
+/* REPLY BUTTON (DESKTOP APP) */
 
 .note .replay-button {
   margin: 0;
@@ -144,14 +144,14 @@
   fill: #000;
 }
 
-/*** REPLAY BUTTON (FIREFOX) ***/
+/* REPLAY BUTTON (FIREFOX) */
 
 .note .gecko audio {
   width: 48px;
   height: 32px;
 }
 
-/*** REPLAY BUTTON (CHROME) ***/
+/* REPLAY BUTTON (CHROME) */
 
 .note .chrome audio {
   width: 143px;
