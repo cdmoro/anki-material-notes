@@ -186,7 +186,7 @@ select {
   top: 0px;
   padding: .75rem;
   z-index: 5;
-  background: var(--background);
+  background: var(--background) !important;
   border: none !important;
   transition: all .5s ease, background 0s;
   color: #2f2e2c;

@@ -1,8 +1,8 @@
-.note[class$="-base"] {
+.note[class*="-base"] {
   --front-color: var(--dark-font-color);
 }
 
-.nightMode .note[class$="-base"] {
+.nightMode .note[class*="-base"] {
   --front-color: var(--light-font-color);
 }
 
@@ -82,21 +82,21 @@
   --accent-color: #e57373;
 }
 
-.card .note[class$="-filled"] {
+.card .note[class*="-filled"] {
   --front-color: #000;
   background: var(--note-background);
   box-shadow: none;
 }
 
-.nightMode .note[class$="-filled"] {
+.nightMode .note[class*="-filled"] {
   --front-color: #fff;
 }
 
-.note.back[class$="-filled"] > hr {
+.note.back[class*="-filled"] > hr {
   border-top-color: #55555533;
 }
 
-.nightMode .note.back[class$="-filled"] > hr {
+.nightMode .note.back[class*="-filled"] > hr {
   border-top-color: #55555555;
 }
 
@@ -170,21 +170,21 @@
   --note-background: #371c1c;
 }
 
-.note[class$="-outlined"] {
+.note[class*="-outlined"] {
   --front-color: var(--light-font-color);
 }
 
-.nightMode .note[class$="-outlined"] {
+.nightMode .note[class*="-outlined"] {
   --front-color: var(--dark-font-color);
 }
 
-.card .note[class$="-outlined"] {
+.card .note[class*="-outlined"] {
   border: var(--border-color) 2px solid;
   box-shadow: none;
   --hr-color: rgb(from var(--border-color) r g b / 40%);
 }
 
-.card .note[class$="-outlined"] .front {
+.card .note[class*="-outlined"] .front {
   border: none;
 }
 
