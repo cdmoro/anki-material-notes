@@ -57,24 +57,24 @@
   display: inline-block;
 }
 
-.note.back[class$="-base"] > .body .hint,
+.note.back[class*="-base"] > .body .hint,
 .note.back[class*="-flag-"] > .body .hint {
   color: var(--back-accent-color, var(--accent-color));
 }
 
-.note[class$="-outlined"] .body .hint {
+.note[class*="-outlined"] .body .hint {
   color: var(--border-color);
 }
 
-.note[class$="-base-outlined"] .body .hint {
+.note[class*="-base-outlined"] .body .hint {
   color: var(--font-color);
 }
 
-.note.back[class$="-filled"] > .body .hint {
+.note.back[class*="-filled"] > .body .hint {
   color: #000;
 }
 
-.nightMode .note[class$="-filled"] .body .hint {
+.nightMode .note[class*="-filled"] .body .hint {
   color: #fff;
 }
 

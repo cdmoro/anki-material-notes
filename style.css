@@ -174,21 +174,21 @@ body.card .note.back hr {
   --accent-color: #e57373;
 }
 
-body.card .note[class$="-filled"] {
+body.card .note[class*="-filled"] {
 	--front-color: #000;
 	background: var(--accent-color);
 	box-shadow: none;
 }
 
-.nightMode .note[class$="-filled"] {
+.nightMode .note[class*="-filled"] {
   --front-color: #FFF;
 }
 
-.note.back[class$="-filled"] > hr {
+.note.back[class*="-filled"] > hr {
 	border-top-color: #55555533;
 }
 
-.nightMode .note.back[class$="-filled"] > hr {
+.nightMode .note.back[class*="-filled"] > hr {
 	border-top-color: #55555555;
 }
 
@@ -262,21 +262,21 @@ body.card .note[class$="-filled"] {
 	--accent-color: #383042;
 }
 
-.note[class$="-outlined"] {
+.note[class*="-outlined"] {
  --front-color: var(--light-font-color);
 }
 
-.nightMode .note[class$="-outlined"] {
+.nightMode .note[class*="-outlined"] {
  --front-color: var(--dark-font-color);
 }
 
-body.card .note[class$="-outlined"] {
+body.card .note[class*="-outlined"] {
   border: var(--border-color) 2px solid;
   box-shadow: none;
   --hr-color: rgb(from var(--border-color) r g b / 40%);
 }
 
-body.card .note[class$="-outlined"] .front {
+body.card .note[class*="-outlined"] .front {
   border: none;
 }
 
@@ -396,7 +396,7 @@ body.card .note[class$="-outlined"] .front {
   fill: #fff;
 }
 
-.note.back[class*="note-"]:not([class$="-outlined"]):not([class="-flag-"])
+.note.back[class*="note-"]:not([class*="-outlined"]):not([class="-flag-"])
   > .body
   .replaybutton
   span
@@ -406,11 +406,11 @@ body.card .note[class$="-outlined"] .front {
   align-self: center;
 }
 
-.note.back[class$="-filled"] > .body .replaybutton span svg polygon {
+.note.back[class*="-filled"] > .body .replaybutton span svg polygon {
   fill: #000;
 }
 
-.nightMode .note.back[class$="-filled"] > .body .replaybutton span svg polygon {
+.nightMode .note.back[class*="-filled"] > .body .replaybutton span svg polygon {
   fill: #fff;
 }
 
@@ -422,23 +422,23 @@ body.card .note[class$="-outlined"] .front {
   fill: #fff;
 }
 
-.note.front[class*="note-"]:not([class$="-outlined"]) .replaybutton svg polygon {
+.note.front[class*="note-"]:not([class*="-outlined"]) .replaybutton svg polygon {
   fill: #fff;
 }
 
 .nightMode
-  .note.front[class*="note-"]:not([class$="-outlined"])
+  .note.front[class*="note-"]:not([class*="-outlined"])
   .replaybutton
   svg
   polygon {
   fill: #000;
 }
 
-.note.front[class$="-filled"] .replaybutton svg polygon {
+.note.front[class*="-filled"] .replaybutton svg polygon {
   fill: #000;
 }
 
-.nightMode .note.front[class$="-filled"] .replaybutton svg polygon {
+.nightMode .note.front[class*="-filled"] .replaybutton svg polygon {
   fill: #fff;
 }
 
@@ -472,27 +472,27 @@ body.card .note[class$="-outlined"] .front {
   fill: #fff;
 }
 
-.note.front[class*="note-"]:not([class$="-outlined"]) .replay-button svg path {
+.note.front[class*="note-"]:not([class*="-outlined"]) .replay-button svg path {
   fill: #fff;
 }
 
 .nightMode
-  .note.front[class*="note-"]:not([class$="-outlined"])
+  .note.front[class*="note-"]:not([class*="-outlined"])
   .replay-button
   svg
   path {
   fill: #000;
 }
 
-.note.front[class$="-filled"] .replay-button svg path {
+.note.front[class*="-filled"] .replay-button svg path {
   fill: #000;
 }
 
-.nightMode .note.front[class$="-filled"] .replay-button svg path {
+.nightMode .note.front[class*="-filled"] .replay-button svg path {
   fill: #fff;
 }
 
-.note.back[class*="note-"]:not([class$="-outlined"]):not([class*="-flag-"])
+.note.back[class*="note-"]:not([class*="-outlined"]):not([class*="-flag-"])
   > .body
   .replay-button
   svg
@@ -500,11 +500,11 @@ body.card .note[class$="-outlined"] .front {
   fill: var(--accent-color);
 }
 
-.note.back[class$="-filled"] > .body .replay-button svg path {
+.note.back[class*="-filled"] > .body .replay-button svg path {
   fill: #000;
 }
 
-.nightMode .note.back[class$="-filled"] > .body .replay-button svg path {
+.nightMode .note.back[class*="-filled"] > .body .replay-button svg path {
   fill: #fff;
 }
 
