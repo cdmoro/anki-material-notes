@@ -1,706 +1,677 @@
-/*
- * Name: Material Notes
- * Author: Carlos Bonadeo
- * Version: 1.0.0
- * Repo: https://github.com/cdmoro/anki-material-notes
+/* Material Notes · Carlos Bonadeo · 1.0.0
+ * https://github.com/cdmoro/anki-material-notes
+ * Generated from src/styles/ by make build-css.
  */
 
-/*** BASE ------------------ ***/
-/*** Basic layout, typography, and core styles ***/
+/* Base */
 
 .card {
   --light-font-color: #010101;
   --dark-font-color: #e9e9e9;
-  --border-radius: 8px;
-  --front-font-size: 21px;
-  --border: none;
-
-  --background: #fff;
-  --accent-color: #fff;
-  --note-background: #fefefe;
   --font-color: var(--light-font-color);
-  --hr-color: #ddd;
+  --background: #fff;
+  --surface: #fefefe;
+  --divider: #ddd;
+  --border-radius: 8px;
+  --note-font-size: 19px;
+  --front-font-size: 21px;
+  --note-width: 500px;
+  --note-padding: 16px;
 
-  background: #fefefe;
-}
-
-.card.nightMode {
-  --background: #121212;
-  --accent-color: #1d1d1d;
-  --note-background: #1d1d1d;
-  --font-color: var(--dark-font-color);
-  --hr-color: #333;
-
-  background: #121212;
-}
-
-.card {
-  font-family: arial;
-  font-size: 19px;
+  font: var(--note-font-size)/1.45 Arial, sans-serif;
   color: var(--font-color);
   background: var(--background);
-  padding: 0.5rem;
+  padding: .5rem;
+}
+
+.card.nightMode,
+.card.night_mode,
+.nightMode .card,
+.night_mode .card {
+  --font-color: var(--dark-font-color);
+  --background: #121212;
+  --surface: #1d1d1d;
+  --divider: #333;
 }
 
 .card a {
-  color: var(--font-color);
+  color: inherit;
+}
+
+.note {
+  --accent-color: var(--surface);
+  --note-background: var(--surface);
+  --front-color: var(--font-color);
+  --back-accent-color: var(--font-color);
+  --hr-color: var(--divider);
+  --note-border: none;
+  --note-shadow: 0 1px 3px rgba(0, 0, 0, .12), 0 1px 2px rgba(0, 0, 0, .24);
 }
 
 .card .note.front,
 .card .note.back {
-  max-width: 500px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-  border-radius: var(--border-radius);
+  box-sizing: border-box;
+  max-width: var(--note-width);
   margin: 0 auto;
   overflow: hidden;
-  color: var(--font-color);
+  overflow-wrap: break-word;
+  border: var(--note-border);
+  border-radius: var(--border-radius);
+  box-shadow: var(--note-shadow);
   background: var(--note-background);
-  border: var(--border);
-  position: relative;
-}
-
-.card .note.back .note.front {
-  border-radius: var(--border-radius) var(--border-radius) 0 0;
-  box-shadow: none !important;
 }
 
 .card .note.front {
-  font-size: var(--front-font-size);
   background: var(--accent-color);
-  text-align: center;
-  color: var(--front-color, --font-color);
+  color: var(--front-color);
+  font-size: var(--front-font-size);
+  text-align: start;
 }
 
-.note.front .header {
-  font-size: 14px;
+.card .note.back {
+  color: var(--font-color);
+  font-size: var(--note-font-size);
+}
+
+.card .note.back > .note.front {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.note > .body {
+  padding: var(--note-padding);
+}
+
+.note :is(ol, ul) {
+  text-align: start;
+  text-wrap: wrap;
+}
+
+.note.back > #answer,
+.note.back > .answer-divider {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--hr-color);
+}
+
+/* Variants */
+
+/* Palette values are shared by the accent, filled, and outlined styles. */
+.note {
+  --palette-light: initial;
+  --palette-dark: initial;
+  --fill-light: initial;
+  --fill-dark: initial;
+  --ink-light: initial;
+  --link-light: initial;
+  --ink-dark: initial;
+  --front-light: initial;
+  --front-dark: initial;
+  --country-stripe: initial;
+  --palette-accent: var(--palette-light, var(--font-color));
+  --palette-front: var(--front-light, var(--palette-accent));
+  --palette-fill: var(--fill-light, var(--surface));
+  --palette-ink: var(--ink-light, #fff);
+  --palette-link: var(--link-light, var(--palette-accent));
+  --outline: var(--palette-accent);
+}
+
+.nightMode .note,
+.night_mode .note {
+  --palette-accent: var(--palette-dark, var(--font-color));
+  --palette-fill: var(--fill-dark, var(--surface));
+  --palette-front: var(--front-dark, var(--palette-accent));
+  --palette-ink: var(--ink-dark, var(--light-font-color));
+  --palette-link: var(--palette-accent);
+}
+
+.note.Material\:\:note-blue,
+.note.Material\:\:note-blue-base,
+.note.Material\:\:note-blue-filled,
+.note.Material\:\:note-blue-outlined {
+  --palette-light: #1976d2;
+  --palette-dark: #42a5f5;
+  --fill-light: #cbdef1;
+  --fill-dark: #243a4c;
+}
+
+.note.Material\:\:note-purple,
+.note.Material\:\:note-purple-base,
+.note.Material\:\:note-purple-filled,
+.note.Material\:\:note-purple-outlined {
+  --palette-light: #6200ee;
+  --palette-dark: #bb86fc;
+  --fill-light: #ccb1ec;
+  --fill-dark: #383042;
+}
+
+.note.Material\:\:note-pink,
+.note.Material\:\:note-pink-base,
+.note.Material\:\:note-pink-filled,
+.note.Material\:\:note-pink-outlined {
+  --palette-light: #e91e63;
+  --palette-dark: #f06292;
+  --fill-light: #f4dddc;
+  --fill-dark: #5a1b39;
+  --ink-light: var(--light-font-color);
+  --link-light: #ad1457;
+}
+
+.note.Material\:\:note-teal,
+.note.Material\:\:note-teal-base,
+.note.Material\:\:note-teal-filled,
+.note.Material\:\:note-teal-outlined {
+  --palette-light: #00796b;
+  --palette-dark: #4db6ac;
+  --fill-light: #c3ffff;
+  --fill-dark: #004646;
+}
+
+.note.Material\:\:note-green,
+.note.Material\:\:note-green-base,
+.note.Material\:\:note-green-filled,
+.note.Material\:\:note-green-outlined {
+  --palette-light: #388e3c;
+  --palette-dark: #81c784;
+  --fill-light: #b8edba;
+  --fill-dark: #1c241c;
+  --ink-light: var(--light-font-color);
+  --link-light: #2e7d32;
+}
+
+.note.Material\:\:note-orange,
+.note.Material\:\:note-orange-base,
+.note.Material\:\:note-orange-filled,
+.note.Material\:\:note-orange-outlined {
+  --palette-light: #ef6c00;
+  --palette-dark: #ffb74d;
+  --fill-light: #ffd8b8;
+  --fill-dark: #372406;
+  --ink-light: var(--light-font-color);
+  --link-light: #a64800;
+}
+
+.note.Material\:\:note-indigo,
+.note.Material\:\:note-indigo-base,
+.note.Material\:\:note-indigo-filled,
+.note.Material\:\:note-indigo-outlined {
+  --palette-light: #3949ab;
+  --palette-dark: #9fa8da;
+  --fill-light: #ccd4ff;
+  --fill-dark: #272938;
+}
+
+.note.Material\:\:note-brown,
+.note.Material\:\:note-brown-base,
+.note.Material\:\:note-brown-filled,
+.note.Material\:\:note-brown-outlined {
+  --palette-light: #6d4c41;
+  --palette-dark: #a1887f;
+  --fill-light: #f9cfab;
+  --fill-dark: #35211a;
+}
+
+.note.Material\:\:note-lime,
+.note.Material\:\:note-lime-base,
+.note.Material\:\:note-lime-filled,
+.note.Material\:\:note-lime-outlined {
+  --palette-light: #9e9d24;
+  --palette-dark: #cddc39;
+  --fill-light: #f4f4a9;
+  --fill-dark: #393300;
+  --ink-light: var(--light-font-color);
+  --link-light: #616000;
+}
+
+.note.Material\:\:note-red,
+.note.Material\:\:note-red-base,
+.note.Material\:\:note-red-filled,
+.note.Material\:\:note-red-outlined {
+  --palette-light: #d32f2f;
+  --palette-dark: #e57373;
+  --fill-light: #f7bfbf;
+  --fill-dark: #371c1c;
+}
+
+/* Presentation rules for each variant family. */
+.note.Material\:\:note-blue-base,
+.note.Material\:\:note-purple-base,
+.note.Material\:\:note-pink-base,
+.note.Material\:\:note-teal-base,
+.note.Material\:\:note-green-base,
+.note.Material\:\:note-orange-base,
+.note.Material\:\:note-indigo-base,
+.note.Material\:\:note-brown-base,
+.note.Material\:\:note-lime-base,
+.note.Material\:\:note-red-base,
+.note.Material\:\:note-blue,
+.note.Material\:\:note-purple,
+.note.Material\:\:note-pink,
+.note.Material\:\:note-teal,
+.note.Material\:\:note-green,
+.note.Material\:\:note-orange,
+.note.Material\:\:note-indigo,
+.note.Material\:\:note-brown,
+.note.Material\:\:note-lime,
+.note.Material\:\:note-red,
+.note.Material\:\:note-flag-argentina-base,
+.note.Material\:\:note-flag-argentina,
+.note.Material\:\:note-flag-brazil-base,
+.note.Material\:\:note-flag-brazil,
+.note.Material\:\:note-flag-china-base,
+.note.Material\:\:note-flag-china,
+.note.Material\:\:note-flag-france-base,
+.note.Material\:\:note-flag-france,
+.note.Material\:\:note-flag-germany-base,
+.note.Material\:\:note-flag-germany,
+.note.Material\:\:note-flag-greece-base,
+.note.Material\:\:note-flag-greece,
+.note.Material\:\:note-flag-italy-base,
+.note.Material\:\:note-flag-italy,
+.note.Material\:\:note-flag-japan-base,
+.note.Material\:\:note-flag-japan,
+.note.Material\:\:note-flag-mexico-base,
+.note.Material\:\:note-flag-mexico,
+.note.Material\:\:note-flag-uk-base,
+.note.Material\:\:note-flag-uk,
+.note.Material\:\:note-flag-usa-base,
+.note.Material\:\:note-flag-usa {
+  --accent-color: var(--palette-front);
+  --front-color: var(--palette-ink);
+  --back-accent-color: var(--palette-link);
+}
+
+.note.Material\:\:note-blue-filled,
+.note.Material\:\:note-purple-filled,
+.note.Material\:\:note-pink-filled,
+.note.Material\:\:note-teal-filled,
+.note.Material\:\:note-green-filled,
+.note.Material\:\:note-orange-filled,
+.note.Material\:\:note-indigo-filled,
+.note.Material\:\:note-brown-filled,
+.note.Material\:\:note-lime-filled,
+.note.Material\:\:note-red-filled,
+.note.Material\:\:note-flag-argentina-filled,
+.note.Material\:\:note-flag-brazil-filled,
+.note.Material\:\:note-flag-china-filled,
+.note.Material\:\:note-flag-france-filled,
+.note.Material\:\:note-flag-germany-filled,
+.note.Material\:\:note-flag-greece-filled,
+.note.Material\:\:note-flag-italy-filled,
+.note.Material\:\:note-flag-japan-filled,
+.note.Material\:\:note-flag-mexico-filled,
+.note.Material\:\:note-flag-uk-filled,
+.note.Material\:\:note-flag-usa-filled {
+  --accent-color: var(--palette-fill);
+  --note-background: var(--palette-fill);
+  --note-shadow: none;
+}
+
+.note.Material\:\:note-blue-outlined,
+.note.Material\:\:note-purple-outlined,
+.note.Material\:\:note-pink-outlined,
+.note.Material\:\:note-teal-outlined,
+.note.Material\:\:note-green-outlined,
+.note.Material\:\:note-orange-outlined,
+.note.Material\:\:note-indigo-outlined,
+.note.Material\:\:note-brown-outlined,
+.note.Material\:\:note-lime-outlined,
+.note.Material\:\:note-red-outlined,
+.note.Material\:\:note-base-outlined,
+.note.Material\:\:note-flag-argentina-outlined,
+.note.Material\:\:note-flag-brazil-outlined,
+.note.Material\:\:note-flag-china-outlined,
+.note.Material\:\:note-flag-france-outlined,
+.note.Material\:\:note-flag-germany-outlined,
+.note.Material\:\:note-flag-greece-outlined,
+.note.Material\:\:note-flag-italy-outlined,
+.note.Material\:\:note-flag-japan-outlined,
+.note.Material\:\:note-flag-mexico-outlined,
+.note.Material\:\:note-flag-uk-outlined,
+.note.Material\:\:note-flag-usa-outlined {
+  --note-border: 2px solid var(--outline);
+  --note-shadow: none;
+  --back-accent-color: var(--palette-link);
+}
+
+.note.Material\:\:note-base-outlined {
+  --outline: #d9d3de;
+  --back-accent-color: var(--font-color);
+}
+
+.nightMode .note.Material\:\:note-base-outlined,
+.night_mode .note.Material\:\:note-base-outlined {
+  --outline: #3d3a43;
+}
+
+.note.Material\:\:note-white-base {
+  --accent-color: #fff;
+  --front-color: var(--light-font-color);
+}
+
+/* Country tags keep their original Accent aliases. */
+.note.Material\:\:note-flag-argentina,
+.note.Material\:\:note-flag-argentina-base,
+.note.Material\:\:note-flag-argentina-filled,
+.note.Material\:\:note-flag-argentina-outlined {
+  --palette-light: #34698e;
+  --palette-dark: #90cdec;
+  --fill-light: #e9f6fd;
+  --fill-dark: #1b3343;
+  --ink-light: #17425e;
+  --ink-dark: #b7e1f7;
+  --link-light: #34698e;
+  --front-light: #a8d7f3;
+  --front-dark: #234b67;
+  --country-stripe: linear-gradient(to right, #74acdf 0 33%, #fffaf0 33% 47%, #daaa3a 47% 53%, #fffaf0 53% 67%, #74acdf 67% 100%);
+}
+
+.note.Material\:\:note-flag-brazil,
+.note.Material\:\:note-flag-brazil-base,
+.note.Material\:\:note-flag-brazil-filled,
+.note.Material\:\:note-flag-brazil-outlined {
+  --palette-light: #006e33;
+  --palette-dark: #75ce97;
+  --fill-light: #e4f4df;
+  --fill-dark: #173626;
+  --ink-light: #ffdf00;
+  --ink-dark: #ffe56a;
+  --link-light: #006b34;
+  --front-dark: #116039;
+  --country-stripe: linear-gradient(to right, #ffdf00 0.00% 33.33%, #ffdf00 33.33% 66.67%, #23408e 66.67% 100.00%);
+}
+
+.note.Material\:\:note-flag-china,
+.note.Material\:\:note-flag-china-base,
+.note.Material\:\:note-flag-china-filled,
+.note.Material\:\:note-flag-china-outlined {
+  --palette-light: #c9141e;
+  --palette-dark: #ff969a;
+  --fill-light: #fbe7e4;
+  --fill-dark: #432226;
+  --ink-light: #ffeb3b;
+  --ink-dark: #ffe56a;
+  --link-light: #b41720;
+  --front-dark: #991923;
+  --country-stripe: linear-gradient(to right, #c9141e 0.00% 33.33%, #c9141e 33.33% 66.67%, #ffda44 66.67% 100.00%);
+}
+
+.note.Material\:\:note-flag-france,
+.note.Material\:\:note-flag-france-base,
+.note.Material\:\:note-flag-france-filled,
+.note.Material\:\:note-flag-france-outlined {
+  --palette-light: #000091;
+  --palette-dark: #aebdff;
+  --fill-light: #eceeff;
+  --fill-dark: #242d49;
+  --ink-dark: #ffffff;
+  --front-dark: #243874;
+  --country-stripe: linear-gradient(to right, #284799 0.00% 33.33%, #ffffff 33.33% 66.67%, #ed2939 66.67% 100.00%);
+}
+
+.note.Material\:\:note-flag-germany,
+.note.Material\:\:note-flag-germany-base,
+.note.Material\:\:note-flag-germany-filled,
+.note.Material\:\:note-flag-germany-outlined {
+  --palette-light: #29282a;
+  --palette-dark: #f1c658;
+  --fill-light: #f7eed7;
+  --fill-dark: #342d22;
+  --ink-dark: #fff2cb;
+  --front-dark: #343236;
+  --country-stripe: linear-gradient(to right, #29282a 0.00% 33.33%, #d22c36 33.33% 66.67%, #ffce41 66.67% 100.00%);
+}
+
+.note.Material\:\:note-flag-greece,
+.note.Material\:\:note-flag-greece-base,
+.note.Material\:\:note-flag-greece-filled,
+.note.Material\:\:note-flag-greece-outlined {
+  --palette-light: #0d5eaf;
+  --palette-dark: #91c7ff;
+  --fill-light: #e5f2ff;
+  --fill-dark: #203549;
+  --ink-dark: #ffffff;
+  --front-dark: #22598d;
+  --country-stripe: linear-gradient(to right, #0d5eaf 0.00% 20.00%, #ffffff 20.00% 40.00%, #0d5eaf 40.00% 60.00%, #ffffff 60.00% 80.00%, #0d5eaf 80.00% 100.00%);
+}
+
+.note.Material\:\:note-flag-italy,
+.note.Material\:\:note-flag-italy-base,
+.note.Material\:\:note-flag-italy-filled,
+.note.Material\:\:note-flag-italy-outlined {
+  --palette-light: #007d41;
+  --palette-dark: #87d6a6;
+  --fill-light: #e7f4e9;
+  --fill-dark: #20372b;
+  --ink-dark: #ffffff;
+  --link-light: #006b34;
+  --front-dark: #166540;
+  --country-stripe: linear-gradient(to right, #009246 0.00% 33.33%, #ffffff 33.33% 66.67%, #ce2b37 66.67% 100.00%);
+}
+
+.note.Material\:\:note-flag-japan,
+.note.Material\:\:note-flag-japan-base,
+.note.Material\:\:note-flag-japan-filled,
+.note.Material\:\:note-flag-japan-outlined {
+  --palette-light: #aa2441;
+  --palette-dark: #ff9bae;
+  --fill-light: #f8e9e9;
+  --fill-dark: #39262b;
+  --ink-light: #8d1e37;
+  --ink-dark: #ffdae1;
+  --front-light: #fff5e8;
+  --front-dark: #572333;
+  --country-stripe: linear-gradient(to right, #fff4e4 0.00% 20.00%, #fff4e4 20.00% 40.00%, #bc2945 40.00% 60.00%, #fff4e4 60.00% 80.00%, #fff4e4 80.00% 100.00%);
+}
+
+.note.Material\:\:note-flag-mexico,
+.note.Material\:\:note-flag-mexico-base,
+.note.Material\:\:note-flag-mexico-filled,
+.note.Material\:\:note-flag-mexico-outlined {
+  --palette-light: #164b3a;
+  --palette-dark: #94c9ab;
+  --fill-light: #f1efdf;
+  --fill-dark: #26372f;
+  --ink-light: #fff3da;
+  --ink-dark: #fff3da;
+  --front-dark: #214a3d;
+  --country-stripe: linear-gradient(to right, #1f6149 0.00% 33.33%, #fff3da 33.33% 66.67%, #c02c42 66.67% 100.00%);
+}
+
+.note.Material\:\:note-flag-uk,
+.note.Material\:\:note-flag-uk-base,
+.note.Material\:\:note-flag-uk-filled,
+.note.Material\:\:note-flag-uk-outlined {
+  --palette-light: #173568;
+  --palette-dark: #a8caff;
+  --fill-light: #e7eefb;
+  --fill-dark: #212f47;
+  --ink-dark: #ffffff;
+  --front-dark: #223c66;
+  --country-stripe: linear-gradient(to right, #213f74 0.00% 20.00%, #ffffff 20.00% 40.00%, #c52a42 40.00% 60.00%, #ffffff 60.00% 80.00%, #213f74 80.00% 100.00%);
+}
+
+.note.Material\:\:note-flag-usa,
+.note.Material\:\:note-flag-usa-base,
+.note.Material\:\:note-flag-usa-filled,
+.note.Material\:\:note-flag-usa-outlined {
+  --palette-light: #b31942;
+  --palette-dark: #ffa1b7;
+  --fill-light: #f9e8ed;
+  --fill-dark: #422735;
+  --ink-dark: #ffffff;
+  --front-dark: #84203f;
+  --country-stripe: linear-gradient(to right, #b31942 0.00% 20.00%, #ffffff 20.00% 40.00%, #284779 40.00% 60.00%, #ffffff 60.00% 80.00%, #b31942 80.00% 100.00%);
+}
+
+.note.front[class*="Material::note-flag-"]::before {
+  content: "";
+  display: block;
+  height: 4px;
+  background: var(--country-stripe);
+}
+
+/* Elements */
+
+.note img {
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+/* Direct images on the front also act as covers in older templates. */
+.note > .cover,
+.note.front > img,
+.note.back > .body > img {
+  display: block;
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+}
+
+.note.front .body img {
+  max-width: min(100%, 400px);
+  max-height: 200px;
+}
+
+.note .header,
+.note .subheader,
+.note .subtitle {
+  font-size: .84rem;
+}
+
+.note .header {
   margin-bottom: 1rem;
   font-style: italic;
 }
 
-.card .note.front .body,
-.card .note.back .body {
-  padding: 16px;
+.note .subheader {
+  margin-top: .5rem;
 }
 
-/* MARK & FLAG */
-
-/* #_mark,
-#_flag {
-  display: none;
-} */
-
-/*#_mark:not([hidden]) + #_flag + #qa .note.front::before {
-.note.front.Marked::before {
-  content: "★";
-  position: absolute;
-  left: 9px;
-  top: -9px;
-  color: var(--note-background);
-  font-size: 21px;
-  border-radius: 0px 0px 6px 6px;
-  padding: 0px 1px 0px 2px;
-  border: 3px solid var(--background);
-  background: #ffcc00;
-}
-
-#_flag:not([hidden]) + #qa .note.front::after {
-.note.front[class^=flag]::after {
-  content: "⚑";
-  position: absolute;
-  right: 9px;
-  top: -5px;
-  font-size: 14px;
-  border-radius: 0px 0px 6px 6px;
-  color: var(--note-background);
-  padding: 3px 3px 2px 4px;
-  border: 3px solid var(--background);
-}
-
-#_flag[style*="flag-1"] + #qa .note.front::after {
-.note.front.flag1::after {
-  background: var(--flag-1);
-}
-
-#_flag[style*="flag-2"] + #qa .note.front::after {
-.note.front.flag2::after {
-  background: var(--flag-2);
-}
-
-#_flag[style*="flag-3"] + #qa .note.front::after {
-.note.front.flag3::after {
-  background: var(--flag-3);
-}
-
-#_flag[style*="flag-4"] + #qa .note.front::after {
-.note.front.flag4::after {
-  background: var(--flag-4);
-}
-
-#_flag[style*="flag-5"] + #qa .note.front::after {
-.note.front.flag5::after {
-  background: var(--flag-5);
-}
-
-#_flag[style*="flag-6"] + #qa .note.front::after {
-.note.front.flag6::after {
-  background: var(--flag-6);
-}
-
-#_flag[style*="flag-7"] + #qa .note.front::after {
-.note.front.flag7::after {
-  background: var(--flag-7);
-} */
-
-/*** VARIANTS ------------------ ***/
-/*** Different color and style variants for cards ***/
-
-.note[class*="-base"] {
-  --front-color: var(--dark-font-color);
-}
-
-.nightMode .note[class*="-base"] {
-  --front-color: var(--light-font-color);
-}
-
-.note.Material\:\:note-white-base,
-.nightMode .note.Material\:\:note-white-base {
-  --front-color: var(--light-font-color);
-  --accent-color: #fff;
-}
-
-.note.Material\:\:note-blue-base {
-  --accent-color: #1976d2;
-}
-.nightMode .note.Material\:\:note-blue-base {
-  --accent-color: #42a5f5;
-}
-
-.note.Material\:\:note-purple-base {
-  --accent-color: #6200ee;
-}
-.nightMode .note.Material\:\:note-purple-base {
-  --accent-color: #bb86fc;
-}
-
-.note.Material\:\:note-pink-base {
-  --accent-color: #e91e63;
-}
-.nigthMode .note.Material\:\:note-pink-base {
-  --accent-color: #f06292;
-}
-
-.note.Material\:\:note-teal-base {
-  --accent-color: #00796b;
-}
-.nightMode .note.Material\:\:note-teal-base {
-  --accent-color: #4db6ac;
-}
-
-.note.Material\:\:note-green-base {
-  --accent-color: #388e3c;
-}
-.nightMode .note.Material\:\:note-green-base {
-  --accent-color: #81c784;
-}
-
-.note.Material\:\:note-orange-base {
-  --accent-color: #ef6c00;
-}
-.nightMode .note.Material\:\:note-orange-base {
-  --accent-color: #ffb74d;
-}
-
-.note.Material\:\:note-indigo-base {
-  --accent-color: #3949ab;
-}
-.nightMode .note.Material\:\:note-indigo-base {
-  --accent-color: #9fa8da;
-}
-
-.note.Material\:\:note-brown-base {
-  --accent-color: #6d4c41;
-}
-.nightMode .note.Material\:\:note-brown-base {
-  --accent-color: #a1887f;
-}
-
-.note.Material\:\:note-lime-base {
-  --accent-color: #9e9d24;
-}
-.nightMode .note.Material\:\:note-lime-base {
-  --accent-color: #cddc39;
-}
-
-.note.Material\:\:note-red-base {
-  --accent-color: #d32f2f;
-}
-.nightMode .note.Material\:\:note-red-base {
-  --accent-color: #e57373;
-}
-
-.card .note[class*="-filled"] {
-  --front-color: #000;
-  background: var(--note-background);
-  box-shadow: none;
-}
-
-.nightMode .note[class*="-filled"] {
-  --front-color: #fff;
-}
-
-.note.back[class*="-filled"] > hr {
-  border-top-color: #55555533;
-}
-
-.nightMode .note.back[class*="-filled"] > hr {
-  border-top-color: #55555555;
-}
-
-.note.Material\:\:note-blue-filled {
-  --note-background: #cbdef1;
-}
-.nightMode .note.Material\:\:note-blue-filled {
-  --note-background: #243a4c;
-}
-
-.note.Material\:\:note-purple-filled {
-  --note-background: #ccb1ec;
-}
-.nightMode .note.Material\:\:note-purple-filled {
-  --note-background: #383042;
-}
-
-.note.Material\:\:note-pink-filled {
-  --note-background: #f4dddc;
-}
-.nightMode .note.Material\:\:note-pink-filled {
-  --note-background: #5a1b39;
-}
-
-.note.Material\:\:note-teal-filled {
-  --note-background: #c3ffff;
-}
-.nightMode .note.Material\:\:note-teal-filled {
-  --note-background: #004646;
-}
-
-.note.Material\:\:note-green-filled {
-  --note-background: #b8edba;
-}
-.nightMode .note.Material\:\:note-green-filled {
-  --note-background: #1c241c;
-}
-
-.note.Material\:\:note-orange-filled {
-  --note-background: #ffd8b8;
-}
-.nightMode .note.Material\:\:note-orange-filled {
-  --note-background: #372406;
-}
-
-.note.Material\:\:note-indigo-filled {
-  --note-background: #ccd4ff;
-}
-.nightMode .note.Material\:\:note-indigo-filled {
-  --note-background: #272938;
-}
-
-.note.Material\:\:note-brown-filled {
-  --note-background: #f9cfab;
-}
-.nightMode .note.Material\:\:note-brown-filled {
-  --note-background: #35211a;
-}
-
-.note.Material\:\:note-lime-filled {
-  --note-background: #f4f4a9;
-}
-.nightMode .note.Material\:\:note-lime-filled {
-  --note-background: #393300;
-}
-
-.note.Material\:\:note-red-filled {
-  --note-background: #f7bfbf;
-}
-.nightMode .note.Material\:\:note-red-filled {
-  --note-background: #371c1c;
-}
-
-.note[class*="-outlined"] {
-  --front-color: var(--light-font-color);
-}
-
-.nightMode .note[class*="-outlined"] {
-  --front-color: var(--dark-font-color);
-}
-
-.card .note[class*="-outlined"] {
-  border: var(--border-color) 2px solid;
-  box-shadow: none;
-  --hr-color: rgb(from var(--border-color) r g b / 40%);
-}
-
-.card .note[class*="-outlined"] .front {
-  border: none;
-}
-
-.note.Material\:\:note-base-outlined {
-  --border-color: #d9d3de;
-}
-.nightMode .note.Material\:\:note-base-outlined {
-  --border-color: #3d3a43;
-}
-
-.note.Material\:\:note-blue-outlined {
-  --border-color: #1976d2;
-}
-.nightMode .note.Material\:\:note-blue-outlined {
-  --border-color: #42a5f5;
-}
-
-.note.Material\:\:note-purple-outlined {
-  --border-color: #6200ee;
-}
-.nightMode .note.Material\:\:note-purple-outlined {
-  --border-color: #bb86fc;
-}
-
-.note.Material\:\:note-pink-outlined {
-  --border-color: #e91e63;
-}
-.nightMode .note.Material\:\:note-pink-outlined {
-  --border-color: #f06292;
-}
-
-.note.Material\:\:note-teal-outlined {
-  --border-color: #00796b;
-}
-.nightMode .note.Material\:\:note-teal-outlined {
-  --border-color: #4db6ac;
-}
-
-.note.Material\:\:note-green-outlined {
-  --border-color: #388e3c;
-}
-.nightMode .note.Material\:\:note-green-outlined {
-  --border-color: #81c784;
-}
-
-.note.Material\:\:note-orange-outlined {
-  --border-color: #ef6c00;
-}
-.nightMode .note.Material\:\:note-orange-outlined {
-  --border-color: #ffb74d;
-}
-
-.note.Material\:\:note-indigo-outlined {
-  --border-color: #3949ab;
-}
-.nightMode .note.Material\:\:note-indigo-outlined {
-  --border-color: #9fa8da;
-}
-
-.note.Material\:\:note-brown-outlined {
-  --border-color: #6d4c41;
-}
-.nightMode .note.Material\:\:note-brown-outlined {
-  --border-color: #a1887f;
-}
-
-.note.Material\:\:note-lime-outlined {
-  --border-color: #9e9d24;
-}
-.nightMode .note.Material\:\:note-lime-outlined {
-  --border-color: #cddc39;
-}
-
-.note.Material\:\:note-red-outlined {
-  --border-color: #d32f2f;
-}
-.nightMode .note.Material\:\:note-red-outlined {
-  --border-color: #e57373;
-}
-
-.note.Material\:\:note-flag-italy {
-  --front-color: #fff;
-  --accent-color: rgb(0, 140, 69);
-}
-
-.note.Material\:\:note-flag-brazil {
-  --front-color: rgba(254, 221, 0, 1);
-  --accent-color: rgba(0, 151, 57, 1);
-}
-
-.note.Material\:\:note-flag-greece {
-  --front-color: #FFF;
-  --accent-color: rgba(13, 94, 175, 1);
-}
-
-.note.Material\:\:note-flag-china {
-  --front-color: rgba(255, 255, 0, 0.8);
-  --accent-color: rgba(238, 28, 37, 1);
-}
-
-.note.Material\:\:note-flag-france {
-  --front-color: #FFF;
-  --accent-color: #000091;
-  --back-accent-color: var(--light-font-color);
-}
-
-.nightMode .note.Material\:\:note-flag-france {
-  --back-accent-color: var(--dark-font-color);
-}
-
-.note.Material\:\:note-flag-usa {
-  --front-color: #FFF;
-  --accent-color: #b31942;
-}
-
-/*** ELEMENTS ------------------ ***/
-/*** Buttons, icons, and other UI elements ***/
-
-.card .note.back hr {
-  margin: 0;
-  border: none;
-  border-top: var(--hr-color) solid 1px;
-  background: none;
-}
-
-.note.back > img.cover,
-.note.front > img.cover {
-  width: 100%;
-  object-fit: cover;
-  max-height: 200px;
-  display: block;
-}
-
-/* HINT */
-
-.note.front.symbol .body,
-.note.front .body .symbol {
-  font-size: 4rem;
-}
-
-.note.front .body .emoji {
-  font-size: 4rem;
-}
-
-.note.front .subheader {
-  margin-top: 0.5rem;
-  font-size: 16px;
+.note .subtitle {
+  margin: 0 0 .6rem;
+  opacity: .75;
 }
 
-.note.back .subtitle {
-  font-size: 16px;
-  margin-bottom: 0.6rem;
-  opacity: 0.6;
+.note .text-block + .text-block,
+.note .body > .subtitle:not(:first-child) {
   margin-top: 1rem;
 }
 
-.note.back .body > .subtitle:first-child {
-  margin-top: 0;
+.note.front.symbol .body,
+.note.front .symbol,
+.note.front .emoji {
+  font-size: 4rem;
+  line-height: 1.15;
 }
 
-/* HINT STYLES */
-
-.hint {
-  font-size: 16px;
+.note .hint {
+  font-size: 1rem;
   font-style: italic;
-  color: inherit;
 }
 
 .note a.hint {
+  color: var(--control-color, inherit);
   text-decoration: underline;
 }
 
-.note .body .hint {
-  font-style: italic;
+.note.front > .body {
+  --control-color: var(--front-color);
+}
+
+.note.back > .body {
+  --control-color: var(--back-accent-color);
+}
+
+.note .pill {
   display: inline-block;
+  border-radius: 1rem;
+  background: rgba(128, 128, 128, .18);
+  color: inherit;
+  padding: .4rem .7rem;
+  font-size: 70%;
 }
 
-.note.back[class*="-base"] > .body .hint,
-.note.back[class*="-flag-"] > .body .hint {
-  color: var(--back-accent-color, var(--accent-color));
+/* Read-only multiple choice */
+.card .note.front.question-card {
+  background: var(--note-background);
 }
 
-.note[class*="-outlined"] .body .hint {
-  color: var(--border-color);
-}
-
-.note[class*="-base-outlined"] .body .hint {
-  color: var(--font-color);
-}
-
-.note.back[class*="-filled"] > .body .hint {
-  color: #000;
-}
-
-.nightMode .note[class*="-filled"] .body .hint {
-  color: #fff;
-}
-
-.note.back.Material\:\:note-white-base > .body .hint {
-  color: #000;
-}
-
-.nightMode .note.back.Material\:\:note-white-base > .body .hint {
-  color: #fff;
-}
-
-.note.front .hint {
+.question-card > .question {
+  background: var(--accent-color);
   color: var(--front-color);
-  font-size: 16px;
 }
 
-/* IMAGE STYLES */
-
-.note.front > img {
-  width: 100%;
-  object-fit: cover;
-  max-width: 500px;
-  max-height: 200px;
-  display: block;
+.note.front.question-card > .question-options {
+  --control-color: var(--font-color);
+  color: var(--font-color);
+  font-size: var(--note-font-size);
 }
 
-.note.front .body img {
-  max-height: 200px;
-  max-width: 400px;
+.note.back > .question-card > .question-options {
+  display: none;
+}
+
+.note.back > .question-results {
+  text-align: start;
+}
+
+.note .question-options ol,
+.note .question-results ol {
+  margin: 0;
+  padding-inline-start: 2em;
+}
+
+.note .wrong-answer {
+  text-decoration: line-through;
+  opacity: .6;
+}
+
+.note .small {
+  font-size: .85rem;
+}
+
+.note .question-source a {
+  text-decoration: underline;
+}
+
+.note a[href^="https://"]::after {
+  content: "↗";
+  margin-left: .25em;
+  font-size: .75em;
+}
+
+/* Audio */
+
+.note .replaybutton,
+.note .replay-button {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin: 0;
+  color: var(--control-color, inherit);
+  text-decoration: none;
   vertical-align: middle;
 }
 
-.note.back > .body > img {
-  width: 100%;
-  object-fit: cover;
-  max-height: 200px;
-  display: block;
-}
-
-/* CENTERED */
-
-.note.Material\:\:note-centered .body,
-.note.Material\:\:note-centered .body .flex {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* gap: 0.5rem; */
-  text-align: center;
-}
-
-/* .note.Material\:\:note-centered .header {
-  margin-bottom: 0.5rem;
-} */
-
-.note.Material\:\:note-centered .body em,
-.note.Material\:\:note-centered .body strong {
-  display: contents;
-}
-
-/* PILL STYLES */
-
-.note .text-block .pill {
-  font-size: 70%;
-  color: #000;
-  background: #dddddd99;
-  padding: 0.4rem 0.7rem;
-  border-radius: 1rem;
-  display: inline-block;
-}
-
-#qa .note a[href^="https://"]::after {
-  content: "";
-  width: 11px;
-  height: 11px;
-  margin-left: 4px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z'/%3E%3Cpath fill-rule='evenodd' d='M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z'/%3E%3C/svg%3E");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  display: inline-block;
-}
-
-.nightMode #qa .note a[href^="https://"]::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23FFFFFF' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z'/%3E%3Cpath fill-rule='evenodd' d='M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z'/%3E%3C/svg%3E");
-}
-
-/*** AUDIO ------------------ ***/
-/*** Styles for audio playback controls ***/
-
-/* REPLAY BUTTON (ANDROID MOBILE APP) */
-
 .note .replaybutton span {
+  display: inline-flex;
+  align-items: center;
   height: 32px;
   padding: 0;
 }
 
-.nightMode .note .replaybutton span svg polygon {
-  fill: #fff;
-}
-
-.note.back[class*="-base"] > .body .replaybutton span svg polygon,
-.note.back[class*="-flag-"] > .body .replaybutton span svg polygon {
-  fill: var(--back-accent-color, var(--accent-color));
-  align-self: center;
-}
-
-.note.back[class*="-filled"] > .body .replaybutton span svg polygon {
-  fill: #000;
-}
-
-.nightMode .note.back[class*="-filled"] > .body .replaybutton span svg polygon {
-  fill: #fff;
-}
-
-.note.back.Material\:\:note-white-base > .body .replaybutton span svg polygon {
-  fill: #000;
-}
-
-.nightMode .note.back.Material\:\:note-white-base > .body .replaybutton span svg polygon {
-  fill: #fff;
-}
-
-.note.front[class*="-base"] .replaybutton svg polygon {
-  fill: #fff;
-}
-
-.note.front[class*="-flag-"] .replaybutton svg polygon {
-  fill: var(--front-color);
-}
-
-.nightMode .note.front[class*="-base"] .replaybutton svg polygon {
-  fill: #000;
-}
-
-.note.front[class*="-filled"] .replaybutton svg polygon {
-  fill: #000;
-}
-
-.nightMode .note.front[class*="-filled"] .replaybutton svg polygon {
-  fill: #fff;
-}
-
-.note[class*="-outlined"] .replaybutton span svg polygon,
-.nightMode .note[class*="-outlined"] .replaybutton span svg polygon {
-  fill: var(--border-color);
-}
-
-.note[class*="-base-outlined"] .replaybutton span svg polygon,
-.nightMode .note[class*="-base-outlined"] .replaybutton span svg polygon {
-  fill: var(--font-color);
-}
-
-.note.front.Material\:\:note-white-base .replaybutton svg polygon {
-  fill: #000;
-}
-
-/* REPLY BUTTON (DESKTOP APP) */
-
-.note .replay-button {
-  margin: 0;
-}
-
+.note .replaybutton span svg,
+.note .replaybutton span img,
 .note .replay-button svg {
   width: 32px;
   height: 32px;
+}
+
+.note .replaybutton svg polygon,
+.note .replay-button svg path {
+  fill: currentColor;
 }
 
 .note .replay-button svg circle {
@@ -709,99 +680,58 @@
 }
 
 .note .replay-button svg path {
-  transform: scale(0.9);
+  transform: scale(.9);
   transform-origin: center;
-  fill: #000;
 }
 
-.nightMode .note .replay-button svg path {
-  fill: #fff;
+.note audio {
+  max-width: 100%;
+  vertical-align: middle;
 }
-
-.note.front[class*="-base"] .replay-button svg path {
-  fill: #fff;
-}
-
-.nightMode .note.front[class*="-base"] .replay-button svg path {
-  fill: #000;
-}
-
-.note.front[class*="-filled"] .replay-button svg path {
-  fill: #000;
-}
-
-.nightMode .note.front[class*="-filled"] .replay-button svg path {
-  fill: #fff;
-}
-
-.note.front[class*="-flag-"] .replay-button svg path {
-  fill: var(--front-color);
-}
-
-.note.back[class*="-base"] > .body .replay-button svg path,
-.note.back[class*="-flag-"] > .body .replay-button svg path {
-  fill: var(--back-accent-color, var(--accent-color));
-}
-
-.note[class*="-outlined"] .body .replay-button svg path {
-  fill: var(--border-color);
-}
-
-.note[class*="-base-outlined"] .body .replay-button svg path {
-  fill: var(--font-color);
-}
-
-.note.back[class*="-filled"] > .body .replay-button svg path {
-  fill: #000;
-}
-
-.nightMode .note.back[class*="-filled"] > .body .replay-button svg path {
-  fill: #fff;
-}
-
-.note.back.Material\:\:note-white-base .body .replay-button svg path {
-  fill: #000;
-}
-
-.nightMode .note.back.Material\:\:note-white-base .body .replay-button svg path {
-  fill: #fff;
-}
-
-.note.back .note.front.Material\:\:note-white-base .replay-button svg path {
-  fill: #000;
-}
-
-/* REPLAY BUTTON (FIREFOX) */
 
 .note .gecko audio {
   width: 48px;
   height: 32px;
 }
 
-/* REPLAY BUTTON (CHROME) */
-
 .note .chrome audio {
   width: 143px;
   height: 32px;
 }
 
-/*** UTILS ------------------ ***/
+/* Utils */
 
-.flex {
+.note .flex {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: .5rem;
 }
 
-.flex-row {
+.note .flex-row {
   flex-direction: row;
 }
 
-.flex-col {
+.note .flex-col {
   flex-direction: column;
 }
 
-.text-center {
+.note .align-items-center {
+  align-items: center;
+}
+
+.note .gap-sm {
+  gap: .5rem;
+}
+
+.note .text-center,
+.note.front .center,
+.note.front .body.question,
+.note.Material\:\:note-centered > .body {
   text-align: center;
+  text-wrap: balance;
+}
+
+.note.Material\:\:note-centered > .body .flex {
+  justify-content: center;
 }

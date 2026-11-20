@@ -5,5 +5,5 @@
   "min_point_version": 45,
   "author": "Carlos Bonadeo",
   "homepage": "https://github.com/cdmoro/anki-material-notes",
-  "description": "Create and manage flashcards with a clean Material Design style. Includes a customizable note type and layout tools."
+  "description": "Create and update Material Design note types in Anki."
 }

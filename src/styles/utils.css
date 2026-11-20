@@ -1,18 +1,34 @@
-.flex {
+.note .flex {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: .5rem;
 }
 
-.flex-row {
+.note .flex-row {
   flex-direction: row;
 }
 
-.flex-col {
+.note .flex-col {
   flex-direction: column;
 }
 
-.text-center {
+.note .align-items-center {
+  align-items: center;
+}
+
+.note .gap-sm {
+  gap: .5rem;
+}
+
+.note .text-center,
+.note.front .center,
+.note.front .body.question,
+.note.Material\:\:note-centered > .body {
   text-align: center;
+  text-wrap: balance;
+}
+
+.note.Material\:\:note-centered > .body .flex {
+  justify-content: center;
 }

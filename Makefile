@@ -1,2 +1,12 @@
+PYTHON ?= python3
+
+.PHONY: build-css build-card build-addon
+
 build-css:
-	python utils/build_css.py
+	$(PYTHON) utils/build_css.py
+
+build-card: build-css
+	$(PYTHON) utils/package.py card
+
+build-addon: build-css
+	$(PYTHON) utils/package.py addon
