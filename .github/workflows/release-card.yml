@@ -1,0 +1,64 @@
+name: Build Material Notes
+
+on:
+  pull_request:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Check the release version
+        if: github.ref_type == 'tag'
+        run: |
+          version=$(python3 -c 'import json; print(json.load(open("manifest.json"))["version"])')
+          if [[ "$GITHUB_REF_NAME" != "v$version" ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME must match manifest.json version $version"
+            exit 1
+          fi
+
+      - name: Build the card and add-on packages
+        run: make build-card build-addon
+
+      - name: Upload build files
+        uses: actions/upload-artifact@v4
+        with:
+          name: material-notes-packages
+          if-no-files-found: error
+          overwrite: true
+          path: |
+            models/front.html
+            models/back.html
+            models/styles.css
+            dist/material-notes-card.zip
+            dist/material-notes.ankiaddon
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download build files
+        uses: actions/download-artifact@v4
+        with:
+          name: material-notes-packages
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          package="dist/material-notes-card-${GITHUB_REF_NAME}.zip"
+          mv dist/material-notes-card.zip "$package"
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes \
+            models/front.html models/back.html models/styles.css "$package" dist/material-notes.ankiaddon

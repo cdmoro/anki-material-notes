@@ -1,142 +1,89 @@
 .card {
   --light-font-color: #010101;
   --dark-font-color: #e9e9e9;
-  --border-radius: 8px;
-  --front-font-size: 21px;
-  --border: none;
-
-  --background: #fff;
-  --accent-color: #fff;
-  --note-background: #fefefe;
   --font-color: var(--light-font-color);
-  --hr-color: #ddd;
+  --background: #fff;
+  --surface: #fefefe;
+  --divider: #ddd;
+  --border-radius: 8px;
+  --note-font-size: 19px;
+  --front-font-size: 21px;
+  --note-width: 500px;
+  --note-padding: 16px;
 
-  background: #fefefe;
-}
-
-.card.nightMode {
-  --background: #121212;
-  --accent-color: #1d1d1d;
-  --note-background: #1d1d1d;
-  --font-color: var(--dark-font-color);
-  --hr-color: #333;
-
-  background: #121212;
-}
-
-.card {
-  font-family: arial;
-  font-size: 19px;
+  font: var(--note-font-size)/1.45 Arial, sans-serif;
   color: var(--font-color);
   background: var(--background);
-  padding: 0.5rem;
+  padding: .5rem;
+}
+
+.card.nightMode,
+.card.night_mode,
+.nightMode .card,
+.night_mode .card {
+  --font-color: var(--dark-font-color);
+  --background: #121212;
+  --surface: #1d1d1d;
+  --divider: #333;
 }
 
 .card a {
-  color: var(--font-color);
+  color: inherit;
+}
+
+.note {
+  --accent-color: var(--surface);
+  --note-background: var(--surface);
+  --front-color: var(--font-color);
+  --back-accent-color: var(--font-color);
+  --hr-color: var(--divider);
+  --note-border: none;
+  --note-shadow: 0 1px 3px rgba(0, 0, 0, .12), 0 1px 2px rgba(0, 0, 0, .24);
 }
 
 .card .note.front,
 .card .note.back {
-  max-width: 500px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-  border-radius: var(--border-radius);
+  box-sizing: border-box;
+  max-width: var(--note-width);
   margin: 0 auto;
   overflow: hidden;
-  color: var(--font-color);
+  overflow-wrap: break-word;
+  border: var(--note-border);
+  border-radius: var(--border-radius);
+  box-shadow: var(--note-shadow);
   background: var(--note-background);
-  border: var(--border);
-  position: relative;
-}
-
-.card .note.back .note.front {
-  border-radius: var(--border-radius) var(--border-radius) 0 0;
-  box-shadow: none !important;
 }
 
 .card .note.front {
-  font-size: var(--front-font-size);
   background: var(--accent-color);
-  text-align: center;
-  color: var(--front-color, --font-color);
+  color: var(--front-color);
+  font-size: var(--front-font-size);
+  text-align: start;
 }
 
-.note.front .header {
-  font-size: 14px;
-  margin-bottom: 1rem;
-  font-style: italic;
+.card .note.back {
+  color: var(--font-color);
+  font-size: var(--note-font-size);
 }
 
-.card .note.front .body,
-.card .note.back .body {
-  padding: 16px;
+.card .note.back > .note.front {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
-/* MARK & FLAG */
-
-/* #_mark,
-#_flag {
-  display: none;
-} */
-
-/*#_mark:not([hidden]) + #_flag + #qa .note.front::before {
-.note.front.Marked::before {
-  content: "★";
-  position: absolute;
-  left: 9px;
-  top: -9px;
-  color: var(--note-background);
-  font-size: 21px;
-  border-radius: 0px 0px 6px 6px;
-  padding: 0px 1px 0px 2px;
-  border: 3px solid var(--background);
-  background: #ffcc00;
+.note > .body {
+  padding: var(--note-padding);
 }
 
-#_flag:not([hidden]) + #qa .note.front::after {
-.note.front[class^=flag]::after {
-  content: "⚑";
-  position: absolute;
-  right: 9px;
-  top: -5px;
-  font-size: 14px;
-  border-radius: 0px 0px 6px 6px;
-  color: var(--note-background);
-  padding: 3px 3px 2px 4px;
-  border: 3px solid var(--background);
+.note :is(ol, ul) {
+  text-align: start;
+  text-wrap: wrap;
 }
 
-#_flag[style*="flag-1"] + #qa .note.front::after {
-.note.front.flag1::after {
-  background: var(--flag-1);
+.note.back > #answer,
+.note.back > .answer-divider {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--hr-color);
 }
-
-#_flag[style*="flag-2"] + #qa .note.front::after {
-.note.front.flag2::after {
-  background: var(--flag-2);
-}
-
-#_flag[style*="flag-3"] + #qa .note.front::after {
-.note.front.flag3::after {
-  background: var(--flag-3);
-}
-
-#_flag[style*="flag-4"] + #qa .note.front::after {
-.note.front.flag4::after {
-  background: var(--flag-4);
-}
-
-#_flag[style*="flag-5"] + #qa .note.front::after {
-.note.front.flag5::after {
-  background: var(--flag-5);
-}
-
-#_flag[style*="flag-6"] + #qa .note.front::after {
-.note.front.flag6::after {
-  background: var(--flag-6);
-}
-
-#_flag[style*="flag-7"] + #qa .note.front::after {
-.note.front.flag7::after {
-  background: var(--flag-7);
-} */

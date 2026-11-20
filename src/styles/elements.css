@@ -1,162 +1,127 @@
-.card .note.back hr {
-  margin: 0;
-  border: none;
-  border-top: var(--hr-color) solid 1px;
-  background: none;
-}
-
-.note.back > img.cover,
-.note.front > img.cover {
-  width: 100%;
-  object-fit: cover;
-  max-height: 200px;
-  display: block;
-}
-
-/* HINT */
-
-.note.front.symbol .body,
-.note.front .body .symbol {
-  font-size: 4rem;
-}
-
-.note.front .body .emoji {
-  font-size: 4rem;
-}
-
-.note.front .subheader {
-  margin-top: 0.5rem;
-  font-size: 16px;
-}
-
-.note.back .subtitle {
-  font-size: 16px;
-  margin-bottom: 0.6rem;
-  opacity: 0.6;
-  margin-top: 1rem;
-}
-
-.note.back .body > .subtitle:first-child {
-  margin-top: 0;
-}
-
-/* HINT STYLES */
-
-.hint {
-  font-size: 16px;
-  font-style: italic;
-  color: inherit;
-}
-
-.note a.hint {
-  text-decoration: underline;
-}
-
-.note .body .hint {
-  font-style: italic;
-  display: inline-block;
-}
-
-.note.back[class*="-base"] > .body .hint,
-.note.back[class*="-flag-"] > .body .hint {
-  color: var(--back-accent-color, var(--accent-color));
-}
-
-.note[class*="-outlined"] .body .hint {
-  color: var(--border-color);
-}
-
-.note[class*="-base-outlined"] .body .hint {
-  color: var(--font-color);
-}
-
-.note.back[class*="-filled"] > .body .hint {
-  color: #000;
-}
-
-.nightMode .note[class*="-filled"] .body .hint {
-  color: #fff;
-}
-
-.note.back.Material\:\:note-white-base > .body .hint {
-  color: #000;
-}
-
-.nightMode .note.back.Material\:\:note-white-base > .body .hint {
-  color: #fff;
-}
-
-.note.front .hint {
-  color: var(--front-color);
-  font-size: 16px;
-}
-
-/* IMAGE STYLES */
-
-.note.front > img {
-  width: 100%;
-  object-fit: cover;
-  max-width: 500px;
-  max-height: 200px;
-  display: block;
-}
-
-.note.front .body img {
-  max-height: 200px;
-  max-width: 400px;
+.note img {
+  max-width: 100%;
   vertical-align: middle;
 }
 
+/* Direct images on the front also act as covers in older templates. */
+.note > .cover,
+.note.front > img,
 .note.back > .body > img {
-  width: 100%;
-  object-fit: cover;
-  max-height: 200px;
   display: block;
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
 }
 
-/* CENTERED */
-
-.note.Material\:\:note-centered .body,
-.note.Material\:\:note-centered .body .flex {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* gap: 0.5rem; */
-  text-align: center;
+.note.front .body img {
+  max-width: min(100%, 400px);
+  max-height: 200px;
 }
 
-/* .note.Material\:\:note-centered .header {
-  margin-bottom: 0.5rem;
-} */
-
-.note.Material\:\:note-centered .body em,
-.note.Material\:\:note-centered .body strong {
-  display: contents;
+.note .header,
+.note .subheader,
+.note .subtitle {
+  font-size: .84rem;
 }
 
-/* PILL STYLES */
+.note .header {
+  margin-bottom: 1rem;
+  font-style: italic;
+}
 
-.note .text-block .pill {
-  font-size: 70%;
-  color: #000;
-  background: #dddddd99;
-  padding: 0.4rem 0.7rem;
+.note .subheader {
+  margin-top: .5rem;
+}
+
+.note .subtitle {
+  margin: 0 0 .6rem;
+  opacity: .75;
+}
+
+.note .text-block + .text-block,
+.note .body > .subtitle:not(:first-child) {
+  margin-top: 1rem;
+}
+
+.note.front.symbol .body,
+.note.front .symbol,
+.note.front .emoji {
+  font-size: 4rem;
+  line-height: 1.15;
+}
+
+.note .hint {
+  font-size: 1rem;
+  font-style: italic;
+}
+
+.note a.hint {
+  color: var(--control-color, inherit);
+  text-decoration: underline;
+}
+
+.note.front > .body {
+  --control-color: var(--front-color);
+}
+
+.note.back > .body {
+  --control-color: var(--back-accent-color);
+}
+
+.note .pill {
+  display: inline-block;
   border-radius: 1rem;
-  display: inline-block;
+  background: rgba(128, 128, 128, .18);
+  color: inherit;
+  padding: .4rem .7rem;
+  font-size: 70%;
 }
 
-#qa .note a[href^="https://"]::after {
-  content: "";
-  width: 11px;
-  height: 11px;
-  margin-left: 4px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z'/%3E%3Cpath fill-rule='evenodd' d='M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z'/%3E%3C/svg%3E");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  display: inline-block;
+/* Read-only multiple choice */
+.card .note.front.question-card {
+  background: var(--note-background);
 }
 
-.nightMode #qa .note a[href^="https://"]::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23FFFFFF' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z'/%3E%3Cpath fill-rule='evenodd' d='M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z'/%3E%3C/svg%3E");
+.question-card > .question {
+  background: var(--accent-color);
+  color: var(--front-color);
+}
+
+.note.front.question-card > .question-options {
+  --control-color: var(--font-color);
+  color: var(--font-color);
+  font-size: var(--note-font-size);
+}
+
+.note.back > .question-card > .question-options {
+  display: none;
+}
+
+.note.back > .question-results {
+  text-align: start;
+}
+
+.note .question-options ol,
+.note .question-results ol {
+  margin: 0;
+  padding-inline-start: 2em;
+}
+
+.note .wrong-answer {
+  text-decoration: line-through;
+  opacity: .6;
+}
+
+.note .small {
+  font-size: .85rem;
+}
+
+.note .question-source a {
+  text-decoration: underline;
+}
+
+.note a[href^="https://"]::after {
+  content: "↗";
+  margin-left: .25em;
+  font-size: .75em;
 }
