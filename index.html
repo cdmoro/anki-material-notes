@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Material Notes — Anki Add-on</title>
     <link rel="icon" type="image/x-icon" href="./src/assets/favicon.ico">
-    <link rel="stylesheet" href="./src/styles/_page.css" />
-    <link rel="stylesheet" href="./models/styles.css?v=3" />
+    <link rel="stylesheet" href="./src/styles/_page.css?v=11" />
+    <link id="card-styles" rel="stylesheet" href="./models/styles.css?v=9" />
 
 </head>
 
@@ -46,7 +46,7 @@
                             <path d="M14.5 10A6.7 6.7 0 0 1 6 1.5 6.7 6.7 0 1 0 14.5 10Z"/>
                         </svg>
                     </button>
-                    <button id="side" class="btn-icon" type="button" title="Show answer" aria-label="Show answer" aria-pressed="true">
+                    <button id="side" class="btn-icon" type="button" title="Show answer" aria-label="Show answer" aria-pressed="false">
                         <svg aria-hidden="true" width="20" height="20" fill="currentColor" viewBox="0 0 56 56">
                             <path
                                 d="M 13.7851 49.5742 L 42.2382 49.5742 C 47.1366 49.5742 49.5743 47.1367 49.5743 42.3086 L 49.5743 13.6914 C 49.5743 8.8633 47.1366 6.4258 42.2382 6.4258 L 13.7851 6.4258 C 8.9101 6.4258 6.4257 8.8398 6.4257 13.6914 L 6.4257 42.3086 C 6.4257 47.1602 8.9101 49.5742 13.7851 49.5742 Z M 42.1679 10.1992 C 44.4882 10.1992 45.8007 11.4414 45.8007 13.8789 L 45.8007 42.1211 C 45.8007 44.5586 44.4882 45.8008 42.1679 45.8008 L 28.0117 45.8008 L 28.0117 10.1992 Z">
@@ -129,10 +129,32 @@
                 </div>
             </div>
             <div class="footer">
-                <a href="https://github.com/cdmoro/anki-material-notes" target="_blank">View on GitHub</a> |
-                Made by <a href="https://www.linkedin.com/in/cdbonadeo/" target="_blank">@CarlosBonadeo</a>
+                <a id="project-link" href="https://github.com/cdmoro/anki-material-notes" target="_blank" rel="noopener">Project</a> |
+                Made by <a href="https://www.linkedin.com/in/cdbonadeo/" target="_blank" rel="noopener">@CarlosBonadeo</a>
             </div>
         </div>
+
+        <template id="review-window-template">
+            <div class="review-window">
+                <div class="review-toolbar" aria-hidden="true">
+                    <span>Decks</span>
+                    <span>Add</span>
+                    <span>Browse</span>
+                    <span>Stats</span>
+                    <span>Sync</span>
+                </div>
+                <div class="review-content"></div>
+                <div class="review-toolbar review-footer">
+                    <button class="review-action review-show-answer" type="button">Show Answer</button>
+                    <div class="review-ratings">
+                        <button class="review-action" type="button">Again</button>
+                        <button class="review-action" type="button">Hard</button>
+                        <button class="review-action review-good" type="button">Good</button>
+                        <button class="review-action" type="button">Easy</button>
+                    </div>
+                </div>
+            </div>
+        </template>
 
         <section class="card-example" id="base" aria-labelledby="base-title">
             <header class="example-intro">
@@ -141,12 +163,12 @@
             </header>
             <div class="note back">
                 <div class="note front">
-                    <div class="body center">
+                    <div class="body center" data-example-field="Front">
                         What is the rarest M&amp;M color?
                     </div>
                 </div>
                 <hr class="answer-divider">
-                <div class="body">
+                <div class="body" data-example-field="Back">
                     Brown
                 </div>
             </div>
@@ -160,8 +182,8 @@
             <div class="note back">
                 <div class="note front">
                     <div class="body center">
-                        <div class="header">Greek nouns</div>
-                        <div>Νερό</div>
+                        <div class="header" data-example-field="Topic">Greek nouns</div>
+                        <div data-example-field="Front">Νερό</div>
                         <div data-hint-field="Pronunciation">
                             <a class="hint" href="#pronunciation-hint" aria-controls="pronunciation-hint">Show Pronunciation</a>
                             <span id="pronunciation-hint" tabindex="-1" hidden>ne-RÓ</span>
@@ -169,11 +191,12 @@
                     </div>
                 </div>
                 <hr class="answer-divider">
-                <img class="cover" src="https://picsum.photos/id/154/600/600" alt="" loading="lazy" />
+                <img class="cover" src="https://picsum.photos/id/154/600/600" alt="" loading="lazy"
+                     data-example-field="Image" data-example-html />
                 <div class="body">
-                    <div class="flex">
+                    <div class="flex" data-example-field="Back" data-example-html>
                         Water
-                        <a class="replay-button soundLink" href="#" title="Ankiweb replay button">
+                        <a class="replay-button soundLink" href="#" title="Ankiweb replay button" data-example-sound="nero.mp3">
                             <svg class="playImage" viewBox="0 0 64 64" version="1.1">
                                 <circle cx="32" cy="32" r="29"></circle>
                                 <path d="M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z"></path>
@@ -195,14 +218,14 @@
             </header>
             <div class="note back">
                 <div class="note front">
-                    <div class="body center">
+                    <div class="body center" data-example-field="Front" data-example-html>
                         <div class="flex flex-col">
                             <div class="emoji">🥣</div>Το πρωινό
                         </div>
                     </div>
                 </div>
                 <hr class="answer-divider">
-                <div class="body">
+                <div class="body" data-example-field="Back" data-example-html>
                     <div class="text-block">
                         The breakfast
                     </div>
@@ -210,7 +233,6 @@
                         <div class="subtitle">Related words</div>
                         <span class="pill">Γεύμα (lunch)</span>
                         <span class="pill">Το δείπνο (dinner)</span>
-
                     </div>
                 </div>
             </div>
@@ -223,18 +245,18 @@
             </header>
             <div class="note back">
                 <div class="note front">
-                    <div class="body center">
+                    <div class="body center" data-example-field="Front" data-example-html>
                         <div class="symbol">漢字</div>
                         <div class="subheader">[kaɲdʑi]</div>
                     </div>
                 </div>
                 <hr class="answer-divider">
-                <div class="body">
+                <div class="body" data-example-field="Back" data-example-html>
                     <div class="text-block">
                         <div class="flex">
                             Kanji (漢字, pronounced [kaɲdʑi]) are the logographic Chinese characters taken from the
                             Chinese script, and used in the writing of Japanese.
-                            <a href="#" class="replaybutton" title="Android replay button">
+                            <a href="#" class="replaybutton" title="Android replay button" data-example-sound="kanji.mp3">
                                 <span>
                                     <svg viewBox="0 0 32 32">
                                         <polygon points="11,25 25,16 11,7" />Replay
@@ -259,9 +281,9 @@
             <div class="note back">
                 <div class="note front">
                     <div class="body center">
-                        <div class="flex flex-col">
-                            What is the rarest M&M color?
-                            <a class="replay-button soundLink" href="#" title="Ankiweb replay button">
+                        <div class="flex flex-col" data-example-field="Front" data-example-html>
+                            What is the rarest M&amp;M color?
+                            <a class="replay-button soundLink" href="#" title="Ankiweb replay button" data-example-sound="rarest-color.mp3">
                                 <svg class="playImage" viewBox="0 0 64 64" version="1.1">
                                     <circle cx="32" cy="32" r="29"></circle>
                                     <path d="M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z"></path>
@@ -271,7 +293,7 @@
                     </div>
                 </div>
                 <hr class="answer-divider">
-                <div class="body">
+                <div class="body" data-example-field="Back">
                     Brown
                 </div>
             </div>
@@ -285,9 +307,9 @@
             <div class="note back">
                 <div class="note front">
                     <div class="body">
-                        <div class="flex flex-row">
-                            What is the rarest M&M color?
-                            <a href="#" class="replaybutton" title="Android replay button">
+                        <div class="flex flex-row" data-example-field="Front" data-example-html>
+                            What is the rarest M&amp;M color?
+                            <a href="#" class="replaybutton" title="Android replay button" data-example-sound="rarest-color.mp3">
                                 <span>
                                     <svg viewBox="0 0 32 32">
                                         <polygon points="11,25 25,16 11,7" />Replay
@@ -298,7 +320,7 @@
                     </div>
                 </div>
                 <hr class="answer-divider">
-                <div class="body">
+                <div class="body" data-example-field="Back">
                     Brown
                 </div>
             </div>
@@ -310,12 +332,12 @@
                 <p>The <code>cover</code> class displays a full-width photo as the prompt, with an identification and explanation on the back. Use it to recognise plants, animals or objects.</p>
             </header>
             <div class="note back">
-                <div class="note front">
+                <div class="note front" data-example-field="Front" data-example-html>
                     <img class="cover"
                         src="https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Equisetum_arvense_001.JPG/960px-Equisetum_arvense_001.JPG?utm_campaign=index&amp;utm_content=thumbnail&amp;utm_source=commons.wikimedia.org" alt="Horsetail plant" loading="lazy" />
                 </div>
                 <hr class="answer-divider">
-                <div class="body">
+                <div class="body" data-example-field="Back" data-example-html>
                     <div class="text-block">
                         Equisetaceae, sometimes called the horsetail family, is the only extant family of the order <a
                             href="https://en.wikipedia.org/wiki/Equisetales" target="_blank">Equisetales</a>, with one
@@ -338,7 +360,7 @@
                 <p>A full-width <code>cover</code> photo above a written prompt. Use it to connect a word with its meaning through a visual cue.</p>
             </header>
             <div class="note back">
-                <div class="note front">
+                <div class="note front" data-example-field="Front" data-example-html>
                     <img class="cover" src="https://picsum.photos/id/259/600/600" alt="" loading="lazy" />
                     <div class="body">
                         Città
@@ -346,7 +368,7 @@
                 </div>
                 <hr class="answer-divider">
                 <div class="body">
-                    <div class="text-block">
+                    <div class="text-block" data-example-field="Back">
                         Town
                     </div>
                 </div>
@@ -360,9 +382,9 @@
             </header>
             <div class="note back">
                 <div class="note front">
-                    <div class="body flex flex-row">
+                    <div class="body flex flex-row" data-example-field="Front" data-example-html>
                         If you study, you'll pass the exam
-                        <a href="#" class="replaybutton">
+                        <a href="#" class="replaybutton" data-example-sound="first-conditional.mp3">
                             <span>
                                 <svg viewBox="0 0 32 32">
                                     <polygon points="11,25 25,16 11,7" />Replay
@@ -373,24 +395,20 @@
                 </div>
                 <hr class="answer-divider">
                 <div class="body">
-                    <div class="subtitle">
-                        FIRST conditional
-                    </div>
-                    <div class="text-block">
-                        <div class="gap-sm align-items-center">
-                            <span class="pill">
-                                PRESENT SIMPLE
-                            </span>
-                            +
-                            <span class="pill">
-                                WILL/WON'T + VERB
-                            </span>
+                    <div class="text-block" data-example-field="Back" data-example-html>
+                        <div class="subtitle">FIRST conditional</div>
+                        <div class="text-block">
+                            <div class="gap-sm align-items-center">
+                                <span class="pill">PRESENT SIMPLE</span>
+                                +
+                                <span class="pill">WILL/WON'T + VERB</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="text-block">
-                        <div class="subtitle">Uses</div>
-                        A possible situation in the future.<br>
-                        Predicting a likely result in the future (if the condition happens).
+                        <div class="text-block">
+                            <div class="subtitle">Uses</div>
+                            A possible situation in the future.<br>
+                            Predicting a likely result in the future (if the condition happens).
+                        </div>
                     </div>
                     <div class="text-block">
                         <div data-hint-field="Translation">
@@ -406,8 +424,6 @@
             <header class="example-intro">
                 <h2 id="multiple-choice-title">Multiple choice</h2>
                 <p>Lettered options on the front, with the correct choices and an explanation on the back. Use it to practise exam questions with one or more correct answers.</p>
-                <p>Create four fields in Anki named <code>Question</code>, <code>Options</code>, <code>Correct Options</code>, and <code>Explanation</code>.</p>
-                <p>Enter <code>Options</code> and <code>Correct Options</code> as HTML in Anki’s field editor. Both lists are available under <strong>Source code</strong>.</p>
             </header>
             <div class="note back">
                 <div class="note front question-card">
@@ -425,13 +441,13 @@
                 <div class="body question-results">
                     <div class="text-block" data-example-field="Correct Options" data-example-html>
                         <ol type="A">
-                            <li class="correct-answer">Uranus</li>
-                            <li class="correct-answer">Neptune</li>
+                            <li>Uranus</li>
+                            <li>Neptune</li>
                             <li class="wrong-answer">Jupiter</li>
                             <li class="wrong-answer">Saturn</li>
                         </ol>
                     </div>
-                    <div class="text-block">
+                    <div class="text-block" data-example-if="Explanation">
                         <div class="subtitle">Explanation</div>
                         <div class="small" data-example-field="Explanation">Uranus and Neptune are ice giants. Jupiter and Saturn are gas giants.</div>
                     </div>
@@ -439,7 +455,7 @@
             </div>
         </section>
     </div>
-    <script src="./src/js/main.js?v=3"></script>
+    <script src="./src/js/main.js?v=10"></script>
 </body>
 
 </html>
