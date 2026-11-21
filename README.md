@@ -67,7 +67,7 @@ Front content aligns to the start by default. A `class="body question"` block is
 
 Copy the **Front** and **Back** templates from **Card setup** in the demo’s **Multiple choice** example into a note type with the fields `Question`, `Options`, `Correct Options`, and `Explanation`. Use the same [stylesheet](models/styles.css) as the basic card.
 
-Copy the HTML snippets for **Options** and **Correct Options** from the **Fields** tab into the corresponding fields using Anki’s HTML editor. Both fields contain the full list in the same order, using `<ol type="A">` for lettered choices. In `Correct Options`, mark correct choices with `class="correct-answer"` and incorrect choices with `class="wrong-answer"`. Incorrect choices appear struck through on the back.
+Copy the HTML snippets for **Options** and **Correct Options** from the **Fields** tab into the corresponding fields using Anki’s HTML editor. Both fields contain the full list in the same order, using `<ol type="A">` for lettered choices. In `Correct Options`, add `class="wrong-answer"` to each incorrect choice so it appears struck through on the back.
 
 ## Build locally
 
