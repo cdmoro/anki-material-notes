@@ -97,6 +97,14 @@
   display: none;
 }
 
+/* Keep the answer anchor without shifting the options when they are revealed. */
+.note.back > .question-card + :is(#answer, .answer-divider) {
+  background: none;
+  border: 0;
+  height: 0;
+  padding: 0;
+}
+
 .note.back > .question-results {
   text-align: start;
 }

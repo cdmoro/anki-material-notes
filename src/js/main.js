@@ -4,6 +4,7 @@ const notes = document.querySelectorAll(".card-example .note");
 const exampleSelect = document.querySelector("#example");
 const colorSelect = document.querySelector("#color");
 const finishes = document.querySelectorAll("[data-finish]");
+const templatePreviews = new Map();
 const keys = {
     example: "note-example",
     style: "note-card-style",
@@ -11,6 +12,22 @@ const keys = {
     view: "note-view",
     centered: "note-centered",
 };
+
+async function updateProjectVersion() {
+    try {
+        const response = await fetch("./manifest.json", { cache: "no-cache" });
+        if (!response.ok) return;
+
+        const { version } = await response.json();
+        if (typeof version === "string" && version) {
+            document.getElementById("project-link").textContent = `Project (v${version})`;
+        }
+    } catch {
+        // Keep the project link available if the manifest cannot be loaded.
+    }
+}
+
+updateProjectVersion();
 
 function readPreference(key) {
     try {
@@ -56,7 +73,13 @@ colorSelect.value = savedStyle?.[1] || savedVariant.replace(/^note-/, "") || "ba
 
 let finish = (colorSelect.value && savedStyle?.[2]) || "base";
 if (!colorSelect.value) colorSelect.value = "base";
-let appliedTag = "";
+let appliedVariant = "";
+
+function updateTemplatePreviews() {
+    for (const [note, { code, content }] of templatePreviews) {
+        code.textContent = '<div class="' + note.className + '">\n' + content + '\n</div>';
+    }
+}
 
 function updateVariant() {
     const color = colorSelect.value;
@@ -66,13 +89,12 @@ function updateVariant() {
     const variant = color.startsWith("flag-") && finish === "base" ? "note-" + color
         : color === "base" && finish === "base" ? ""
         : "note-" + color + "-" + finish;
-    const tag = variant && "Material::" + variant;
-
     notes.forEach(note => {
-        if (appliedTag) note.classList.remove(appliedTag);
-        if (tag) note.classList.add(tag);
+        if (appliedVariant) note.classList.remove(appliedVariant);
+        if (variant) note.classList.add(variant);
     });
-    appliedTag = tag;
+    appliedVariant = variant;
+    updateTemplatePreviews();
 
     finishes.forEach(button => {
         button.disabled = !allowed.includes(button.dataset.finish);
@@ -96,12 +118,15 @@ function setupToggle(id, key, initialValue, apply) {
         button.setAttribute("aria-pressed", enabled);
         apply(enabled);
     }
-    update(initialValue);
-    button.addEventListener("click", () => {
-        const enabled = button.getAttribute("aria-pressed") !== "true";
+    function select(enabled) {
         update(enabled);
         savePreference(key, enabled);
+    }
+    update(initialValue);
+    button.addEventListener("click", () => {
+        select(button.getAttribute("aria-pressed") !== "true");
     });
+    return select;
 }
 
 const themeButton = document.getElementById("theme-toggle");
@@ -137,12 +162,13 @@ systemTheme.addEventListener("change", updateTheme);
 updateTheme();
 
 setupToggle("centered", keys.centered, readPreference(keys.centered) === "true", enabled => {
-    notes.forEach(note => note.classList.toggle("Material::note-centered", enabled));
+    notes.forEach(note => note.classList.toggle("note-centered", enabled));
+    updateTemplatePreviews();
 });
 
 const storedView = readPreference(keys.view) ?? readPreference("note-side");
-const showAnswer = storedView !== "false" && storedView !== "front";
-setupToggle("side", keys.view, showAnswer, enabled => {
+const showAnswer = storedView === "true" || storedView === "back";
+const setAnswerVisible = setupToggle("side", keys.view, showAnswer, enabled => {
     card.classList.toggle("front-side", !enabled);
 });
 
@@ -156,61 +182,254 @@ document.querySelectorAll("[data-hint-field] .hint").forEach(link => {
     });
 });
 
-function indentExample(element, baseIndent) {
-    const lines = element.innerHTML.trimEnd().split("\n")
-        .filter((line, index) => index > 0 || line.trim());
-    const indent = baseIndent ?? (lines[0]?.match(/^ */)[0].length ?? 0);
-    const leadingIndent = new RegExp("^ {" + indent + "}");
-    return lines.map(line => line.replace(leadingIndent, "")).join("\n");
+function dedent(html) {
+    const lines = html.replace(/^\s*\n/, "").trimEnd().split("\n");
+    const indent = Math.min(...lines.filter(line => line.trim()).map(line => line.match(/^ */)[0].length));
+    return lines.map(line => line.slice(indent)).join("\n");
 }
 
-examples.forEach(example => {
-    const back = example.querySelector(".note.back").cloneNode(true);
-    const front = back.querySelector(".note.front");
-    const divider = back.querySelector(".answer-divider");
-    const source = document.createElement("div");
-    const heading = document.createElement("h3");
-    source.className = "example-source";
-    heading.id = example.id + "-source-title";
-    heading.textContent = "Source code";
-    source.append(heading);
+function templateContent(element) {
+    return dedent(element.innerHTML).replace(/^(?=.)/gm, "    ");
+}
 
-    const fields = Array.from(back.querySelectorAll("[data-example-html]"), element => [
-        element.dataset.exampleField, indentExample(element),
-    ]);
-    back.querySelectorAll("[data-hint-field]").forEach(hint => {
-        hint.replaceWith("{{hint:" + hint.dataset.hintField + "}}");
+function readExampleTemplates(preview) {
+    const back = preview.cloneNode(true);
+    const front = back.querySelector(".note.front");
+    const fields = [];
+
+    back.querySelectorAll("img[loading]").forEach(image => image.removeAttribute("loading"));
+    back.querySelectorAll("[data-example-sound]").forEach(button => {
+        button.replaceWith("[sound:" + button.dataset.exampleSound + "]");
     });
-    back.querySelectorAll("[data-example-field]").forEach(element => {
-        element.textContent = "{{" + element.dataset.exampleField + "}}";
+    back.querySelectorAll("[data-example-field], [data-hint-field]").forEach(element => {
+        const hint = element.dataset.hintField;
+        const name = hint ?? element.dataset.exampleField;
+        const html = element.hasAttribute("data-example-html");
+        const image = element.matches("img");
         element.removeAttribute("data-example-field");
         element.removeAttribute("data-example-html");
+
+        const content = hint ? element.querySelector("[aria-controls] + span").textContent.trim()
+            : image ? element.outerHTML
+            : html ? dedent(element.innerHTML)
+            : element.textContent.trim();
+        fields.push({ name, html, content });
+
+        if (hint || image) {
+            element.replaceWith(hint ? "{{hint:" + name + "}}" : "{{" + name + "}}");
+        } else {
+            element.textContent = "{{" + name + "}}";
+        }
     });
-    const frontClass = front.classList.contains("question-card") ? "note front question-card" : "note front";
-    const frontHTML = '<div class="' + frontClass + ' {{Tags}}">\n' +
-        indentExample(front, 16) + '\n</div>';
+    back.querySelectorAll("[data-example-if]").forEach(element => {
+        const name = element.dataset.exampleIf;
+        const indent = element.previousSibling.textContent.match(/ *$/)[0];
+        element.removeAttribute("data-example-if");
+        element.before("{{#" + name + "}}\n" + indent);
+        element.after("\n" + indent + "{{/" + name + "}}");
+    });
+
+    const frontContent = templateContent(front);
     front.replaceWith("{{FrontSide}}");
+    const divider = back.querySelector(".answer-divider");
     divider.removeAttribute("class");
     divider.id = "answer";
-    const backHTML = '<div class="note back {{Tags}}">\n' +
-        indentExample(back, 16) + '\n</div>';
+    return { fields, frontContent, backContent: templateContent(back) };
+}
+
+function codeBlock(content) {
+    const pre = document.createElement("pre");
+    const code = document.createElement("code");
+    pre.tabIndex = 0;
+    code.textContent = content;
+    pre.append(code);
+    return pre;
+}
+
+function copyAction(label, getText, failureMessage) {
+    const controls = document.createElement("div");
+    const button = document.createElement("button");
+    const status = document.createElement("span");
+    controls.className = "copy-controls";
+    button.type = "button";
+    button.textContent = label;
+    status.setAttribute("role", "status");
+    controls.append(button, status);
+
+    let resetStatus;
+    button.addEventListener("click", async () => {
+        window.clearTimeout(resetStatus);
+        status.textContent = "";
+        try {
+            await navigator.clipboard.writeText(getText());
+            status.textContent = "Copied!";
+            resetStatus = window.setTimeout(() => { status.textContent = ""; }, 2500);
+        } catch {
+            status.textContent = failureMessage;
+        }
+    });
+
+    return { controls, button, status };
+}
+
+function renderTemplatePreview(panel, label, note, content) {
+    const pre = codeBlock("");
+    const code = pre.firstElementChild;
+    const { controls } = copyAction("Copy " + label.toLowerCase(), () => code.textContent,
+        "Couldn’t copy. Select the code below to copy it manually.");
+    templatePreviews.set(note, { code, content });
+    panel.append(controls, pre);
+}
+
+function renderExampleFields(panel, example, fields) {
+    const list = document.createElement("dl");
+    panel.classList.add("example-fields");
+    panel.tabIndex = 0;
+
+    const instructions = [];
+    if (fields.some(({ name }) => name === "Front")) {
+        const custom = fields.filter(({ name }) => name !== "Front" && name !== "Back").map(({ name }) => name);
+        if (custom.length) {
+            const names = new Intl.ListFormat("en").format(custom);
+            instructions.push("Add " + names + " to the Basic note type’s fields.");
+        }
+    } else {
+        instructions.push("Create a note type with the fields listed below, except FrontSide, which Anki provides.");
+    }
+    if (fields.some(({ html }) => html)) {
+        instructions.push("Paste HTML values into Anki’s field HTML editor.");
+    }
+    if (example.querySelector("[data-example-sound]")) {
+        instructions.push("Replace each sample sound filename with the corresponding audio file in your Anki collection.");
+    }
+    if (instructions.length) {
+        const description = document.createElement("p");
+        description.textContent = instructions.join(" ");
+        panel.append(description);
+    }
+
+    const rows = [
+        ...fields.map(field => ({
+            ...field,
+            kind: field.html ? "HTML" : "Text",
+        })),
+        { name: "FrontSide", kind: "Special field", content: "Anki inserts the rendered front on the back." },
+    ];
+    rows.forEach(({ name, kind, html, content }) => {
+        const row = document.createElement("div");
+        const term = document.createElement("dt");
+        const fieldName = document.createElement("code");
+        const format = document.createElement("span");
+        const value = document.createElement("dd");
+        fieldName.textContent = name;
+        format.textContent = kind;
+        term.append(fieldName, format);
+        if (html) {
+            const { controls, button } = copyAction("Copy HTML", () => content,
+                "Couldn’t copy. Select the code below to copy it manually.");
+            button.setAttribute("aria-label", "Copy HTML for " + name);
+            value.append(controls, codeBlock(content));
+        } else {
+            value.textContent = content;
+        }
+        row.append(term, value);
+        list.append(row);
+    });
+    panel.append(list);
+}
+
+const stylesheetUrl = document.getElementById("card-styles").href;
+const stylesheetText = fetch(stylesheetUrl).then(response => {
+    if (!response.ok) throw new Error("Couldn’t load the stylesheet.");
+    return response.text();
+});
+
+function renderStylePanel(panel) {
+    const description = document.createElement("p");
+    description.textContent = "In Anki, open Cards… and paste this CSS into Styling. All examples, palettes, and finishes use the same stylesheet.";
+    const { controls, button, status } = copyAction("Copy style", () => css,
+        "Couldn’t copy. Use Download CSS to get the stylesheet.");
+    const download = document.createElement("a");
+    download.href = stylesheetUrl;
+    download.download = "styles.css";
+    download.textContent = "Download CSS";
+    controls.insertBefore(download, status);
+    panel.classList.add("example-style");
+    panel.append(description, controls);
+
+    let css;
+    button.disabled = true;
+    stylesheetText.then(text => {
+        css = text;
+        button.disabled = false;
+    }, () => {
+        status.textContent = "Couldn’t load the stylesheet. Try Download CSS.";
+    });
+}
+
+function setupTabIcon(pathData) {
+    const namespace = "http://www.w3.org/2000/svg";
+    const icon = document.createElementNS(namespace, "svg");
+    const path = document.createElementNS(namespace, "path");
+    icon.setAttribute("viewBox", "0 0 16 16");
+    icon.setAttribute("aria-hidden", "true");
+    path.setAttribute("d", pathData);
+    icon.append(path);
+    return icon;
+}
+
+const reviewWindowTemplate = document.getElementById("review-window-template");
+examples.forEach(example => {
+    const preview = example.querySelector(".note.back");
+    const reviewWindow = reviewWindowTemplate.content.cloneNode(true);
+    const reviewContent = reviewWindow.querySelector(".review-content");
+    const showAnswerButton = reviewWindow.querySelector(".review-show-answer");
+    const goodButton = reviewWindow.querySelector(".review-good");
+    showAnswerButton.addEventListener("click", () => {
+        setAnswerVisible(true);
+        goodButton.focus();
+    });
+    reviewWindow.querySelectorAll(".review-ratings button").forEach(button => {
+        button.addEventListener("click", () => {
+            setAnswerVisible(false);
+            showAnswerButton.focus();
+        });
+    });
+    preview.before(reviewWindow);
+    reviewContent.append(preview);
+
+    const { fields, frontContent, backContent } = readExampleTemplates(preview);
+    const setup = document.createElement("section");
+    const heading = document.createElement("h3");
+    setup.className = "example-setup";
+    heading.id = example.id + "-setup-title";
+    heading.textContent = "Card setup";
+    setup.setAttribute("aria-labelledby", heading.id);
+    setup.append(heading);
 
     const tabList = document.createElement("div");
-    tabList.className = "example-source-tabs";
+    tabList.className = "example-setup-tabs";
     tabList.setAttribute("role", "tablist");
     tabList.setAttribute("aria-labelledby", heading.id);
-    source.append(tabList);
+    setup.append(tabList);
 
-    const tabs = [["Front", frontHTML], ["Back", backHTML], ...fields].map(([label, html]) => {
+    const tabs = [
+        ["Front", "M3 3.5h10a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Zm2 3h6",
+            panel => renderTemplatePreview(panel, "Front", preview.querySelector(".note.front"), frontContent)],
+        ["Back", "M3 3.5h10a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Zm2 6h6",
+            panel => renderTemplatePreview(panel, "Back", preview, backContent)],
+        ["Style", "M3 2.5h10v5H3zm2 5v1.25h6V7.5M7 8.75V13a1 1 0 0 0 2 0V8.75M6 2.5v2",
+            renderStylePanel],
+        ["Fields", "M5.5 4h8m-8 4h8m-8 4h8M2.5 4h.1m-.1 4h.1m-.1 4h.1",
+            panel => renderExampleFields(panel, example, fields)],
+    ].map(([label, iconPath, renderPanel]) => {
         const tab = document.createElement("button");
         const panel = document.createElement("div");
-        const code = document.createElement("code");
-        const pre = document.createElement("pre");
-        const id = example.id + "-source-" + label.toLowerCase().replaceAll(" ", "-");
+        const id = example.id + "-setup-" + label.toLowerCase();
 
         tab.type = "button";
         tab.id = id + "-tab";
-        tab.textContent = label;
+        tab.append(setupTabIcon(iconPath), label);
         tab.setAttribute("role", "tab");
         tab.setAttribute("aria-controls", id);
         tabList.append(tab);
@@ -218,11 +437,8 @@ examples.forEach(example => {
         panel.id = id;
         panel.setAttribute("role", "tabpanel");
         panel.setAttribute("aria-labelledby", tab.id);
-        pre.tabIndex = 0;
-        code.textContent = html;
-        pre.append(code);
-        panel.append(pre);
-        source.append(panel);
+        renderPanel(panel);
+        setup.append(panel);
         return { tab, panel };
     });
 
@@ -252,5 +468,6 @@ examples.forEach(example => {
         });
     });
     selectTab(0);
-    example.append(source);
+    example.append(setup);
 });
+updateTemplatePreviews();

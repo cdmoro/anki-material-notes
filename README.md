@@ -1,6 +1,6 @@
 # Material Notes for Anki
 
-Material-style flashcards for Anki with light and dark modes. In the [interactive demo](https://anki-material-notes.netlify.app), choose a color or country palette, then choose an available finish. Use the **Show answer** icon to reveal or hide the answer. Under **Source code**, select the **Front** or **Back** tab to see the corresponding HTML.
+Material-style flashcards for Anki with light and dark modes. In the [interactive demo](https://anki-material-notes.netlify.app), choose a color or country palette, then choose an available finish. Use the **Show answer** icon to reveal or hide the answer. Under **Card setup**, copy the styled templates from **Front** and **Back** and use **Style → Copy style** for the CSS. The **Fields** tab lists the note fields and lets you copy each HTML example.
 
 ## Use the add-on
 
@@ -10,7 +10,7 @@ Open **Tools → Material Notes…** to see the Material note types in the curre
 
 ## Copy a card into Anki
 
-Open **Cards…** for a Basic note type with the **Front** and **Back** fields. Copy the contents of each file into the corresponding editor pane.
+Open **Cards…** for a Basic note type with the **Front** and **Back** fields. Use the demo’s **Copy front**, **Copy back**, and **Copy style** buttons to fill the corresponding editor panes below, or copy from the files directly.
 
 Download a versioned copy of the three files, together or individually, from [GitHub Releases](https://github.com/cdmoro/anki-material-notes/releases).
 
@@ -22,9 +22,11 @@ Download a versioned copy of the three files, together or individually, from [Gi
 
 If you want these templates for a single deck, clone the note type before editing and assign the clone to those notes. Anki applies template changes to every note that uses the edited note type.
 
-### Customize with tags
+### Customize with classes or tags
 
-Use one variant tag per note. For example, pick one of these three green finishes.
+For a style shared by a whole note type, add a class such as `note-green-filled` to the outer `.note` element in both templates. The same stylesheet supports classes with the `Material::` prefix.
+
+For styling individual notes, include `{{Tags}}` in the class list of both templates and use one variant tag per note. For example, pick one of these three green finishes.
 
 | Finish | Example tag |
 | --- | --- |
@@ -63,9 +65,9 @@ Front content aligns to the start by default. A `class="body question"` block is
 
 ### Read-only multiple choice
 
-Copy the templates from **Multiple choice → Source code** in the demo into a note type with the fields `Question`, `Options`, `Correct Options`, and `Explanation`. Use the same [stylesheet](models/styles.css) as the basic card.
+Copy the **Front** and **Back** templates from **Card setup** in the demo’s **Multiple choice** example into a note type with the fields `Question`, `Options`, `Correct Options`, and `Explanation`. Use the same [stylesheet](models/styles.css) as the basic card.
 
-Paste the snippets from the **Options** and **Correct Options** tabs into the corresponding fields using Anki’s HTML editor. Both fields contain the full list in the same order, using `<ol type="A">` for lettered choices. In `Correct Options`, mark correct choices with `class="correct-answer"` and incorrect choices with `class="wrong-answer"`. Incorrect choices appear struck through on the back.
+Copy the HTML snippets for **Options** and **Correct Options** from the **Fields** tab into the corresponding fields using Anki’s HTML editor. Both fields contain the full list in the same order, using `<ol type="A">` for lettered choices. In `Correct Options`, mark correct choices with `class="correct-answer"` and incorrect choices with `class="wrong-answer"`. Incorrect choices appear struck through on the back.
 
 ## Build locally
 

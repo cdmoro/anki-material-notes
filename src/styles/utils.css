@@ -24,11 +24,11 @@
 .note .text-center,
 .note.front .center,
 .note.front .body.question,
-.note.Material\:\:note-centered > .body {
+.note:is(.note-centered, .Material\:\:note-centered) > .body {
   text-align: center;
   text-wrap: balance;
 }
 
-.note.Material\:\:note-centered > .body .flex {
+.note:is(.note-centered, .Material\:\:note-centered) > .body .flex {
   justify-content: center;
 }
