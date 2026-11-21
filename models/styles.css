@@ -110,6 +110,7 @@ body.card {
   --front-light: initial;
   --front-dark: initial;
   --country-stripe: initial;
+  --country-stripe-content: none;
   --palette-accent: var(--palette-light, var(--font-color));
   --palette-front: var(--front-light, var(--palette-accent));
   --palette-fill: var(--fill-light, var(--surface));
@@ -237,6 +238,11 @@ body.card {
   --fill-dark: #4b2c2d;
 }
 
+.note:is(.note-base-filled, .Material\:\:note-base-filled) {
+  --fill-light: #eeedf0;
+  --fill-dark: #2b2a2e;
+}
+
 /* Presentation rules for each variant family. */
 .note:is(.note-blue-base, .Material\:\:note-blue-base),
 .note:is(.note-purple-base, .Material\:\:note-purple-base),
@@ -285,6 +291,7 @@ body.card {
   --back-accent-color: var(--palette-link);
 }
 
+.note:is(.note-base-filled, .Material\:\:note-base-filled),
 .note:is(.note-blue-filled, .Material\:\:note-blue-filled),
 .note:is(.note-purple-filled, .Material\:\:note-purple-filled),
 .note:is(.note-pink-filled, .Material\:\:note-pink-filled),
@@ -368,6 +375,7 @@ body.card {
   --link-light: #34698e;
   --front-light: #a8d7f3;
   --front-dark: #234b67;
+  --country-stripe-content: "";
   --country-stripe: linear-gradient(to right, #74acdf 0 33%, #fffaf0 33% 47%, #daaa3a 47% 53%, #fffaf0 53% 67%, #74acdf 67% 100%);
 }
 
@@ -383,6 +391,7 @@ body.card {
   --ink-dark: #ffe56a;
   --link-light: #006b34;
   --front-dark: #116039;
+  --country-stripe-content: "";
   --country-stripe: linear-gradient(to right, #ffdf00 0.00% 33.33%, #ffdf00 33.33% 66.67%, #23408e 66.67% 100.00%);
 }
 
@@ -398,6 +407,7 @@ body.card {
   --ink-dark: #ffe56a;
   --link-light: #b41720;
   --front-dark: #991923;
+  --country-stripe-content: "";
   --country-stripe: linear-gradient(to right, #c9141e 0.00% 33.33%, #c9141e 33.33% 66.67%, #ffda44 66.67% 100.00%);
 }
 
@@ -411,6 +421,7 @@ body.card {
   --fill-dark: #242d49;
   --ink-dark: #ffffff;
   --front-dark: #243874;
+  --country-stripe-content: "";
   --country-stripe: linear-gradient(to right, #284799 0.00% 33.33%, #ffffff 33.33% 66.67%, #ed2939 66.67% 100.00%);
 }
 
@@ -424,6 +435,7 @@ body.card {
   --fill-dark: #342d22;
   --ink-dark: #fff2cb;
   --front-dark: #343236;
+  --country-stripe-content: "";
   --country-stripe: linear-gradient(to right, #29282a 0.00% 33.33%, #d22c36 33.33% 66.67%, #ffce41 66.67% 100.00%);
 }
 
@@ -437,6 +449,7 @@ body.card {
   --fill-dark: #213b58;
   --ink-dark: #ffffff;
   --front-dark: #22598d;
+  --country-stripe-content: "";
   --country-stripe: linear-gradient(to right, #0d5eaf 0.00% 20.00%, #ffffff 20.00% 40.00%, #0d5eaf 40.00% 60.00%, #ffffff 60.00% 80.00%, #0d5eaf 80.00% 100.00%);
 }
 
@@ -451,6 +464,7 @@ body.card {
   --ink-dark: #ffffff;
   --link-light: #006b34;
   --front-dark: #166540;
+  --country-stripe-content: "";
   --country-stripe: linear-gradient(to right, #009246 0.00% 33.33%, #ffffff 33.33% 66.67%, #ce2b37 66.67% 100.00%);
 }
 
@@ -466,6 +480,7 @@ body.card {
   --ink-dark: #ffdae1;
   --front-light: #fff5e8;
   --front-dark: #572333;
+  --country-stripe-content: "";
   --country-stripe: linear-gradient(to right, #fff4e4 0.00% 20.00%, #fff4e4 20.00% 40.00%, #bc2945 40.00% 60.00%, #fff4e4 60.00% 80.00%, #fff4e4 80.00% 100.00%);
 }
 
@@ -480,6 +495,7 @@ body.card {
   --ink-light: #fff3da;
   --ink-dark: #fff3da;
   --front-dark: #214a3d;
+  --country-stripe-content: "";
   --country-stripe: linear-gradient(to right, #1f6149 0.00% 33.33%, #fff3da 33.33% 66.67%, #c02c42 66.67% 100.00%);
 }
 
@@ -493,6 +509,7 @@ body.card {
   --fill-dark: #212f47;
   --ink-dark: #ffffff;
   --front-dark: #223c66;
+  --country-stripe-content: "";
   --country-stripe: linear-gradient(to right, #213f74 0.00% 20.00%, #ffffff 20.00% 40.00%, #c52a42 40.00% 60.00%, #ffffff 60.00% 80.00%, #213f74 80.00% 100.00%);
 }
 
@@ -506,11 +523,12 @@ body.card {
   --fill-dark: #422735;
   --ink-dark: #ffffff;
   --front-dark: #84203f;
+  --country-stripe-content: "";
   --country-stripe: linear-gradient(to right, #b31942 0.00% 20.00%, #ffffff 20.00% 40.00%, #284779 40.00% 60.00%, #ffffff 60.00% 80.00%, #b31942 80.00% 100.00%);
 }
 
-.note.front:is([class*="Material::note-flag-"], [class^="note-flag-"], [class*=" note-flag-"])::before {
-  content: "";
+.note.front::before {
+  content: var(--country-stripe-content);
   display: block;
   height: 4px;
   background: var(--country-stripe);
