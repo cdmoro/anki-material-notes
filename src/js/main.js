@@ -62,7 +62,6 @@ exampleSelect.addEventListener("change", () => {
 });
 
 function availableFinishes(color) {
-    if (color === "base") return ["base", "outlined"];
     if (color === "white") return ["base"];
     return ["base", "filled", "outlined"];
 }
@@ -367,7 +366,13 @@ const stylesheetText = fetch(stylesheetUrl).then(response => {
 
 function renderStylePanel(panel) {
     const description = document.createElement("p");
-    description.textContent = "In Anki, open Cards… and paste this CSS into Styling. All examples, palettes, and finishes use the same stylesheet.";
+    const guide = document.createElement("a");
+    guide.href = "https://github.com/cdmoro/anki-material-notes/blob/main/docs/using-style-tags.md";
+    guide.textContent = "How to use style tags";
+    description.append(
+        "In Anki, open Cards… and paste this CSS into Styling. All examples, palettes, and finishes use the same stylesheet. ",
+        guide
+    );
     const { controls, button, status } = copyAction("Copy style", () => css,
         "Couldn’t copy. Use Download CSS to get the stylesheet.");
     const download = document.createElement("a");

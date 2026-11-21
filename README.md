@@ -4,9 +4,12 @@ Material-style flashcards for Anki with light and dark modes. In the [interactiv
 
 ## Use the add-on
 
-Open **Tools → Material Notes… → Create note type…**. Choose a template to see its purpose and fields, then name the new type. The add-on includes Basic, Vocabulary with hints, Emoji and pills, Symbols and characters, both audio layouts, both image layouts, Grammar and usage, and both Multiple choice templates.
+Open **Tools → Material Notes… → Create note type…**. Choose a template to see its purpose and the fields it will create, then choose how to apply styles.
 
-Under **Appearance**, choose a color or flag in **Palette**, select **Accent**, **Filled**, or **Outlined** where available, and enable **Center card content** if you want centered text. These choices apply to the whole note type. Open **Add** and select the new type to start adding notes.
+- **Fixed style** is the default. Choose a color or country palette and select **Base**, **Filled**, or **Outlined** where available. You can also enable **Center card content**. The whole note type uses these settings and you can use tags to organize your notes.
+- **Style using tags** lets you change the appearance of each note with a tag such as `Material::note-pink-outlined`. The same style applies to every card generated from that note. See [How to use style tags](docs/using-style-tags.md) for the setup and full catalog.
+
+Leave **Note type name** blank to use the suggestion, such as `Basic - Pink Outlined` or `Basic - Tags`. If the suggested name already exists, the add-on appends `(2)`, `(3)`, and so on. Open **Add** and select the new note type to start adding notes.
 
 **Update note types** refreshes the templates and CSS while keeping your appearance choices and the field values on existing notes. If you edited the templates or styling, the add-on asks before replacing your changes.
 
@@ -28,23 +31,7 @@ If you want these templates for a single deck, clone the note type before editin
 
 For a style shared by a whole note type, choose an appearance in the add-on or add a class such as `note-green-filled` to the outer `.note` element in both templates.
 
-For styling individual notes, leave the note type's appearance at its defaults and use one variant tag per note. The templates created by the add-on already include `{{Tags}}`. Both spellings below work as classes or as tags.
-
-| Finish | Plain | With namespace |
-| --- | --- | --- |
-| Accent | `note-green-base` | `Material::note-green-base` |
-| Filled | `note-green-filled` | `Material::note-green-filled` |
-| Outlined | `note-green-outlined` | `Material::note-green-outlined` |
-
-Replace `green` with `blue`, `purple`, `pink`, `teal`, `orange`, `indigo`, `brown`, `lime`, or `red`. Older accent tags such as `Material::note-green` still work. The neutral card also has an outlined variant (`Material::note-base-outlined`), and `Material::note-white-base` keeps the front white in either mode.
-
-Add `note-centered` or `Material::note-centered` to center card content for an individual note. Native reviewer flags and stars are styled by Anki.
-
-### Country palettes
-
-Use `Material::note-flag-uk` for Accent, `Material::note-flag-uk-filled` for Filled, or `Material::note-flag-uk-outlined` for Outline. The `-base` suffix also works for Accent. Each country has a thin stripe inspired by its flag and colors for light and dark mode.
-
-Replace `uk` with `argentina`, `brazil`, `china`, `france`, `germany`, `greece`, `italy`, `japan`, `mexico`, or `usa`.
+For styling individual notes, put `{{Tags}}` in the class list of the outer `.note` element in both templates in place of any fixed palette class. The Basic templates linked above already use `{{Tags}}`. Add one palette tag per note, such as `note-green-filled` or `Material::note-green-filled`. See [How to use style tags](docs/using-style-tags.md) for step-by-step instructions and the list of colors, finishes, and country palettes.
 
 ### Optional HTML inside a field
 
@@ -96,7 +83,8 @@ Fill in Option A and Option B. Option C, Option D, Explanation, and Source are o
 | --- | --- |
 | `make build-card` | `dist/material-notes-card.zip` with the three files for manual use |
 | `make build-addon` | `dist/material-notes.ankiaddon` with the add-on and all note type templates |
-| `make build-css` | Refreshes `models/styles.css` from the CSS sources in `src/styles/` |
+| `make build-css` | Refreshes `models/styles.css` and the guide’s style tag catalog from the CSS sources |
+| `make test` | Checks the style tag catalog and runs integration tests when Anki’s Python modules are available |
 
 Manual installation of the basic card requires only `front.html`, `back.html`, and `styles.css` in `models/`.
 
