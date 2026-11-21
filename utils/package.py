@@ -1,4 +1,5 @@
 import argparse
+import json
 from zipfile import ZIP_DEFLATED, ZipFile
 
 from build_css import ROOT
@@ -14,12 +15,19 @@ def package(target):
         files = [(ROOT / "models" / name, name) for name in CARD_FILES]
     else:
         archive = output_dir / "material-notes.ankiaddon"
+        presets_path = ROOT / "models" / "presets.json"
+        presets = json.loads(presets_path.read_text(encoding="utf-8"))
+        templates = dict.fromkeys(
+            f"models/{preset[side]}"
+            for preset in presets.values()
+            for side in ("front", "back")
+        )
         paths = (
             "__init__.py",
             "manifest.json",
-            *(f"models/{name}" for name in CARD_FILES),
-            "models/multiple-choice/front.html",
-            "models/multiple-choice/back.html",
+            "models/presets.json",
+            "models/styles.css",
+            *templates,
         )
         files = [(ROOT / name, name) for name in paths]
 

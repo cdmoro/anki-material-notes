@@ -5,6 +5,7 @@
 
 /* Direct images on the front also act as covers in older templates. */
 .note > .cover,
+.note > .cover img,
 .note.front > img,
 .note.back > .body > img {
   display: block;
@@ -93,7 +94,7 @@
   font-size: var(--note-font-size);
 }
 
-.note.back > .question-card > .question-options {
+.note.back:not(.choice-answer-card) > .question-card > .question-options {
   display: none;
 }
 
@@ -118,6 +119,10 @@
 .note .wrong-answer {
   text-decoration: line-through;
   opacity: .6;
+}
+
+.note.back > #answer.choice-answer-anchor {
+  border: 0;
 }
 
 .note .small {

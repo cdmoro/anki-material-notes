@@ -7,7 +7,7 @@
     <title>Material Notes — Anki Add-on</title>
     <link rel="icon" type="image/x-icon" href="./src/assets/favicon.ico">
     <link rel="stylesheet" href="./src/styles/_page.css?v=11" />
-    <link id="card-styles" rel="stylesheet" href="./models/styles.css?v=9" />
+    <link id="card-styles" rel="stylesheet" href="./models/styles.css?v=12" />
 
 </head>
 
@@ -30,6 +30,7 @@
                         <option value="image-and-text">Image and text prompt</option>
                         <option value="grammar">Grammar and usage</option>
                         <option value="multiple-choice">Multiple choice</option>
+                        <option value="multiple-choice-2">Multiple choice 2</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -454,8 +455,36 @@
                 </div>
             </div>
         </section>
+        <section class="card-example" id="multiple-choice-2" aria-labelledby="multiple-choice-2-title"
+            data-template-directory="./models/multiple-choice-2"
+            data-fields-help="Option A and Option B are required. Enter correct choices as letters separated by spaces (B D), or as four digits separated by spaces (0 1 0 1).">
+            <header class="example-intro">
+                <h2 id="multiple-choice-2-title">Multiple choice 2</h2>
+                <p>Enter each option in its own field. Show Answer strikes through the incorrect choices.</p>
+            </header>
+            <div class="note back choice-answer-card">
+                <div class="note front question-card">
+                    <div class="body question" data-example-field="Question">Which two planets in our solar system are classified as ice giants?</div>
+                    <div class="body question-options">
+                        <ol type="A">
+                            <li data-preview-wrong-choice data-example-field="Option A">Jupiter</li>
+                            <li data-example-field="Option B">Uranus</li>
+                            <li data-preview-wrong-choice data-example-field="Option C" data-example-if="Option C">Saturn</li>
+                            <li data-example-field="Option D" data-example-if="Option D">Neptune</li>
+                        </ol>
+                    </div>
+                </div>
+                <hr class="answer-divider">
+                <div data-example-field="Correct Answers" hidden>B D</div>
+                <div class="body question-results" data-example-if="Explanation">
+                    <div class="subtitle">Explanation</div>
+                    <div class="small" data-example-field="Explanation">Uranus and Neptune are ice giants. Jupiter and Saturn are gas giants.</div>
+                </div>
+                <div class="body question-results question-source small" data-example-field="Source" data-example-if="Source">Solar system quiz · Question 4</div>
+            </div>
+        </section>
     </div>
-    <script src="./src/js/main.js?v=10"></script>
+    <script src="./src/js/main.js?v=13"></script>
 </body>
 
 </html>
