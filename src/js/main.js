@@ -168,8 +168,10 @@ setupToggle("centered", keys.centered, readPreference(keys.centered) === "true",
 
 const storedView = readPreference(keys.view) ?? readPreference("note-side");
 const showAnswer = storedView === "true" || storedView === "back";
+const wrongChoices = document.querySelectorAll("[data-preview-wrong-choice]");
 const setAnswerVisible = setupToggle("side", keys.view, showAnswer, enabled => {
     card.classList.toggle("front-side", !enabled);
+    wrongChoices.forEach(choice => choice.classList.toggle("wrong-answer", enabled));
 });
 
 document.querySelectorAll("[data-hint-field] .hint").forEach(link => {
@@ -205,6 +207,7 @@ function readExampleTemplates(preview) {
         const hint = element.dataset.hintField;
         const name = hint ?? element.dataset.exampleField;
         const html = element.hasAttribute("data-example-html");
+        const optional = Boolean(hint) || element.closest("[data-example-if]")?.dataset.exampleIf === name;
         const image = element.matches("img");
         element.removeAttribute("data-example-field");
         element.removeAttribute("data-example-html");
@@ -213,7 +216,7 @@ function readExampleTemplates(preview) {
             : image ? element.outerHTML
             : html ? dedent(element.innerHTML)
             : element.textContent.trim();
-        fields.push({ name, html, content });
+        fields.push({ name, html, optional, content });
 
         if (hint || image) {
             element.replaceWith(hint ? "{{hint:" + name + "}}" : "{{" + name + "}}");
@@ -275,10 +278,28 @@ function copyAction(label, getText, failureMessage) {
 function renderTemplatePreview(panel, label, note, content) {
     const pre = codeBlock("");
     const code = pre.firstElementChild;
-    const { controls } = copyAction("Copy " + label.toLowerCase(), () => code.textContent,
+    const { controls, button, status } = copyAction("Copy " + label.toLowerCase(), () => code.textContent,
         "Couldn’t copy. Select the code below to copy it manually.");
-    templatePreviews.set(note, { code, content });
     panel.append(controls, pre);
+
+    const directory = note.closest(".card-example").dataset.templateDirectory;
+    if (!directory) {
+        templatePreviews.set(note, { code, content });
+        return;
+    }
+
+    button.disabled = true;
+    fetch(directory + "/" + label.toLowerCase() + ".html").then(async response => {
+        if (!response.ok) throw new Error("Template unavailable");
+        const template = (await response.text()).trim();
+        const body = template.slice(template.indexOf("\n") + 1, template.lastIndexOf("\n"));
+        templatePreviews.set(note, { code, content: body });
+        updateTemplatePreviews();
+        button.disabled = false;
+    }).catch(() => {
+        status.textContent = "Couldn’t load the template.";
+        pre.hidden = true;
+    });
 }
 
 function renderExampleFields(panel, example, fields) {
@@ -294,10 +315,16 @@ function renderExampleFields(panel, example, fields) {
             instructions.push("Add " + names + " to the Basic note type’s fields.");
         }
     } else {
-        instructions.push("Create a note type with the fields listed below, except FrontSide, which Anki provides.");
+        instructions.push("Create a note type with the fields listed below.");
+    }
+    if (fields.some(({ optional }) => optional)) {
+        instructions.push("Optional fields can be left blank on individual notes.");
     }
     if (fields.some(({ html }) => html)) {
         instructions.push("Paste HTML values into Anki’s field HTML editor.");
+    }
+    if (example.dataset.fieldsHelp) {
+        instructions.push(example.dataset.fieldsHelp);
     }
     if (example.querySelector("[data-example-sound]")) {
         instructions.push("Replace each sample sound filename with the corresponding audio file in your Anki collection.");
@@ -308,21 +335,15 @@ function renderExampleFields(panel, example, fields) {
         panel.append(description);
     }
 
-    const rows = [
-        ...fields.map(field => ({
-            ...field,
-            kind: field.html ? "HTML" : "Text",
-        })),
-        { name: "FrontSide", kind: "Special field", content: "Anki inserts the rendered front on the back." },
-    ];
-    rows.forEach(({ name, kind, html, content }) => {
+    fields.forEach(({ name, html, optional, content }) => {
         const row = document.createElement("div");
         const term = document.createElement("dt");
         const fieldName = document.createElement("code");
         const format = document.createElement("span");
         const value = document.createElement("dd");
         fieldName.textContent = name;
-        format.textContent = kind;
+        format.textContent = html ? "HTML" : "Text";
+        if (optional) format.textContent += " · Optional";
         term.append(fieldName, format);
         if (html) {
             const { controls, button } = copyAction("Copy HTML", () => content,

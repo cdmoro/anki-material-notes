@@ -1,6 +1,7 @@
 """Manage Material Notes note types in the active Anki collection."""
 
 import hashlib
+import json
 from copy import deepcopy
 from pathlib import Path
 
@@ -9,10 +10,12 @@ from anki.errors import AnkiError
 from aqt import gui_hooks, mw
 from aqt.qt import (
     QAction,
+    QCheckBox,
     QComboBox,
     QDialog,
     QDialogButtonBox,
     QFormLayout,
+    QGroupBox,
     QLabel,
     QLineEdit,
     QListWidget,
@@ -23,25 +26,49 @@ from aqt.qt import (
 from aqt.utils import askUser, showInfo
 
 MODEL_DIR = Path(__file__).resolve().parent / "models"
-NOTE_TYPES = {
-    "basic": ("Basic", "Material (basic)", ("Front", "Back"), MODEL_DIR),
-    "multiple-choice": (
-        "Multiple choice",
-        "Material (multiple choice)",
-        ("Question", "Options", "Correct Options", "Explanation"),
-        MODEL_DIR / "multiple-choice",
-    ),
-}
+NOTE_TYPES = json.loads((MODEL_DIR / "presets.json").read_text(encoding="utf-8"))
+COLORS = (
+    "White", "Blue", "Purple", "Pink", "Teal", "Green",
+    "Orange", "Indigo", "Brown", "Lime", "Red",
+)
+COUNTRIES = (
+    ("Argentina", "ar", "argentina"), ("Brazil", "br", "brazil"),
+    ("China", "cn", "china"), ("France", "fr", "france"),
+    ("Germany", "de", "germany"), ("Greece", "gr", "greece"),
+    ("Italy", "it", "italy"), ("Japan", "jp", "japan"),
+    ("Mexico", "mx", "mexico"), ("United Kingdom", "gb", "uk"),
+    ("USA", "us", "usa"),
+)
+FINISHES = {"base": "Accent", "filled": "Filled", "outlined": "Outlined"}
 
 
 def read_model_file(path):
     return path.read_text(encoding="utf-8")
 
 
-def template_content(directory):
+def available_finishes(palette):
+    if palette == "base":
+        return ("base", "outlined")
+    if palette == "white":
+        return ("base",)
+    return tuple(FINISHES)
+
+
+def appearance_classes(palette="base", finish="base", centered=False):
+    classes = []
+    if palette != "base" or finish != "base":
+        suffix = "" if palette.startswith("flag-") and finish == "base" else f"-{finish}"
+        classes.append(f"note-{palette}{suffix}")
+    if centered:
+        classes.append("note-centered")
+    return classes
+
+
+def template_content(preset, appearance=None):
+    classes = " ".join([*appearance_classes(**(appearance or {})), "{{Tags}}"])
     return {
-        "qfmt": read_model_file(directory / "front.html"),
-        "afmt": read_model_file(directory / "back.html"),
+        key: read_model_file(MODEL_DIR / preset[side]).replace("{{Tags}}", classes, 1)
+        for key, side in (("qfmt", "front"), ("afmt", "back"))
     }
 
 
@@ -56,17 +83,19 @@ def record_installed_content(model, kind, css, template):
     model["mfc_template_hash"] = content_hash(template["qfmt"], template["afmt"])
 
 
-def create_note_type(models, kind, name):
-    _, _, fields, directory = NOTE_TYPES[kind]
+def create_note_type(models, kind, name, appearance=None):
+    preset = NOTE_TYPES[kind]
     model = models.new(name)
-    for field in fields:
+    for field in preset["fields"]:
         models.addField(model, models.newField(field))
 
     css = read_model_file(MODEL_DIR / "styles.css")
     template = models.newTemplate("Card 1")
-    template.update(template_content(directory))
+    template.update(template_content(preset, appearance))
     models.addTemplate(model, template)
     model["css"] = css
+    if appearance:
+        model["mfc_appearance"] = appearance
     record_installed_content(model, kind, css, template)
     models.add(model)
 
@@ -83,13 +112,13 @@ def update_note_type(models, model, css, confirm_overwrite):
     if kind not in NOTE_TYPES or model["type"] != MODEL_STD:
         return "incompatible"
 
-    _, _, fields, directory = NOTE_TYPES[kind]
+    preset = NOTE_TYPES[kind]
     model_fields = {field["name"] for field in model["flds"]}
-    if not model_fields.issuperset(fields) or len(model["tmpls"]) != 1:
+    if not model_fields.issuperset(preset["fields"]) or len(model["tmpls"]) != 1:
         return "incompatible"
 
     installed = model["tmpls"][0]
-    latest = template_content(directory)
+    latest = template_content(preset, model.get("mfc_appearance"))
     css_changed = css != model["css"]
     template_changed = any(installed[key] != value for key, value in latest.items())
     if not css_changed and not template_changed:
@@ -115,15 +144,34 @@ class CreateNoteTypeDialog(QDialog):
         super().__init__(parent)
         self.models = models
         self.setWindowTitle("Create Material note type")
+        self.setMinimumWidth(520)
 
         self.kind = QComboBox()
-        for kind, (label, _, _, _) in NOTE_TYPES.items():
-            self.kind.addItem(label, kind)
+        for kind, preset in NOTE_TYPES.items():
+            self.kind.addItem(preset["label"], kind)
+        self.description = QLabel()
+        self.description.setWordWrap(True)
+        self.description.setMinimumHeight(44)
         self.name = QLineEdit()
         self.fields = QLabel()
         self.fields.setWordWrap(True)
+        self.fields.setMinimumHeight(44)
         self.kind.currentIndexChanged.connect(self.update_preview)
-        self.update_preview()
+
+        self.palette = QComboBox()
+        self.palette.addItem("Default", "base")
+        self.palette.insertSeparator(self.palette.count())
+        for color in COLORS:
+            self.palette.addItem(color, color.lower())
+        self.palette.insertSeparator(self.palette.count())
+        for country, code, slug in COUNTRIES:
+            flag = "".join(chr(ord(letter) - ord("a") + 0x1F1E6) for letter in code)
+            self.palette.addItem(f"{flag}  {country}", f"flag-{slug}")
+
+        self.finish = QComboBox()
+        self.centered = QCheckBox("Center card content")
+        self.palette.currentIndexChanged.connect(self.update_finishes)
+        self.update_finishes()
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
@@ -132,21 +180,47 @@ class CreateNoteTypeDialog(QDialog):
         buttons.accepted.connect(self.create)
         buttons.rejected.connect(self.reject)
 
-        layout = QFormLayout(self)
-        layout.addRow("Template", self.kind)
-        layout.addRow("Name", self.name)
-        layout.addRow("Fields", self.fields)
-        layout.addRow(buttons)
+        template_group = QGroupBox("Note type")
+        template_layout = QFormLayout(template_group)
+        template_layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
+        template_layout.addRow("Template", self.kind)
+        template_layout.addRow("", self.description)
+        template_layout.addRow("Name", self.name)
+        template_layout.addRow("Fields", self.fields)
+
+        appearance_group = QGroupBox("Appearance")
+        appearance_layout = QFormLayout(appearance_group)
+        appearance_layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
+        appearance_layout.addRow("Palette", self.palette)
+        appearance_layout.addRow("Finish", self.finish)
+        appearance_layout.addRow("", self.centered)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 18, 18, 18)
+        layout.setSpacing(12)
+        layout.addWidget(template_group)
+        layout.addWidget(appearance_group)
+        layout.addWidget(buttons)
+        self.update_preview()
 
     def update_preview(self):
-        _, default_name, fields, _ = NOTE_TYPES[self.kind.currentData()]
+        preset = NOTE_TYPES[self.kind.currentData()]
+        default_name = f"Material ({preset['label'].lower()})"
         suggested_name = default_name
         suffix = 2
         while self.models.byName(suggested_name):
             suggested_name = f"{default_name} {suffix}"
             suffix += 1
         self.name.setPlaceholderText(suggested_name)
-        self.fields.setText(", ".join(fields))
+        self.description.setText(preset["description"])
+        self.fields.setText(", ".join(preset["fields"]))
+
+    def update_finishes(self):
+        selected = self.finish.currentData()
+        self.finish.clear()
+        for finish in available_finishes(self.palette.currentData()):
+            self.finish.addItem(FINISHES[finish], finish)
+        self.finish.setCurrentIndex(max(0, self.finish.findData(selected)))
 
     def create(self):
         name = self.name.text().strip() or self.name.placeholderText()
@@ -155,7 +229,12 @@ class CreateNoteTypeDialog(QDialog):
             return
 
         try:
-            create_note_type(self.models, self.kind.currentData(), name)
+            appearance = {
+                "palette": self.palette.currentData(),
+                "finish": self.finish.currentData(),
+                "centered": self.centered.isChecked(),
+            }
+            create_note_type(self.models, self.kind.currentData(), name, appearance)
         except (AnkiError, OSError) as error:
             showInfo(str(error), parent=self, textFormat=Qt.TextFormat.PlainText)
             return

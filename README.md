@@ -4,9 +4,11 @@ Material-style flashcards for Anki with light and dark modes. In the [interactiv
 
 ## Use the add-on
 
-Open **Tools → Material Notes…** to see the Material note types in the current collection. **Create note type…** lets you choose **Basic** or **Multiple choice** and name the new type.
+Open **Tools → Material Notes… → Create note type…**. Choose a template to see its purpose and fields, then name the new type. The add-on includes Basic, Vocabulary with hints, Emoji and pills, Symbols and characters, both audio layouts, both image layouts, Grammar and usage, and both Multiple choice templates.
 
-**Update note types** refreshes the card templates and styling of the listed types in place. If you edited the templates or styling, the add-on asks before replacing your changes. Existing notes keep their field values.
+Under **Appearance**, choose a color or flag in **Palette**, select **Accent**, **Filled**, or **Outlined** where available, and enable **Center card content** if you want centered text. These choices apply to the whole note type. Open **Add** and select the new type to start adding notes.
+
+**Update note types** refreshes the templates and CSS while keeping your appearance choices and the field values on existing notes. If you edited the templates or styling, the add-on asks before replacing your changes.
 
 ## Copy a card into Anki
 
@@ -24,19 +26,19 @@ If you want these templates for a single deck, clone the note type before editin
 
 ### Customize with classes or tags
 
-For a style shared by a whole note type, add a class such as `note-green-filled` to the outer `.note` element in both templates. The same stylesheet supports classes with the `Material::` prefix.
+For a style shared by a whole note type, choose an appearance in the add-on or add a class such as `note-green-filled` to the outer `.note` element in both templates.
 
-For styling individual notes, include `{{Tags}}` in the class list of both templates and use one variant tag per note. For example, pick one of these three green finishes.
+For styling individual notes, leave the note type's appearance at its defaults and use one variant tag per note. The templates created by the add-on already include `{{Tags}}`. Both spellings below work as classes or as tags.
 
-| Finish | Example tag |
-| --- | --- |
-| Accent | `Material::note-green-base` |
-| Filled | `Material::note-green-filled` |
-| Outline | `Material::note-green-outlined` |
+| Finish | Plain | With namespace |
+| --- | --- | --- |
+| Accent | `note-green-base` | `Material::note-green-base` |
+| Filled | `note-green-filled` | `Material::note-green-filled` |
+| Outlined | `note-green-outlined` | `Material::note-green-outlined` |
 
 Replace `green` with `blue`, `purple`, `pink`, `teal`, `orange`, `indigo`, `brown`, `lime`, or `red`. Older accent tags such as `Material::note-green` still work. The neutral card also has an outlined variant (`Material::note-base-outlined`), and `Material::note-white-base` keeps the front white in either mode.
 
-Add `Material::note-centered` separately to center the answer. Native reviewer flags and stars are styled by Anki.
+Add `note-centered` or `Material::note-centered` to center card content for an individual note. Native reviewer flags and stars are styled by Anki.
 
 ### Country palettes
 
@@ -69,12 +71,31 @@ Copy the **Front** and **Back** templates from **Card setup** in the demo’s **
 
 Copy the HTML snippets for **Options** and **Correct Options** from the **Fields** tab into the corresponding fields using Anki’s HTML editor. Both fields contain the full list in the same order, using `<ol type="A">` for lettered choices. In `Correct Options`, add `class="wrong-answer"` to each incorrect choice so it appears struck through on the back.
 
+### Multiple choice 2
+
+Use the add-on to create the note type, or copy [Front](models/multiple-choice-2/front.html), [Back](models/multiple-choice-2/back.html), and the shared [Styling](models/styles.css) into a note type with these fields.
+
+| Field | Example |
+| --- | --- |
+| `Question` | Which two planets are ice giants? |
+| `Option A` | Jupiter |
+| `Option B` | Uranus |
+| `Option C` | Saturn |
+| `Option D` | Neptune |
+| `Correct Answers` | `B D` |
+| `Explanation` | Uranus and Neptune are ice giants. |
+| `Source` | Solar system quiz · Question 4 |
+
+Fill in Option A and Option B. Option C, Option D, Explanation, and Source are optional. If you leave an optional choice blank, its letter stays reserved so the answer key still matches the named fields. Enter one letter for a single correct answer or separate multiple letters with spaces. The four-position key `0 1 0 1` also works. A `1` marks the corresponding option as correct.
+
+**Show Answer** strikes through the incorrect choices. The template uses JavaScript to read the answer key. Use Anki’s review buttons to grade yourself.
+
 ## Build locally
 
 | Command | Output |
 | --- | --- |
 | `make build-card` | `dist/material-notes-card.zip` with the three files for manual use |
-| `make build-addon` | `dist/material-notes.ankiaddon` with the add-on and both note type templates |
+| `make build-addon` | `dist/material-notes.ankiaddon` with the add-on and all note type templates |
 | `make build-css` | Refreshes `models/styles.css` from the CSS sources in `src/styles/` |
 
 Manual installation of the basic card requires only `front.html`, `back.html`, and `styles.css` in `models/`.

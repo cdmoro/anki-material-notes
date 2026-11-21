@@ -1,0 +1,37 @@
+<div class="note back choice-answer-card {{Tags}}">
+    <hr id="answer" class="choice-answer-anchor">
+    {{FrontSide}}
+    <div id="choice-answer-key" hidden>{{text:Correct Answers}}</div>
+    <div class="body question-results" hidden>Check the Correct Answers field. Enter letters such as B D or a key such as 0 1 0 1.</div>
+    {{#Explanation}}
+    <div class="body question-results">
+        <div class="subtitle">Explanation</div>
+        <div class="small">{{Explanation}}</div>
+    </div>
+    {{/Explanation}}
+    {{#Source}}
+    <div class="body question-results question-source small">{{Source}}</div>
+    {{/Source}}
+    <script>
+        (function () {
+            const key = document.getElementById("choice-answer-key");
+            const choices = Array.from(key.parentElement.querySelectorAll(".question-options [data-choice]"));
+            const letters = "ABCD";
+            const answers = key.textContent.trim().toUpperCase();
+            const tokens = answers.split(/\s+/);
+            const correct = /^[01](?:\s+[01]){3}$/.test(answers)
+                ? tokens.flatMap((bit, index) => bit === "1" ? [letters[index]] : [])
+                : tokens;
+
+            const available = new Set(choices.map(choice => choice.dataset.choice));
+            if (!correct.length || correct.some(letter => !available.has(letter))) {
+                key.nextElementSibling.hidden = false;
+                return;
+            }
+
+            choices.forEach(choice => {
+                choice.classList.toggle("wrong-answer", !correct.includes(choice.dataset.choice));
+            });
+        })();
+    </script>
+</div>
