@@ -2,7 +2,6 @@
 
 import hashlib
 import json
-import re
 from copy import deepcopy
 from pathlib import Path
 
@@ -45,20 +44,6 @@ FINISHES = {"base": "Accent", "filled": "Filled", "outlined": "Outlined"}
 
 def read_model_file(path):
     return path.read_text(encoding="utf-8")
-
-
-def css_version(css):
-    header, end, _ = css.lstrip().partition("*/")
-    if not end or not header.startswith("/*"):
-        return None
-
-    version = re.search(
-        r"(?:^\s*\*\s*Version:[ \t]*|·[ \t]*)"
-        r"(\d+\.\d+\.\d+(?:-[\w.-]+)?(?:\+[\w.-]+)?)[ \t]*\r?$",
-        header,
-        re.MULTILINE,
-    )
-    return version.group(1) if version else None
 
 
 def available_finishes(palette):
@@ -286,10 +271,7 @@ class NoteTypesDialog(QDialog):
     def refresh(self):
         note_types = managed_note_types(self.models)
         self.note_types.clear()
-        for model in note_types:
-            version = css_version(model.get("css", ""))
-            label = f"CSS v{version}" if version else "CSS version unknown"
-            self.note_types.addItem(f"{model['name']} — {label}")
+        self.note_types.addItems([model["name"] for model in note_types])
         self.empty_message.setVisible(not note_types)
         self.update_button.setEnabled(bool(note_types))
 
