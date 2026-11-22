@@ -4,9 +4,14 @@ Material-style flashcards for Anki with light and dark modes. In the [interactiv
 
 ## Use the add-on
 
-Open **Tools → Material Notes…** to see the Material note types in the current collection. **Create note type…** lets you choose **Basic** or **Multiple choice** and name the new type.
+Open **Tools → Material Notes… → Create note type…**. Choose a template to see its purpose and the fields it will create, then choose how to apply styles.
 
-**Update note types** refreshes the card templates and styling of the listed types in place. If you edited the templates or styling, the add-on asks before replacing your changes. Existing notes keep their field values.
+- **Fixed style** is the default. Choose a color or country palette and select **Base**, **Filled**, or **Outlined** where available. You can also enable **Center card content**. The whole note type uses these settings and you can use tags to organize your notes.
+- **Style using tags** lets you change the appearance of each note with a tag such as `Material::note-pink-outlined`. The same style applies to every card generated from that note. See [How to use style tags](docs/using-style-tags.md) for the setup and full catalog.
+
+Leave **Note type name** blank to use the suggestion, such as `Basic - Pink Outlined` or `Basic - Tags`. If the suggested name already exists, the add-on appends `(2)`, `(3)`, and so on. Open **Add** and select the new note type to start adding notes.
+
+**Update note types** refreshes the templates and CSS while keeping your appearance choices and the field values on existing notes. If you edited the templates or styling, the add-on asks before replacing your changes.
 
 ## Copy a card into Anki
 
@@ -24,25 +29,9 @@ If you want these templates for a single deck, clone the note type before editin
 
 ### Customize with classes or tags
 
-For a style shared by a whole note type, add a class such as `note-green-filled` to the outer `.note` element in both templates. The same stylesheet supports classes with the `Material::` prefix.
+For a style shared by a whole note type, choose an appearance in the add-on or add a class such as `note-green-filled` to the outer `.note` element in both templates.
 
-For styling individual notes, include `{{Tags}}` in the class list of both templates and use one variant tag per note. For example, pick one of these three green finishes.
-
-| Finish | Example tag |
-| --- | --- |
-| Accent | `Material::note-green-base` |
-| Filled | `Material::note-green-filled` |
-| Outline | `Material::note-green-outlined` |
-
-Replace `green` with `blue`, `purple`, `pink`, `teal`, `orange`, `indigo`, `brown`, `lime`, or `red`. Older accent tags such as `Material::note-green` still work. The neutral card also has an outlined variant (`Material::note-base-outlined`), and `Material::note-white-base` keeps the front white in either mode.
-
-Add `Material::note-centered` separately to center the answer. Native reviewer flags and stars are styled by Anki.
-
-### Country palettes
-
-Use `Material::note-flag-uk` for Accent, `Material::note-flag-uk-filled` for Filled, or `Material::note-flag-uk-outlined` for Outline. The `-base` suffix also works for Accent. Each country has a thin stripe inspired by its flag and colors for light and dark mode.
-
-Replace `uk` with `argentina`, `brazil`, `china`, `france`, `germany`, `greece`, `italy`, `japan`, `mexico`, or `usa`.
+For styling individual notes, put `{{Tags}}` in the class list of the outer `.note` element in both templates in place of any fixed palette class. The Basic templates linked above already use `{{Tags}}`. Add one palette tag per note, such as `note-green-filled` or `Material::note-green-filled`. See [How to use style tags](docs/using-style-tags.md) for step-by-step instructions and the list of colors, finishes, and country palettes.
 
 ### Optional HTML inside a field
 
@@ -59,23 +48,46 @@ Use the field's HTML editor for accessories such as headings, labels, and cover 
 
 For a hint, add a field such as `Pronunciation` to the note type. Put the hint text in that field and use `{{hint:Pronunciation}}` in the card template. The other examples use `{{hint:Variants}}` and `{{hint:Translation}}`.
 
-Other classes include `header`, `subheader`, `symbol`, `emoji`, `cover`, `text-center`, `flex`, `flex-row`, `flex-col`, and `gap-sm`.
+Other classes include `header`, `subheader`, `symbol`, `emoji`, `cover`, `text-sm`, `text-md`, `text-base`, `text-center`, `flex`, `flex-row`, `flex-col`, and `gap-sm`. Use `text-sm` for small labels, `text-md` for explanatory copy, and `text-base` for the note’s regular text size.
 
 Front content aligns to the start by default. A `class="body question"` block is centered, as are front blocks marked with `center` or `text-center`. Lists align to the start inside centered blocks.
 
-### Read-only multiple choice
+### Multiple Choice — Single and Multiple
 
-Copy the **Front** and **Back** templates from **Card setup** in the demo’s **Multiple choice** example into a note type with the fields `Question`, `Options`, `Correct Options`, and `Explanation`. Use the same [stylesheet](models/styles.css) as the basic card.
+Use the add-on to create the note type, or copy [Front](models/multiple-choice-2/front.html), [Back](models/multiple-choice-2/back.html), and the shared [Styling](models/styles.css) into a note type with these fields.
 
-Copy the HTML snippets for **Options** and **Correct Options** from the **Fields** tab into the corresponding fields using Anki’s HTML editor. Both fields contain the full list in the same order, using `<ol type="A">` for lettered choices. In `Correct Options`, add `class="wrong-answer"` to each incorrect choice so it appears struck through on the back.
+| Field | Example |
+| --- | --- |
+| `Question` | Which two planets are ice giants? |
+| `Option A` | Jupiter |
+| `Option B` | Uranus |
+| `Option C` | Saturn |
+| `Option D` | Neptune |
+| `Correct Answers` | `B,D` |
+| `Shuffle Options` | `true` (optional) |
+| `Explanation` | Uranus and Neptune are ice giants. |
+| `Source` | Solar system quiz · Question 4 |
+
+Fill in Option A and Option B. Option C, Option D, Shuffle Options, Explanation, and Source are optional. Enter `A` for one correct answer or `A,C` (commas or spaces) for several. Blank optional choices keep their letter positions. In the add-on dialog, **Shuffle answers by default** sets the initial preference for new Multiple Choice 2 note types; a note's `Shuffle Options` field can override it with `true` or `false`.
+
+When a field is empty in Anki’s editor, its description gives a short hint. For example, **Correct Answers** explains the `A` / `A,C` format, and **Shuffle Options** explains how `true`, `false`, and a blank value behave.
+
+The demo includes **Multiple Choice — Single** and **Multiple Choice — Multiple** examples. Both use the same interactive note type: Anki shows radio buttons when `Correct Answers` contains one letter and checkboxes when it contains several. **Show Answer** keeps the selected choices and their order, then colors each option as correct or incorrect. The choices are shuffled once per review when enabled, so the same order remains on the back. Use Anki’s review buttons to grade yourself.
+
+The **Card setup** section shows all fields, including optional `Shuffle Options`. Its template switch uses the selected palette and finish as fixed CSS classes by default; turn on **Use `{{Tags}}` instead of classes in templates** to copy templates that take their styling from note tags.
+
+Templates copied from the demo are standalone: a blank `Shuffle Options` keeps the listed order, and `true` shuffles the answers. The add-on’s **Shuffle answers by default** setting is applied when creating a note type in Anki.
+
+The older HTML multiple-choice note type remains supported for existing collections, but is no longer offered when creating new note types.
 
 ## Build locally
 
 | Command | Output |
 | --- | --- |
 | `make build-card` | `dist/material-notes-card.zip` with the three files for manual use |
-| `make build-addon` | `dist/material-notes.ankiaddon` with the add-on and both note type templates |
-| `make build-css` | Refreshes `models/styles.css` from the CSS sources in `src/styles/` |
+| `make build-addon` | `dist/material-notes.ankiaddon` with the add-on and all note type templates |
+| `make build-css` | Refreshes `models/styles.css` and the guide’s style tag catalog from the CSS sources |
+| `make test` | Checks the style tag catalog and runs integration tests when Anki’s Python modules are available |
 
 Manual installation of the basic card requires only `front.html`, `back.html`, and `styles.css` in `models/`.
 

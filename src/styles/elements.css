@@ -5,6 +5,7 @@
 
 /* Direct images on the front also act as covers in older templates. */
 .note > .cover,
+.note > .cover img,
 .note.front > img,
 .note.back > .body > img {
   display: block;
@@ -36,6 +37,18 @@
 .note .subtitle {
   margin: 0 0 .6rem;
   opacity: .75;
+}
+
+.note .text-sm {
+  font-size: .84rem;
+}
+
+.note .text-md {
+  font-size: 1rem;
+}
+
+.note .text-base {
+  font-size: var(--note-font-size);
 }
 
 .note .text-block + .text-block,
@@ -93,7 +106,7 @@
   font-size: var(--note-font-size);
 }
 
-.note.back > .question-card > .question-options {
+.note.back:not(.choice-answer-card) > .question-card > .question-options {
   display: none;
 }
 
@@ -103,6 +116,17 @@
   border: 0;
   height: 0;
   padding: 0;
+}
+
+.note.back.choice-answer-card > #answer.choice-answer-anchor {
+  display: block !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  visibility: hidden !important;
+  overflow: hidden !important;
 }
 
 .note.back > .question-results {
@@ -115,9 +139,52 @@
   padding-inline-start: 2em;
 }
 
+.note .question-options label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .45em;
+}
+
+.note .question-options [data-choice] {
+  box-sizing: border-box;
+  margin-block: .2em;
+  padding: .1em 0;
+  border-radius: .15em;
+}
+
+.note .question-options input {
+  accent-color: var(--accent-color);
+}
+
 .note .wrong-answer {
   text-decoration: line-through;
   opacity: .6;
+}
+
+.note .correct-answer {
+  color: #238636;
+  font-weight: 700;
+}
+
+.choice-answer-card .question-options [data-choice]::marker {
+  color: var(--font-color);
+}
+
+.choice-answer-card .question-options [data-choice].correct-answer {
+  background: var(--feedback-correct-background);
+  color: inherit;
+  font-weight: inherit;
+}
+
+.choice-answer-card .question-options [data-choice].wrong-answer {
+  background: var(--feedback-incorrect-background);
+  color: inherit;
+  opacity: 1;
+  text-decoration: none;
+}
+
+.choice-answer-card .question-options input:disabled {
+  opacity: 1;
 }
 
 .note .small {

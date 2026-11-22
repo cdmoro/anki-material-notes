@@ -1,0 +1,91 @@
+{
+  "basic": {
+    "label": "Basic",
+    "description": "A question and answer for general flashcards.",
+    "fields": ["Front", "Back"],
+    "front": "front.html",
+    "back": "back.html"
+  },
+  "vocabulary-with-hints": {
+    "label": "Vocabulary with hints",
+    "description": "Learn words with a pronunciation hint, an optional image and a hint for related forms.",
+    "fields": ["Front", "Back", "Topic", "Pronunciation", "Image", "Variants"],
+    "front": "vocabulary-with-hints/front.html",
+    "back": "vocabulary-with-hints/back.html"
+  },
+  "emoji-and-pills": {
+    "label": "Emoji and pills",
+    "description": "Use an emoji as a cue and show related words as pills on the answer.",
+    "fields": ["Front", "Back", "Emoji", "Related word 1", "Related word 2"],
+    "front": "emoji-and-pills/front.html",
+    "back": "emoji-and-pills/back.html"
+  },
+  "symbols": {
+    "label": "Symbols and characters",
+    "description": "Study kanji, letters or symbols in large type, with an optional reading beneath.",
+    "fields": ["Front", "Back", "Reading"],
+    "front": "symbols/front.html",
+    "back": "back.html"
+  },
+  "audio-stacked": {
+    "label": "Audio below the prompt",
+    "description": "Practise listening to sentences with the replay control below the prompt.",
+    "fields": ["Front", "Back", "Audio"],
+    "front": "audio-stacked/front.html",
+    "back": "back.html"
+  },
+  "audio-inline": {
+    "label": "Audio beside the prompt",
+    "description": "Practise listening to short words or phrases with the replay control next to the prompt.",
+    "fields": ["Front", "Back", "Audio"],
+    "front": "audio-inline/front.html",
+    "back": "back.html"
+  },
+  "image-only": {
+    "label": "Image-only prompt",
+    "description": "Identify a plant, animal or object from a full-width image.",
+    "fields": ["Image", "Back"],
+    "front": "image-only/front.html",
+    "back": "back.html"
+  },
+  "image-and-text": {
+    "label": "Image and text prompt",
+    "description": "Associate a written prompt with an image shown above it.",
+    "fields": ["Front", "Back", "Image"],
+    "front": "image-and-text/front.html",
+    "back": "back.html"
+  },
+  "grammar": {
+    "label": "Grammar and usage",
+    "description": "Learn a grammar pattern from a sentence, usage notes and an optional translation hint.",
+    "fields": ["Front", "Back", "Audio", "Translation"],
+    "front": "grammar/front.html",
+    "back": "grammar/back.html"
+  },
+  "multiple-choice": {
+    "label": "Multiple Choice (HTML)",
+    "description": "Use two HTML lists to show the choices and mark incorrect answers on the back.",
+    "deprecated": true,
+    "fields": ["Question", "Options", "Correct Options", "Explanation"],
+    "field_descriptions": {
+      "Options": "Enter one answer choice per line.",
+      "Correct Options": "Enter the correct option letters, e.g. A or A,C.",
+      "Explanation": "Optional explanation shown on the answer side."
+    },
+    "front": "multiple-choice/front.html",
+    "back": "multiple-choice/back.html"
+  },
+  "multiple-choice-2": {
+    "label": "Multiple Choice (JS)",
+    "description": "Choose answers interactively, then use Show Answer to see correct, incorrect and missed choices.",
+    "fields": ["Question", "Option A", "Option B", "Option C", "Option D", "Correct Answers", "Shuffle Options", "Explanation", "Source"],
+    "field_descriptions": {
+      "Correct Answers": "Enter correct option letters, e.g. A or A,C. Separate multiple letters with commas or spaces.",
+      "Shuffle Options": "Optional: true to shuffle choices each review, false to keep their listed order. Blank uses the note type default.",
+      "Explanation": "Optional explanation shown on the answer side.",
+      "Source": "Optional source or reference for this question."
+    },
+    "front": "multiple-choice-2/front.html",
+    "back": "multiple-choice-2/back.html"
+  }
+}

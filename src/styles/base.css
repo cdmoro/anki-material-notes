@@ -6,6 +6,10 @@ body.card {
   --background: #fefefe;
   --surface: #fefefe;
   --divider: #ddd;
+  --feedback-correct-background: #c8e6c9;
+  --feedback-correct-foreground: #1b5e20;
+  --feedback-incorrect-background: #ffcdd2;
+  --feedback-incorrect-foreground: #b71c1c;
   --border-radius: 8px;
   --note-font-size: 19px;
   --front-font-size: 21px;
@@ -26,6 +30,10 @@ body.card {
   --background: #121212;
   --surface: #1d1d1d;
   --divider: #333;
+  --feedback-correct-background: #1b5e20;
+  --feedback-correct-foreground: #c8e6c9;
+  --feedback-incorrect-background: #b71c1c;
+  --feedback-incorrect-foreground: #ffcdd2;
 }
 
 .card a {

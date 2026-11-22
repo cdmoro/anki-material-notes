@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: build-css build-card build-addon
+.PHONY: build-css build-card build-addon test
 
 build-css:
 	$(PYTHON) utils/build_css.py
@@ -10,3 +10,6 @@ build-card: build-css
 
 build-addon: build-css
 	$(PYTHON) utils/package.py addon
+
+test:
+	$(PYTHON) -m unittest discover -s tests

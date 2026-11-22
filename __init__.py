@@ -1,6 +1,8 @@
 """Manage Material Notes note types in the active Anki collection."""
 
 import hashlib
+import json
+import re
 from copy import deepcopy
 from pathlib import Path
 
@@ -9,40 +11,110 @@ from anki.errors import AnkiError
 from aqt import gui_hooks, mw
 from aqt.qt import (
     QAction,
+    QApplication,
+    QCheckBox,
     QComboBox,
     QDialog,
     QDialogButtonBox,
     QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
     QLabel,
     QLineEdit,
     QListWidget,
     QPushButton,
+    QSettings,
     Qt,
     QVBoxLayout,
+    QWidget,
 )
 from aqt.utils import askUser, showInfo
 
 MODEL_DIR = Path(__file__).resolve().parent / "models"
-NOTE_TYPES = {
-    "basic": ("Basic", "Material (basic)", ("Front", "Back"), MODEL_DIR),
-    "multiple-choice": (
-        "Multiple choice",
-        "Material (multiple choice)",
-        ("Question", "Options", "Correct Options", "Explanation"),
-        MODEL_DIR / "multiple-choice",
-    ),
+ADDON_CONFIG_KEY = "shuffle_answers_by_default"
+NOTE_TYPES = json.loads((MODEL_DIR / "presets.json").read_text(encoding="utf-8"))
+GUIDE_URL = "https://github.com/cdmoro/anki-material-notes/blob/main/docs/using-style-tags.md"
+STYLE_TAG_EXAMPLES = (
+    "note-pink-outlined",
+    "Material::note-blue-filled",
+    "Material::note-flag-uk",
+)
+COLORS = (
+    "White", "Blue", "Purple", "Pink", "Teal", "Green",
+    "Orange", "Indigo", "Brown", "Lime", "Red",
+)
+COUNTRIES = (
+    ("Argentina", "ar", "argentina"), ("Brazil", "br", "brazil"),
+    ("China", "cn", "china"), ("France", "fr", "france"),
+    ("Germany", "de", "germany"), ("Greece", "gr", "greece"),
+    ("Italy", "it", "italy"), ("Japan", "jp", "japan"),
+    ("Mexico", "mx", "mexico"), ("United Kingdom", "gb", "uk"),
+    ("USA", "us", "usa"),
+)
+PALETTE_NAMES = {
+    "base": "Default",
+    **{color.lower(): color for color in COLORS},
+    **{f"flag-{slug}": country for country, _, slug in COUNTRIES},
 }
+FINISHES = {"base": "Base", "filled": "Filled", "outlined": "Outlined"}
 
 
 def read_model_file(path):
     return path.read_text(encoding="utf-8")
 
 
-def template_content(directory):
+def css_version(css):
+    header, end, _ = css.lstrip().partition("*/")
+    if not end or not header.startswith("/*"):
+        return None
+
+    version = re.search(
+        r"(?:^\s*\*\s*Version:[ \t]*|·[ \t]*)"
+        r"(\d+\.\d+\.\d+(?:-[\w.-]+)?(?:\+[\w.-]+)?)[ \t]*\r?$",
+        header,
+        re.MULTILINE,
+    )
+    return version.group(1) if version else None
+
+
+def available_finishes(palette):
+    if palette == "white":
+        return ("base",)
+    return tuple(FINISHES)
+
+
+def appearance_classes(palette="base", finish="base", centered=False):
+    classes = []
+    if palette != "base" or finish != "base":
+        suffix = "" if palette.startswith("flag-") and finish == "base" else f"-{finish}"
+        classes.append(f"note-{palette}{suffix}")
+    if centered:
+        classes.append("note-centered")
+    return classes
+
+
+def template_content(preset, appearance=None, style_application="fixed", shuffle_default=False):
+    classes = [] if style_application == "tags" else appearance_classes(**(appearance or {}))
+    if style_application != "fixed":
+        classes.append("{{Tags}}")
+    replacement = " " + " ".join(classes) if classes else ""
     return {
-        "qfmt": read_model_file(directory / "front.html"),
-        "afmt": read_model_file(directory / "back.html"),
+        key: read_model_file(MODEL_DIR / preset[side]).replace(" {{Tags}}", replacement, 1)
+        .replace("const defaults = false;", f"const defaults = {str(bool(shuffle_default)).lower()};")
+        for key, side in (("qfmt", "front"), ("afmt", "back"))
     }
+
+
+def suggest_note_type_name(models, kind, style_application, palette, finish):
+    label = NOTE_TYPES[kind]["label"]
+    style = "Tags" if style_application == "tags" else f"{PALETTE_NAMES[palette]} {FINISHES[finish]}"
+    base_name = f"{label} - {style}"
+    name = base_name
+    suffix = 2
+    while models.byName(name):
+        name = f"{base_name} ({suffix})"
+        suffix += 1
+    return name
 
 
 def content_hash(*parts):
@@ -56,17 +128,24 @@ def record_installed_content(model, kind, css, template):
     model["mfc_template_hash"] = content_hash(template["qfmt"], template["afmt"])
 
 
-def create_note_type(models, kind, name):
-    _, _, fields, directory = NOTE_TYPES[kind]
+def create_note_type(models, kind, name, appearance=None, style_application="fixed", shuffle_default=False):
+    preset = NOTE_TYPES[kind]
     model = models.new(name)
-    for field in fields:
-        models.addField(model, models.newField(field))
+    descriptions = preset.get("field_descriptions", {})
+    for field_name in preset["fields"]:
+        field = models.newField(field_name)
+        field["description"] = descriptions.get(field_name, "")
+        models.addField(model, field)
 
     css = read_model_file(MODEL_DIR / "styles.css")
     template = models.newTemplate("Card 1")
-    template.update(template_content(directory))
+    template.update(template_content(preset, appearance, style_application, shuffle_default))
     models.addTemplate(model, template)
     model["css"] = css
+    model["mfc_style_application"] = style_application
+    model["mfc_shuffle_default"] = bool(shuffle_default)
+    if appearance and style_application == "fixed":
+        model["mfc_appearance"] = appearance
     record_installed_content(model, kind, css, template)
     models.add(model)
 
@@ -83,16 +162,39 @@ def update_note_type(models, model, css, confirm_overwrite):
     if kind not in NOTE_TYPES or model["type"] != MODEL_STD:
         return "incompatible"
 
-    _, _, fields, directory = NOTE_TYPES[kind]
+    preset = NOTE_TYPES[kind]
+    missing_fields = set(preset["fields"]) - {field["name"] for field in model["flds"]}
+    if kind == "multiple-choice-2" and missing_fields == {"Shuffle Options"}:
+        updated = deepcopy(model)
+        models.addField(updated, models.newField("Shuffle Options"))
+        models.save(updated)
+        model = models.byName(model["name"])
     model_fields = {field["name"] for field in model["flds"]}
-    if not model_fields.issuperset(fields) or len(model["tmpls"]) != 1:
+    if not model_fields.issuperset(preset["fields"]) or len(model["tmpls"]) != 1:
         return "incompatible"
 
+    # Fill in descriptions for addon-managed fields without replacing text the
+    # user may have entered in Anki's field settings.
+    descriptions = preset.get("field_descriptions", {})
+    fields_changed = False
+    updated = deepcopy(model)
+    for field in updated["flds"]:
+        description = descriptions.get(field["name"])
+        if description and not field.get("description"):
+            field["description"] = description
+            fields_changed = True
+
     installed = model["tmpls"][0]
-    latest = template_content(directory)
+    latest = template_content(
+        preset, model.get("mfc_appearance"), model.get("mfc_style_application", "legacy"),
+        model.get("mfc_shuffle_default", False),
+    )
     css_changed = css != model["css"]
     template_changed = any(installed[key] != value for key, value in latest.items())
     if not css_changed and not template_changed:
+        if fields_changed:
+            models.save(updated)
+            return "updated"
         return "up to date"
 
     custom_css = css_changed and model.get("mfc_original_css_hash") != content_hash(model["css"])
@@ -102,7 +204,6 @@ def update_note_type(models, model, css, confirm_overwrite):
     if (custom_css or custom_template) and not confirm_overwrite(model["name"]):
         return "skipped"
 
-    updated = deepcopy(model)
     updated["css"] = css
     updated["tmpls"][0].update(latest)
     record_installed_content(updated, kind, css, latest)
@@ -115,15 +216,39 @@ class CreateNoteTypeDialog(QDialog):
         super().__init__(parent)
         self.models = models
         self.setWindowTitle("Create Material note type")
+        self.setMinimumWidth(520)
 
         self.kind = QComboBox()
-        for kind, (label, _, _, _) in NOTE_TYPES.items():
-            self.kind.addItem(label, kind)
+        for kind, preset in NOTE_TYPES.items():
+            if not preset.get("deprecated"):
+                self.kind.addItem(preset["label"], kind)
+        self.description = QLabel()
+        self.description.setWordWrap(True)
+        self.description.setMinimumHeight(44)
         self.name = QLineEdit()
         self.fields = QLabel()
         self.fields.setWordWrap(True)
-        self.kind.currentIndexChanged.connect(self.update_preview)
-        self.update_preview()
+        self.fields.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+
+        self.style_application = QComboBox()
+        self.style_application.addItem("Fixed style", "fixed")
+        self.style_application.addItem("Style using tags", "tags")
+
+        self.palette = QComboBox()
+        self.palette.addItem(PALETTE_NAMES["base"], "base")
+        self.palette.insertSeparator(self.palette.count())
+        for color in COLORS:
+            self.palette.addItem(color, color.lower())
+        self.palette.insertSeparator(self.palette.count())
+        for country, code, slug in COUNTRIES:
+            flag = "".join(chr(ord(letter) - ord("a") + 0x1F1E6) for letter in code)
+            self.palette.addItem(f"{flag}  {country}", f"flag-{slug}")
+
+        self.finish = QComboBox()
+        self.centered = QCheckBox("Center card content")
+        self.shuffle_default = QCheckBox("Shuffle answers by default")
+        self.shuffle_default.setChecked(bool(QSettings("Material Notes", "Material Notes").value(ADDON_CONFIG_KEY, False, type=bool)))
+        self.update_finishes()
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
@@ -132,30 +257,127 @@ class CreateNoteTypeDialog(QDialog):
         buttons.accepted.connect(self.create)
         buttons.rejected.connect(self.reject)
 
-        layout = QFormLayout(self)
-        layout.addRow("Template", self.kind)
-        layout.addRow("Name", self.name)
-        layout.addRow("Fields", self.fields)
-        layout.addRow(buttons)
+        template_group = QGroupBox("Note type")
+        template_layout = QFormLayout(template_group)
+        template_layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
+        template_layout.addRow("Template", self.kind)
+        template_layout.addRow("", self.description)
+        template_layout.addRow("Note type name (optional)", self.name)
+        template_layout.addRow("Fields to create", self.fields)
+
+        appearance_group = QGroupBox("Appearance")
+        appearance_layout = QFormLayout(appearance_group)
+        appearance_layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
+        appearance_layout.addRow("Style application", self.style_application)
+
+        self.fixed_controls = QWidget()
+        fixed_layout = QFormLayout(self.fixed_controls)
+        fixed_layout.setContentsMargins(0, 0, 0, 0)
+        fixed_layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow)
+        fixed_layout.addRow("Palette", self.palette)
+        fixed_layout.addRow("Finish", self.finish)
+        fixed_layout.addRow("", self.centered)
+        appearance_layout.addRow(self.fixed_controls)
+        appearance_layout.addRow("Multiple Choice 2", self.shuffle_default)
+
+        self.tag_controls = QWidget()
+        tag_layout = QVBoxLayout(self.tag_controls)
+        tag_layout.setContentsMargins(0, 0, 0, 0)
+        tag_help = QLabel(
+            "Add one style tag in Anki’s Tags field to set each note’s appearance. "
+            "All cards from the same note share its tags."
+        )
+        tag_help.setWordWrap(True)
+        tag_layout.addWidget(tag_help)
+
+        self.tag_examples = QComboBox()
+        self.tag_examples.setAccessibleName("Style tag examples")
+        self.tag_examples.addItems(STYLE_TAG_EXAMPLES)
+        self.copy_tag = QPushButton("Copy tag")
+        self.copy_tag.setAutoDefault(False)
+        self.copy_tag.clicked.connect(self.copy_style_tag)
+        self.tag_examples.currentIndexChanged.connect(lambda: self.copy_tag.setText("Copy tag"))
+        example_layout = QHBoxLayout()
+        example_layout.addWidget(self.tag_examples, 1)
+        example_layout.addWidget(self.copy_tag)
+        tag_layout.addLayout(example_layout)
+
+        guide = QLabel(f'<a href="{GUIDE_URL}">📖 How to use style tags ↗</a>')
+        guide.setOpenExternalLinks(True)
+        guide.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
+        tag_layout.addWidget(guide)
+        appearance_layout.addRow(self.tag_controls)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 18, 18, 18)
+        layout.setSpacing(12)
+        layout.addWidget(template_group)
+        layout.addWidget(appearance_group)
+        layout.addWidget(buttons)
+        self.kind.currentIndexChanged.connect(self.update_preview)
+        self.style_application.currentIndexChanged.connect(self.update_style_application)
+        self.palette.currentIndexChanged.connect(self.update_finishes)
+        self.finish.currentIndexChanged.connect(self.update_suggested_name)
+        self.update_preview()
+        self.update_style_application()
+
+    def suggested_name(self):
+        return suggest_note_type_name(
+            self.models, self.kind.currentData(), self.style_application.currentData(),
+            self.palette.currentData(), self.finish.currentData(),
+        )
+
+    def update_suggested_name(self):
+        self.name.setPlaceholderText(self.suggested_name())
 
     def update_preview(self):
-        _, default_name, fields, _ = NOTE_TYPES[self.kind.currentData()]
-        suggested_name = default_name
-        suffix = 2
-        while self.models.byName(suggested_name):
-            suggested_name = f"{default_name} {suffix}"
-            suffix += 1
-        self.name.setPlaceholderText(suggested_name)
-        self.fields.setText(", ".join(fields))
+        preset = NOTE_TYPES[self.kind.currentData()]
+        self.update_suggested_name()
+        self.description.setText(preset["description"])
+        self.fields.setText(", ".join(preset["fields"]))
+
+    def update_finishes(self):
+        selected = self.finish.currentData()
+        signals_blocked = self.finish.blockSignals(True)
+        self.finish.clear()
+        for finish in available_finishes(self.palette.currentData()):
+            self.finish.addItem(FINISHES[finish], finish)
+        self.finish.setCurrentIndex(max(0, self.finish.findData(selected)))
+        self.finish.blockSignals(signals_blocked)
+        self.update_suggested_name()
+
+    def update_style_application(self):
+        using_tags = self.style_application.currentData() == "tags"
+        self.fixed_controls.setVisible(not using_tags)
+        self.shuffle_default.setVisible(self.kind.currentData() == "multiple-choice-2")
+        self.tag_controls.setVisible(using_tags)
+        self.update_suggested_name()
+        self.adjustSize()
+
+    def copy_style_tag(self):
+        QApplication.clipboard().setText(self.tag_examples.currentText())
+        self.copy_tag.setText("Copied!")
 
     def create(self):
-        name = self.name.text().strip() or self.name.placeholderText()
-        if self.models.byName(name):
+        name = self.name.text().strip()
+        if name and self.models.byName(name):
             showInfo("A note type with that name already exists.", parent=self)
             return
+        name = name or self.suggested_name()
 
         try:
-            create_note_type(self.models, self.kind.currentData(), name)
+            style_application = self.style_application.currentData()
+            shuffle_default = self.shuffle_default.isChecked()
+            QSettings("Material Notes", "Material Notes").setValue(ADDON_CONFIG_KEY, shuffle_default)
+            appearance = {
+                "palette": self.palette.currentData(),
+                "finish": self.finish.currentData(),
+                "centered": self.centered.isChecked(),
+            } if style_application == "fixed" else None
+            create_note_type(
+                self.models, self.kind.currentData(), name, appearance, style_application,
+                shuffle_default,
+            )
         except (AnkiError, OSError) as error:
             showInfo(str(error), parent=self, textFormat=Qt.TextFormat.PlainText)
             return
@@ -192,7 +414,10 @@ class NoteTypesDialog(QDialog):
     def refresh(self):
         note_types = managed_note_types(self.models)
         self.note_types.clear()
-        self.note_types.addItems([model["name"] for model in note_types])
+        for model in note_types:
+            version = css_version(model.get("css", ""))
+            label = f"CSS v{version}" if version else "CSS version unknown"
+            self.note_types.addItem(f"{model['name']} — {label}")
         self.empty_message.setVisible(not note_types)
         self.update_button.setEnabled(bool(note_types))
 

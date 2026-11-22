@@ -11,7 +11,9 @@ const keys = {
     theme: "note-dark-theme",
     view: "note-view",
     centered: "note-centered",
+    templateStyle: "note-template-style",
 };
+let templateStyle = readPreference(keys.templateStyle) === "tags" ? "tags" : "classes";
 
 async function updateProjectVersion() {
     try {
@@ -57,12 +59,12 @@ showSelectedExample();
 exampleSelect.disabled = false;
 exampleSelect.addEventListener("change", () => {
     showSelectedExample();
+    if (exampleSelect.value.startsWith("multiple-choice-2")) setAnswerVisible(false);
     savePreference(keys.example, exampleSelect.value);
     window.scrollTo(0, 0);
 });
 
 function availableFinishes(color) {
-    if (color === "base") return ["base", "outlined"];
     if (color === "white") return ["base"];
     return ["base", "filled", "outlined"];
 }
@@ -76,8 +78,16 @@ if (!colorSelect.value) colorSelect.value = "base";
 let appliedVariant = "";
 
 function updateTemplatePreviews() {
-    for (const [note, { code, content }] of templatePreviews) {
-        code.textContent = '<div class="' + note.className + '">\n' + content + '\n</div>';
+    for (const [note, { code, content, raw }] of templatePreviews) {
+        if (raw) {
+            const classes = Array.from(note.classList)
+                .filter(name => name.startsWith("note-") || name.startsWith("Material::note-"))
+                .join(" ");
+            const standalone = content.replace(/\{\{mfc_shuffle_default\}\}/g, "false");
+            code.textContent = standalone.replace(/\{\{Tags\}\}/g, templateStyle === "tags" ? "{{Tags}}" : classes);
+        } else {
+            code.textContent = '<div class="' + note.className + '">\n' + content + '\n</div>';
+        }
     }
 }
 
@@ -168,9 +178,48 @@ setupToggle("centered", keys.centered, readPreference(keys.centered) === "true",
 
 const storedView = readPreference(keys.view) ?? readPreference("note-side");
 const showAnswer = storedView === "true" || storedView === "back";
+const wrongChoices = document.querySelectorAll("[data-preview-wrong-choice]");
 const setAnswerVisible = setupToggle("side", keys.view, showAnswer, enabled => {
     card.classList.toggle("front-side", !enabled);
+    wrongChoices.forEach(choice => choice.classList.toggle("wrong-answer", enabled));
+    updateMultipleChoice2Preview(enabled);
 });
+
+function updateMultipleChoice2Preview(showAnswer) {
+    document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
+        const answers = example.querySelector('[data-example-field="Correct Answers"]')?.textContent.trim().toUpperCase() || "";
+        const correct = new Set(answers.split(/[\s,]+/).filter(Boolean));
+        const options = Array.from(example.querySelectorAll("[data-choice]"));
+        options.forEach(option => {
+            const input = option.querySelector("input");
+            if (!input) return;
+            const isCorrect = correct.has(option.dataset.choice);
+            const wasSelected = input.checked;
+            option.classList.toggle("correct-answer", showAnswer && isCorrect);
+            option.classList.toggle("wrong-answer", showAnswer && !isCorrect);
+            option.classList.toggle("missed-answer", showAnswer && !wasSelected && isCorrect);
+            input.disabled = showAnswer;
+        });
+        const feedback = example.querySelector("[data-mc2-feedback]");
+        if (feedback) feedback.hidden = true;
+    });
+}
+
+document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
+    const answers = example.querySelector('[data-example-field="Correct Answers"]')?.textContent.trim().toUpperCase() || "";
+    const correctCount = answers.split(/[\s,]+/).filter(Boolean).length;
+    example.querySelectorAll("[data-choice]").forEach(option => {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = correctCount > 1 ? "checkbox" : "radio";
+        input.name = example.id + "-preview-answer";
+        input.value = option.dataset.choice;
+        input.addEventListener("change", () => updateMultipleChoice2Preview(false));
+        label.append(input, document.createTextNode(" "), ...Array.from(option.childNodes));
+        option.replaceChildren(label);
+    });
+});
+updateMultipleChoice2Preview(showAnswer);
 
 document.querySelectorAll("[data-hint-field] .hint").forEach(link => {
     const hint = document.getElementById(link.getAttribute("aria-controls"));
@@ -205,6 +254,7 @@ function readExampleTemplates(preview) {
         const hint = element.dataset.hintField;
         const name = hint ?? element.dataset.exampleField;
         const html = element.hasAttribute("data-example-html");
+        const optional = Boolean(hint) || element.closest("[data-example-if]")?.dataset.exampleIf === name;
         const image = element.matches("img");
         element.removeAttribute("data-example-field");
         element.removeAttribute("data-example-html");
@@ -213,7 +263,7 @@ function readExampleTemplates(preview) {
             : image ? element.outerHTML
             : html ? dedent(element.innerHTML)
             : element.textContent.trim();
-        fields.push({ name, html, content });
+        fields.push({ name, html, optional, content });
 
         if (hint || image) {
             element.replaceWith(hint ? "{{hint:" + name + "}}" : "{{" + name + "}}");
@@ -275,10 +325,36 @@ function copyAction(label, getText, failureMessage) {
 function renderTemplatePreview(panel, label, note, content) {
     const pre = codeBlock("");
     const code = pre.firstElementChild;
-    const { controls } = copyAction("Copy " + label.toLowerCase(), () => code.textContent,
+    const { controls, button, status } = copyAction("Copy " + label.toLowerCase(), () => code.textContent,
         "Couldn’t copy. Select the code below to copy it manually.");
-    templatePreviews.set(note, { code, content });
     panel.append(controls, pre);
+
+    const directory = note.closest(".card-example").dataset.templateDirectory;
+    if (!directory) {
+        templatePreviews.set(note, { code, content });
+        return;
+    }
+
+    const templateName = directory.split("/").pop();
+    const localTemplate = window.materialNotesSources?.templates?.[templateName]?.[label.toLowerCase()];
+    if (localTemplate) {
+        templatePreviews.set(note, { code, content: localTemplate.trim(), raw: true });
+        updateTemplatePreviews();
+        return;
+    }
+
+    button.disabled = true;
+    fetch(directory + "/" + label.toLowerCase() + ".html").then(async response => {
+        if (!response.ok) throw new Error("Template unavailable");
+        const template = (await response.text()).trim();
+        const body = template.slice(template.indexOf("\n") + 1, template.lastIndexOf("\n"));
+        templatePreviews.set(note, { code, content: body });
+        updateTemplatePreviews();
+        button.disabled = false;
+    }).catch(() => {
+        status.textContent = "Couldn’t load the template.";
+        pre.hidden = true;
+    });
 }
 
 function renderExampleFields(panel, example, fields) {
@@ -294,10 +370,16 @@ function renderExampleFields(panel, example, fields) {
             instructions.push("Add " + names + " to the Basic note type’s fields.");
         }
     } else {
-        instructions.push("Create a note type with the fields listed below, except FrontSide, which Anki provides.");
+        instructions.push("Create a note type with the fields listed below.");
+    }
+    if (fields.some(({ optional }) => optional)) {
+        instructions.push("Optional fields can be left blank on individual notes.");
     }
     if (fields.some(({ html }) => html)) {
         instructions.push("Paste HTML values into Anki’s field HTML editor.");
+    }
+    if (example.dataset.fieldsHelp) {
+        instructions.push(example.dataset.fieldsHelp);
     }
     if (example.querySelector("[data-example-sound]")) {
         instructions.push("Replace each sample sound filename with the corresponding audio file in your Anki collection.");
@@ -308,21 +390,15 @@ function renderExampleFields(panel, example, fields) {
         panel.append(description);
     }
 
-    const rows = [
-        ...fields.map(field => ({
-            ...field,
-            kind: field.html ? "HTML" : "Text",
-        })),
-        { name: "FrontSide", kind: "Special field", content: "Anki inserts the rendered front on the back." },
-    ];
-    rows.forEach(({ name, kind, html, content }) => {
+    fields.forEach(({ name, html, optional, content }) => {
         const row = document.createElement("div");
         const term = document.createElement("dt");
         const fieldName = document.createElement("code");
         const format = document.createElement("span");
         const value = document.createElement("dd");
         fieldName.textContent = name;
-        format.textContent = kind;
+        format.textContent = html ? "HTML" : "Text";
+        if (optional) format.textContent += " · Optional";
         term.append(fieldName, format);
         if (html) {
             const { controls, button } = copyAction("Copy HTML", () => content,
@@ -339,14 +415,22 @@ function renderExampleFields(panel, example, fields) {
 }
 
 const stylesheetUrl = document.getElementById("card-styles").href;
-const stylesheetText = fetch(stylesheetUrl).then(response => {
-    if (!response.ok) throw new Error("Couldn’t load the stylesheet.");
-    return response.text();
-});
+const stylesheetText = window.materialNotesSources?.styles
+    ? Promise.resolve(window.materialNotesSources.styles)
+    : fetch(stylesheetUrl).then(response => {
+        if (!response.ok) throw new Error("Couldn’t load the stylesheet.");
+        return response.text();
+    });
 
 function renderStylePanel(panel) {
     const description = document.createElement("p");
-    description.textContent = "In Anki, open Cards… and paste this CSS into Styling. All examples, palettes, and finishes use the same stylesheet.";
+    const guide = document.createElement("a");
+    guide.href = "https://github.com/cdmoro/anki-material-notes/blob/main/docs/using-style-tags.md";
+    guide.textContent = "How to use style tags";
+    description.append(
+        "In Anki, open Cards… and paste this CSS into Styling. All examples, palettes, and finishes use the same stylesheet. ",
+        guide
+    );
     const { controls, button, status } = copyAction("Copy style", () => css,
         "Couldn’t copy. Use Download CSS to get the stylesheet.");
     const download = document.createElement("a");
@@ -406,6 +490,25 @@ examples.forEach(example => {
     heading.textContent = "Card setup";
     setup.setAttribute("aria-labelledby", heading.id);
     setup.append(heading);
+
+    if (example.dataset.templateDirectory) {
+        const styleControl = document.createElement("label");
+        const styleCheckbox = document.createElement("input");
+        styleControl.className = "template-style-toggle";
+        styleCheckbox.type = "checkbox";
+        styleCheckbox.checked = templateStyle === "tags";
+        styleCheckbox.setAttribute("role", "switch");
+        styleControl.append(styleCheckbox, document.createTextNode(" Use {{Tags}} instead of classes in templates"));
+        styleCheckbox.addEventListener("change", () => {
+            templateStyle = styleCheckbox.checked ? "tags" : "classes";
+            document.querySelectorAll(".template-style-toggle input").forEach(input => {
+                input.checked = styleCheckbox.checked;
+            });
+            savePreference(keys.templateStyle, templateStyle);
+            updateTemplatePreviews();
+        });
+        setup.append(styleControl);
+    }
 
     const tabList = document.createElement("div");
     tabList.className = "example-setup-tabs";
