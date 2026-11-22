@@ -573,6 +573,11 @@ class EditNoteTypeDialog(QDialog):
         self.style_application.setCurrentIndex(self.style_application.findData(current_style))
 
         old_appearance = model.get("mfc_appearance", {})
+        self.fixed_appearance = {
+            "palette": old_appearance.get("palette", "base"),
+            "finish": old_appearance.get("finish", "base"),
+            "centered": bool(old_appearance.get("centered", False)),
+        }
         self.palette = QComboBox()
         self.palette.addItem(PALETTE_NAMES["base"], "base")
         self.palette.insertSeparator(self.palette.count())
@@ -595,6 +600,10 @@ class EditNoteTypeDialog(QDialog):
         fixed_layout.addRow("Palette", self.palette)
         fixed_layout.addRow("Finish", self.finish)
         fixed_layout.addRow("", self.centered)
+        self.tags_help = QLabel(
+            "The palette and layout come from each note’s tags while this mode is selected."
+        )
+        self.tags_help.setWordWrap(True)
 
         self.option_count = QSpinBox()
         current_count = multiple_choice_option_count(
@@ -623,6 +632,7 @@ class EditNoteTypeDialog(QDialog):
         note_layout.addRow("Name", QLabel(model["name"]))
         note_layout.addRow("Style application", self.style_application)
         note_layout.addRow(self.fixed_controls)
+        note_layout.addRow(self.tags_help)
 
         self.multiple_choice_controls = QWidget()
         mc_layout = QFormLayout(self.multiple_choice_controls)
@@ -643,14 +653,22 @@ class EditNoteTypeDialog(QDialog):
         layout.addWidget(note_group)
         layout.addWidget(buttons)
         self.style_application.currentIndexChanged.connect(self.update_style_controls)
-        self.palette.currentIndexChanged.connect(self.update_finishes)
+        self.palette.currentIndexChanged.connect(self.palette_changed)
+        self.finish.currentIndexChanged.connect(self.remember_fixed_appearance)
+        self.centered.toggled.connect(self.remember_fixed_appearance)
         self.update_finishes()
         self.update_style_controls()
 
     def update_style_controls(self):
-        self.fixed_controls.setVisible(self.style_application.currentData() == "fixed")
+        fixed_style = self.style_application.currentData() == "fixed"
+        self.fixed_controls.setVisible(fixed_style)
+        self.tags_help.setVisible(not fixed_style)
         self.multiple_choice_controls.setVisible(self.is_multiple_choice)
         self.adjustSize()
+
+    def palette_changed(self):
+        self.update_finishes()
+        self.remember_fixed_appearance()
 
     def update_finishes(self):
         selected = self.finish.currentData()
@@ -658,14 +676,18 @@ class EditNoteTypeDialog(QDialog):
         for finish in available_finishes(self.palette.currentData()):
             self.finish.addItem(FINISHES[finish], finish)
         self.finish.setCurrentIndex(max(0, self.finish.findData(selected or "base")))
+        self.remember_fixed_appearance()
+
+    def remember_fixed_appearance(self, *_):
+        self.fixed_appearance = {
+            "palette": self.palette.currentData() or "base",
+            "finish": self.finish.currentData() or "base",
+            "centered": self.centered.isChecked(),
+        }
 
     def save(self):
         style_application = self.style_application.currentData()
-        appearance = {
-            "palette": self.palette.currentData(),
-            "finish": self.finish.currentData(),
-            "centered": self.centered.isChecked(),
-        } if style_application == "fixed" else None
+        appearance = self.fixed_appearance if style_application == "fixed" else None
         try:
             result = edit_note_type_settings(
                 self.models, self.model, appearance, style_application,
