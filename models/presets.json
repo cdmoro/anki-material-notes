@@ -67,6 +67,11 @@
     "description": "Use two HTML lists to show the choices and mark incorrect answers on the back.",
     "deprecated": true,
     "fields": ["Question", "Options", "Correct Options", "Explanation"],
+    "field_descriptions": {
+      "Options": "Enter one answer choice per line.",
+      "Correct Options": "Enter the correct option letters, e.g. A or A,C.",
+      "Explanation": "Optional explanation shown on the answer side."
+    },
     "front": "multiple-choice/front.html",
     "back": "multiple-choice/back.html"
   },
@@ -74,6 +79,12 @@
     "label": "Multiple Choice (JS)",
     "description": "Choose answers interactively, then use Show Answer to see correct, incorrect and missed choices.",
     "fields": ["Question", "Option A", "Option B", "Option C", "Option D", "Correct Answers", "Shuffle Options", "Explanation", "Source"],
+    "field_descriptions": {
+      "Correct Answers": "Enter correct option letters, e.g. A or A,C. Separate multiple letters with commas or spaces.",
+      "Shuffle Options": "Optional: true to shuffle choices each review, false to keep their listed order. Blank uses the note type default.",
+      "Explanation": "Optional explanation shown on the answer side.",
+      "Source": "Optional source or reference for this question."
+    },
     "front": "multiple-choice-2/front.html",
     "back": "multiple-choice-2/back.html"
   }

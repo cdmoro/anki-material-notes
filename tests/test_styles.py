@@ -71,6 +71,36 @@ class AnkiStyleTests(unittest.TestCase):
             self.assertEqual(name, expected)
             self.addon["create_note_type"](self.models, "basic", name, style_application="tags")
 
+    def test_multiple_choice_field_descriptions_are_added_and_preserved(self):
+        create = self.addon["create_note_type"]
+        update = self.addon["update_note_type"]
+        css = (ROOT / "models" / "styles.css").read_text(encoding="utf-8")
+        create(self.models, "multiple-choice-2", "Multiple Choice")
+        model = self.models.byName("Multiple Choice")
+        field_descriptions = {field["name"]: field.get("description", "") for field in model["flds"]}
+        self.assertIn("A or A,C", field_descriptions["Correct Answers"])
+        self.assertIn("true", field_descriptions["Shuffle Options"])
+
+        # A pre-existing managed note type gains help text on update.
+        for field in model["flds"]:
+            field["description"] = ""
+        self.models.save(model)
+        model = self.models.byName("Multiple Choice")
+        self.assertEqual(update(self.models, model, css, lambda _: True), "updated")
+        model = self.models.byName("Multiple Choice")
+        self.assertIn("A or A,C", next(f["description"] for f in model["flds"] if f["name"] == "Correct Answers"))
+
+        # User-authored descriptions are left intact.
+        correct = next(f for f in model["flds"] if f["name"] == "Correct Answers")
+        correct["description"] = "My custom hint"
+        self.models.save(model)
+        model = self.models.byName("Multiple Choice")
+        self.assertEqual(update(self.models, model, css, lambda _: True), "up to date")
+        self.assertEqual(
+            next(f["description"] for f in self.models.byName("Multiple Choice")["flds"] if f["name"] == "Correct Answers"),
+            "My custom hint",
+        )
+
     def test_anki_renders_and_updates_all_style_modes(self):
         appearance = {"palette": "pink", "finish": "outlined"}
         for mode, expected_class in (

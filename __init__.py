@@ -131,8 +131,11 @@ def record_installed_content(model, kind, css, template):
 def create_note_type(models, kind, name, appearance=None, style_application="fixed", shuffle_default=False):
     preset = NOTE_TYPES[kind]
     model = models.new(name)
-    for field in preset["fields"]:
-        models.addField(model, models.newField(field))
+    descriptions = preset.get("field_descriptions", {})
+    for field_name in preset["fields"]:
+        field = models.newField(field_name)
+        field["description"] = descriptions.get(field_name, "")
+        models.addField(model, field)
 
     css = read_model_file(MODEL_DIR / "styles.css")
     template = models.newTemplate("Card 1")
@@ -170,6 +173,17 @@ def update_note_type(models, model, css, confirm_overwrite):
     if not model_fields.issuperset(preset["fields"]) or len(model["tmpls"]) != 1:
         return "incompatible"
 
+    # Fill in descriptions for addon-managed fields without replacing text the
+    # user may have entered in Anki's field settings.
+    descriptions = preset.get("field_descriptions", {})
+    fields_changed = False
+    updated = deepcopy(model)
+    for field in updated["flds"]:
+        description = descriptions.get(field["name"])
+        if description and not field.get("description"):
+            field["description"] = description
+            fields_changed = True
+
     installed = model["tmpls"][0]
     latest = template_content(
         preset, model.get("mfc_appearance"), model.get("mfc_style_application", "legacy"),
@@ -178,6 +192,9 @@ def update_note_type(models, model, css, confirm_overwrite):
     css_changed = css != model["css"]
     template_changed = any(installed[key] != value for key, value in latest.items())
     if not css_changed and not template_changed:
+        if fields_changed:
+            models.save(updated)
+            return "updated"
         return "up to date"
 
     custom_css = css_changed and model.get("mfc_original_css_hash") != content_hash(model["css"])
@@ -187,7 +204,6 @@ def update_note_type(models, model, css, confirm_overwrite):
     if (custom_css or custom_template) and not confirm_overwrite(model["name"]):
         return "skipped"
 
-    updated = deepcopy(model)
     updated["css"] = css
     updated["tmpls"][0].update(latest)
     record_installed_content(updated, kind, css, latest)
