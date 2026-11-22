@@ -70,6 +70,8 @@ Use the add-on to create the note type, or copy [Front](models/multiple-choice-2
 
 Fill in Option A and Option B. Every option after B up to the number created for the note type is optional, as are Shuffle Options, Explanation, and Source. The add-on supports 2–10 options, named Option A through Option J. Enter `A` for one correct answer or `A,C` (commas or spaces) for several. Blank optional choices keep their letter positions. In the add-on dialog, **Shuffle answers by default** sets the initial preference for new Multiple Choice 2 note types; a note's `Shuffle Options` field can override it with `true` or `false`.
 
+Choose **Answer feedback** when creating a Multiple Choice note type. **Show all correct answers** uses the current coloring, marking all correct choices green and incorrect choices red. **Highlight only mistakes** marks selected incorrect choices red and missed correct choices green, leaving the other choices uncolored.
+
 When a field is empty in Anki’s editor, its description gives a short hint. For example, **Correct Answers** explains the `A` / `A,C` format, and **Shuffle Options** explains how `true`, `false`, and a blank value behave.
 
 The demo includes **Multiple Choice — Single** and **Multiple Choice — Multiple** examples. Both use the same interactive note type: Anki shows radio buttons when `Correct Answers` contains one letter and checkboxes when it contains several. **Show Answer** keeps the selected choices and their order, then colors each option as correct or incorrect. The choices are shuffled once per review when enabled, so the same order remains on the back. Use Anki’s review buttons to grade yourself.

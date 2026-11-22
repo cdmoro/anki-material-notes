@@ -73,6 +73,7 @@
             const correct = new Set(raw.split(/[\s,]+/).filter(Boolean));
             const available = new Set(options.map(option => option.dataset.choice));
             const feedback = back.querySelector("[data-mc2-feedback]");
+            const answerColoring = "all";
             if (!correct.size || Array.from(correct).some(letter => !available.has(letter))) {
                 feedback.hidden = false;
                 feedback.textContent = "Check the Correct Answers field. Enter letters such as A or A,C.";
@@ -93,8 +94,10 @@
                 const letter = option.dataset.choice;
                 const isCorrect = correct.has(letter);
                 const wasSelected = selected.has(letter);
-                option.classList.toggle("correct-answer", isCorrect);
-                option.classList.toggle("wrong-answer", !isCorrect);
+                const highlightCorrect = isCorrect && (answerColoring === "all" || !wasSelected);
+                const highlightWrong = !isCorrect && (answerColoring === "all" || wasSelected);
+                option.classList.toggle("correct-answer", highlightCorrect);
+                option.classList.toggle("wrong-answer", highlightWrong);
                 option.classList.toggle("missed-answer", !wasSelected && isCorrect);
                 const input = option.querySelector("input");
                 if (input) {

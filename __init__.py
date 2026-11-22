@@ -61,10 +61,20 @@ FINISHES = {"base": "Base", "filled": "Filled", "outlined": "Outlined"}
 MULTIPLE_CHOICE_KIND = "multiple-choice-2"
 MULTIPLE_CHOICE_DEFAULT_COUNT = 4
 MULTIPLE_CHOICE_MAX_COUNT = 10
+ANSWER_COLORING_CONFIG_KEY = "answer_coloring_by_default"
+ANSWER_COLORING_ALL = "all"
+ANSWER_COLORING_MISTAKES = "mistakes"
 
 
 def read_model_file(path):
     return path.read_text(encoding="utf-8")
+
+
+def configured_answer_coloring():
+    value = QSettings("Material Notes", "Material Notes").value(
+        ANSWER_COLORING_CONFIG_KEY, ANSWER_COLORING_ALL, type=str
+    )
+    return value if value in {ANSWER_COLORING_ALL, ANSWER_COLORING_MISTAKES} else ANSWER_COLORING_ALL
 
 
 def css_version(css):
@@ -125,6 +135,7 @@ def preset_fields(kind, preset=None, option_count=None):
 
 def template_content(
     preset, appearance=None, style_application="fixed", shuffle_default=False, option_count=None,
+    answer_coloring=ANSWER_COLORING_ALL,
 ):
     classes = [] if style_application == "tags" else appearance_classes(**(appearance or {}))
     if style_application != "fixed":
@@ -133,6 +144,7 @@ def template_content(
     templates = {
         key: read_model_file(MODEL_DIR / preset[side]).replace(" {{Tags}}", replacement, 1)
         .replace("const defaults = false;", f"const defaults = {str(bool(shuffle_default)).lower()};")
+        .replace('const answerColoring = "all";', f'const answerColoring = "{answer_coloring}";')
         for key, side in (("qfmt", "front"), ("afmt", "back"))
     }
     if preset.get("front") == "multiple-choice-2/front.html":
@@ -172,9 +184,11 @@ def record_installed_content(model, kind, css, template):
 
 def create_note_type(
     models, kind, name, appearance=None, style_application="fixed", shuffle_default=False,
-    option_count=None,
+    option_count=None, answer_coloring=ANSWER_COLORING_ALL,
 ):
     preset = NOTE_TYPES[kind]
+    if answer_coloring not in {ANSWER_COLORING_ALL, ANSWER_COLORING_MISTAKES}:
+        answer_coloring = ANSWER_COLORING_ALL
     model = models.new(name)
     count = multiple_choice_option_count(
         requested=option_count, default=preset.get("option_count_default", MULTIPLE_CHOICE_DEFAULT_COUNT)
@@ -187,13 +201,16 @@ def create_note_type(
 
     css = read_model_file(MODEL_DIR / "styles.css")
     template = models.newTemplate("Card 1")
-    template.update(template_content(preset, appearance, style_application, shuffle_default, count))
+    template.update(template_content(
+        preset, appearance, style_application, shuffle_default, count, answer_coloring
+    ))
     models.addTemplate(model, template)
     model["css"] = css
     model["mfc_style_application"] = style_application
     model["mfc_shuffle_default"] = bool(shuffle_default)
     if count is not None:
         model["mfc_option_count"] = count
+        model["mfc_answer_coloring"] = answer_coloring
     if appearance and style_application == "fixed":
         model["mfc_appearance"] = appearance
     record_installed_content(model, kind, css, template)
@@ -239,9 +256,13 @@ def update_note_type(models, model, css, confirm_overwrite):
             fields_changed = True
 
     installed = model["tmpls"][0]
+    answer_coloring = model.get("mfc_answer_coloring", ANSWER_COLORING_ALL)
+    if answer_coloring not in {ANSWER_COLORING_ALL, ANSWER_COLORING_MISTAKES}:
+        answer_coloring = ANSWER_COLORING_ALL
     latest = template_content(
         preset, model.get("mfc_appearance"), model.get("mfc_style_application", "legacy"),
         model.get("mfc_shuffle_default", False), option_count,
+        answer_coloring,
     )
     css_changed = css != model["css"]
     template_changed = any(installed[key] != value for key, value in latest.items())
@@ -262,6 +283,7 @@ def update_note_type(models, model, css, confirm_overwrite):
     updated["tmpls"][0].update(latest)
     if option_count is not None:
         updated["mfc_option_count"] = option_count
+        updated["mfc_answer_coloring"] = answer_coloring
     record_installed_content(updated, kind, css, latest)
     models.save(updated)
     return "updated"
@@ -307,6 +329,12 @@ class CreateNoteTypeDialog(QDialog):
         self.centered = QCheckBox("Center card content")
         self.shuffle_default = QCheckBox("Shuffle answers by default")
         self.shuffle_default.setChecked(bool(QSettings("Material Notes", "Material Notes").value(ADDON_CONFIG_KEY, False, type=bool)))
+        self.answer_coloring = QComboBox()
+        self.answer_coloring.addItem("Show all correct answers", ANSWER_COLORING_ALL)
+        self.answer_coloring.addItem("Highlight only mistakes", ANSWER_COLORING_MISTAKES)
+        self.answer_coloring.setCurrentIndex(
+            self.answer_coloring.findData(configured_answer_coloring())
+        )
         self.update_finishes()
 
         buttons = QDialogButtonBox(
@@ -338,7 +366,8 @@ class CreateNoteTypeDialog(QDialog):
         fixed_layout.addRow("Finish", self.finish)
         fixed_layout.addRow("", self.centered)
         appearance_layout.addRow(self.fixed_controls)
-        appearance_layout.addRow("Multiple Choice 2", self.shuffle_default)
+        appearance_layout.addRow("Shuffle answers by default", self.shuffle_default)
+        appearance_layout.addRow("Answer feedback", self.answer_coloring)
 
         self.tag_controls = QWidget()
         tag_layout = QVBoxLayout(self.tag_controls)
@@ -414,7 +443,9 @@ class CreateNoteTypeDialog(QDialog):
     def update_style_application(self):
         using_tags = self.style_application.currentData() == "tags"
         self.fixed_controls.setVisible(not using_tags)
-        self.shuffle_default.setVisible(self.kind.currentData() == "multiple-choice-2")
+        is_multiple_choice = self.kind.currentData() == MULTIPLE_CHOICE_KIND
+        self.shuffle_default.setVisible(is_multiple_choice)
+        self.answer_coloring.setVisible(is_multiple_choice)
         self.tag_controls.setVisible(using_tags)
         self.update_suggested_name()
         self.adjustSize()
@@ -434,6 +465,11 @@ class CreateNoteTypeDialog(QDialog):
             style_application = self.style_application.currentData()
             shuffle_default = self.shuffle_default.isChecked()
             QSettings("Material Notes", "Material Notes").setValue(ADDON_CONFIG_KEY, shuffle_default)
+            answer_coloring = self.answer_coloring.currentData()
+            if self.kind.currentData() == MULTIPLE_CHOICE_KIND:
+                QSettings("Material Notes", "Material Notes").setValue(
+                    ANSWER_COLORING_CONFIG_KEY, answer_coloring
+                )
             appearance = {
                 "palette": self.palette.currentData(),
                 "finish": self.finish.currentData(),
@@ -443,6 +479,7 @@ class CreateNoteTypeDialog(QDialog):
                 self.models, self.kind.currentData(), name, appearance, style_application,
                 shuffle_default,
                 self.option_count.value() if self.kind.currentData() == MULTIPLE_CHOICE_KIND else None,
+                answer_coloring,
             )
         except (AnkiError, OSError) as error:
             showInfo(str(error), parent=self, textFormat=Qt.TextFormat.PlainText)
