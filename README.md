@@ -13,6 +13,8 @@ Leave **Note type name** blank to use the suggestion, such as `Basic - Pink Outl
 
 **Update note types** refreshes the templates and CSS while keeping your appearance choices and the field values on existing notes. If you edited the templates or styling, the add-on asks before replacing your changes.
 
+The managed note type list shows each type’s style and, for Multiple Choice, its option count, shuffle behavior, and feedback style. Select a type and choose **Edit settings…** to change those settings for all its cards. Option counts can be increased; existing fields are retained.
+
 ## Copy a card into Anki
 
 Open **Cards…** for a Basic note type with the **Front** and **Back** fields. Use the demo’s **Copy front**, **Copy back**, and **Copy style** buttons to fill the corresponding editor panes below, or copy from the files directly.

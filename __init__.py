@@ -64,6 +64,10 @@ MULTIPLE_CHOICE_MAX_COUNT = 10
 ANSWER_COLORING_CONFIG_KEY = "answer_coloring_by_default"
 ANSWER_COLORING_ALL = "all"
 ANSWER_COLORING_MISTAKES = "mistakes"
+SHUFFLE_POLICY_FIELD = "field"
+SHUFFLE_POLICY_ALWAYS = "always"
+SHUFFLE_POLICY_NEVER = "never"
+SHUFFLE_POLICIES = {SHUFFLE_POLICY_FIELD, SHUFFLE_POLICY_ALWAYS, SHUFFLE_POLICY_NEVER}
 
 
 def read_model_file(path):
@@ -135,7 +139,7 @@ def preset_fields(kind, preset=None, option_count=None):
 
 def template_content(
     preset, appearance=None, style_application="fixed", shuffle_default=False, option_count=None,
-    answer_coloring=ANSWER_COLORING_ALL,
+    answer_coloring=ANSWER_COLORING_ALL, shuffle_policy=SHUFFLE_POLICY_FIELD,
 ):
     classes = [] if style_application == "tags" else appearance_classes(**(appearance or {}))
     if style_application != "fixed":
@@ -145,6 +149,7 @@ def template_content(
         key: read_model_file(MODEL_DIR / preset[side]).replace(" {{Tags}}", replacement, 1)
         .replace("const defaults = false;", f"const defaults = {str(bool(shuffle_default)).lower()};")
         .replace('const answerColoring = "all";', f'const answerColoring = "{answer_coloring}";')
+        .replace('const shufflePolicy = "field";', f'const shufflePolicy = "{shuffle_policy}";')
         for key, side in (("qfmt", "front"), ("afmt", "back"))
     }
     if preset.get("front") == "multiple-choice-2/front.html":
@@ -185,10 +190,13 @@ def record_installed_content(model, kind, css, template):
 def create_note_type(
     models, kind, name, appearance=None, style_application="fixed", shuffle_default=False,
     option_count=None, answer_coloring=ANSWER_COLORING_ALL,
+    shuffle_policy=SHUFFLE_POLICY_FIELD,
 ):
     preset = NOTE_TYPES[kind]
     if answer_coloring not in {ANSWER_COLORING_ALL, ANSWER_COLORING_MISTAKES}:
         answer_coloring = ANSWER_COLORING_ALL
+    if shuffle_policy not in SHUFFLE_POLICIES:
+        shuffle_policy = SHUFFLE_POLICY_FIELD
     model = models.new(name)
     count = multiple_choice_option_count(
         requested=option_count, default=preset.get("option_count_default", MULTIPLE_CHOICE_DEFAULT_COUNT)
@@ -202,7 +210,7 @@ def create_note_type(
     css = read_model_file(MODEL_DIR / "styles.css")
     template = models.newTemplate("Card 1")
     template.update(template_content(
-        preset, appearance, style_application, shuffle_default, count, answer_coloring
+        preset, appearance, style_application, shuffle_default, count, answer_coloring, shuffle_policy
     ))
     models.addTemplate(model, template)
     model["css"] = css
@@ -211,6 +219,7 @@ def create_note_type(
     if count is not None:
         model["mfc_option_count"] = count
         model["mfc_answer_coloring"] = answer_coloring
+        model["mfc_shuffle_policy"] = shuffle_policy
     if appearance and style_application == "fixed":
         model["mfc_appearance"] = appearance
     record_installed_content(model, kind, css, template)
@@ -259,10 +268,13 @@ def update_note_type(models, model, css, confirm_overwrite):
     answer_coloring = model.get("mfc_answer_coloring", ANSWER_COLORING_ALL)
     if answer_coloring not in {ANSWER_COLORING_ALL, ANSWER_COLORING_MISTAKES}:
         answer_coloring = ANSWER_COLORING_ALL
+    shuffle_policy = model.get("mfc_shuffle_policy", SHUFFLE_POLICY_FIELD)
+    if shuffle_policy not in SHUFFLE_POLICIES:
+        shuffle_policy = SHUFFLE_POLICY_FIELD
     latest = template_content(
         preset, model.get("mfc_appearance"), model.get("mfc_style_application", "legacy"),
         model.get("mfc_shuffle_default", False), option_count,
-        answer_coloring,
+        answer_coloring, shuffle_policy,
     )
     css_changed = css != model["css"]
     template_changed = any(installed[key] != value for key, value in latest.items())
@@ -284,7 +296,60 @@ def update_note_type(models, model, css, confirm_overwrite):
     if option_count is not None:
         updated["mfc_option_count"] = option_count
         updated["mfc_answer_coloring"] = answer_coloring
+        updated["mfc_shuffle_policy"] = shuffle_policy
     record_installed_content(updated, kind, css, latest)
+    models.save(updated)
+    return "updated"
+
+
+def edit_note_type_settings(
+    models, model, appearance, style_application, shuffle_default, option_count,
+    answer_coloring, shuffle_policy, confirm_overwrite,
+):
+    kind = model.get("mfc_kind", "basic")
+    if kind not in NOTE_TYPES or model["type"] != MODEL_STD:
+        return "incompatible"
+
+    preset = NOTE_TYPES[kind]
+    is_multiple_choice = kind == MULTIPLE_CHOICE_KIND
+    if answer_coloring not in {ANSWER_COLORING_ALL, ANSWER_COLORING_MISTAKES}:
+        answer_coloring = ANSWER_COLORING_ALL
+    if shuffle_policy not in SHUFFLE_POLICIES:
+        shuffle_policy = SHUFFLE_POLICY_FIELD
+
+    updated = deepcopy(model)
+    current_count = multiple_choice_option_count(
+        model, default=preset.get("option_count_default", MULTIPLE_CHOICE_DEFAULT_COUNT)
+    ) if is_multiple_choice else None
+    if is_multiple_choice:
+        option_count = max(current_count, min(MULTIPLE_CHOICE_MAX_COUNT, int(option_count)))
+        for index in range(current_count, option_count):
+            field = models.newField(f"Option {chr(ord('A') + index)}")
+            models.addField(updated, field)
+
+    updated["mfc_style_application"] = style_application
+    if style_application == "fixed":
+        updated["mfc_appearance"] = appearance or {}
+    updated["mfc_shuffle_default"] = bool(shuffle_default)
+    if is_multiple_choice:
+        updated["mfc_option_count"] = option_count
+        updated["mfc_answer_coloring"] = answer_coloring
+        updated["mfc_shuffle_policy"] = shuffle_policy
+
+    latest = template_content(
+        {**preset, "kind": kind}, updated.get("mfc_appearance"), style_application,
+        shuffle_default, option_count, answer_coloring, shuffle_policy,
+    )
+    installed = model["tmpls"][0]
+    template_changed = any(installed[key] != value for key, value in latest.items())
+    custom_template = model.get("mfc_template_hash") != content_hash(
+        installed["qfmt"], installed["afmt"]
+    )
+    if template_changed and custom_template and not confirm_overwrite(model["name"]):
+        return "skipped"
+
+    updated["tmpls"][0].update(latest)
+    record_installed_content(updated, kind, updated["css"], latest)
     models.save(updated)
     return "updated"
 
@@ -487,6 +552,139 @@ class CreateNoteTypeDialog(QDialog):
         self.accept()
 
 
+class EditNoteTypeDialog(QDialog):
+    def __init__(self, parent, models, model, confirm_overwrite):
+        super().__init__(parent)
+        self.models = models
+        self.model = model
+        self.confirm_overwrite = confirm_overwrite
+        self.setWindowTitle("Edit note type settings")
+        self.setMinimumWidth(520)
+
+        kind = model.get("mfc_kind", "basic")
+        preset = NOTE_TYPES[kind]
+        self.is_multiple_choice = kind == MULTIPLE_CHOICE_KIND
+        self.style_application = QComboBox()
+        self.style_application.addItem("Fixed style", "fixed")
+        self.style_application.addItem("Style using tags", "tags")
+        current_style = model.get("mfc_style_application", "legacy")
+        if current_style not in {"fixed", "tags"}:
+            current_style = "tags"
+        self.style_application.setCurrentIndex(self.style_application.findData(current_style))
+
+        old_appearance = model.get("mfc_appearance", {})
+        self.palette = QComboBox()
+        self.palette.addItem(PALETTE_NAMES["base"], "base")
+        self.palette.insertSeparator(self.palette.count())
+        for color in COLORS:
+            self.palette.addItem(color, color.lower())
+        self.palette.insertSeparator(self.palette.count())
+        for country, code, slug in COUNTRIES:
+            flag = "".join(chr(ord(letter) - ord("a") + 0x1F1E6) for letter in code)
+            self.palette.addItem(f"{flag}  {country}", f"flag-{slug}")
+        self.palette.setCurrentIndex(
+            max(0, self.palette.findData(old_appearance.get("palette", "base")))
+        )
+
+        self.finish = QComboBox()
+        self.centered = QCheckBox("Center card content")
+        self.centered.setChecked(bool(old_appearance.get("centered", False)))
+        self.fixed_controls = QWidget()
+        fixed_layout = QFormLayout(self.fixed_controls)
+        fixed_layout.setContentsMargins(0, 0, 0, 0)
+        fixed_layout.addRow("Palette", self.palette)
+        fixed_layout.addRow("Finish", self.finish)
+        fixed_layout.addRow("", self.centered)
+
+        self.option_count = QSpinBox()
+        current_count = multiple_choice_option_count(
+            model, default=preset.get("option_count_default", MULTIPLE_CHOICE_DEFAULT_COUNT)
+        ) if self.is_multiple_choice else MULTIPLE_CHOICE_DEFAULT_COUNT
+        self.option_count.setRange(current_count, MULTIPLE_CHOICE_MAX_COUNT)
+        self.option_count.setValue(current_count)
+
+        self.shuffle_default = QCheckBox("Shuffle when Shuffle Options is blank")
+        self.shuffle_default.setChecked(bool(model.get("mfc_shuffle_default", False)))
+        self.shuffle_policy = QComboBox()
+        self.shuffle_policy.addItem("Use each note’s Shuffle Options field", SHUFFLE_POLICY_FIELD)
+        self.shuffle_policy.addItem("Always shuffle", SHUFFLE_POLICY_ALWAYS)
+        self.shuffle_policy.addItem("Never shuffle", SHUFFLE_POLICY_NEVER)
+        policy = model.get("mfc_shuffle_policy", SHUFFLE_POLICY_FIELD)
+        self.shuffle_policy.setCurrentIndex(max(0, self.shuffle_policy.findData(policy)))
+
+        self.answer_coloring = QComboBox()
+        self.answer_coloring.addItem("Show all correct answers", ANSWER_COLORING_ALL)
+        self.answer_coloring.addItem("Highlight only mistakes", ANSWER_COLORING_MISTAKES)
+        coloring = model.get("mfc_answer_coloring", ANSWER_COLORING_ALL)
+        self.answer_coloring.setCurrentIndex(max(0, self.answer_coloring.findData(coloring)))
+
+        note_group = QGroupBox("Note type")
+        note_layout = QFormLayout(note_group)
+        note_layout.addRow("Name", QLabel(model["name"]))
+        note_layout.addRow("Style application", self.style_application)
+        note_layout.addRow(self.fixed_controls)
+
+        self.multiple_choice_controls = QWidget()
+        mc_layout = QFormLayout(self.multiple_choice_controls)
+        mc_layout.setContentsMargins(0, 0, 0, 0)
+        mc_layout.addRow("Number of options", self.option_count)
+        mc_layout.addRow("Default shuffle", self.shuffle_default)
+        mc_layout.addRow("Shuffle behavior", self.shuffle_policy)
+        mc_layout.addRow("Answer feedback", self.answer_coloring)
+        note_layout.addRow(self.multiple_choice_controls)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel
+        )
+        buttons.accepted.connect(self.save)
+        buttons.rejected.connect(self.reject)
+
+        layout = QVBoxLayout(self)
+        layout.addWidget(note_group)
+        layout.addWidget(buttons)
+        self.style_application.currentIndexChanged.connect(self.update_style_controls)
+        self.palette.currentIndexChanged.connect(self.update_finishes)
+        self.update_finishes()
+        self.update_style_controls()
+
+    def update_style_controls(self):
+        self.fixed_controls.setVisible(self.style_application.currentData() == "fixed")
+        self.multiple_choice_controls.setVisible(self.is_multiple_choice)
+        self.adjustSize()
+
+    def update_finishes(self):
+        selected = self.finish.currentData()
+        self.finish.clear()
+        for finish in available_finishes(self.palette.currentData()):
+            self.finish.addItem(FINISHES[finish], finish)
+        self.finish.setCurrentIndex(max(0, self.finish.findData(selected or "base")))
+
+    def save(self):
+        style_application = self.style_application.currentData()
+        appearance = {
+            "palette": self.palette.currentData(),
+            "finish": self.finish.currentData(),
+            "centered": self.centered.isChecked(),
+        } if style_application == "fixed" else None
+        try:
+            result = edit_note_type_settings(
+                self.models, self.model, appearance, style_application,
+                self.shuffle_default.isChecked(), self.option_count.value(),
+                self.answer_coloring.currentData(), self.shuffle_policy.currentData(),
+                self.confirm_overwrite,
+            )
+        except (AnkiError, OSError) as error:
+            showInfo(str(error), parent=self, textFormat=Qt.TextFormat.PlainText)
+            return
+        if result == "skipped":
+            showInfo("The settings were not applied.", parent=self)
+            return
+        if result == "incompatible":
+            showInfo("This note type is no longer compatible with the preset.", parent=self)
+            return
+        self.accept()
+
+
 class NoteTypesDialog(QDialog):
     def __init__(self, parent, models):
         super().__init__(parent)
@@ -497,21 +695,29 @@ class NoteTypesDialog(QDialog):
         self.note_types = QListWidget()
         self.note_types.setAccessibleName("Managed note types")
         self.empty_message = QLabel("No Material note types in this collection yet.")
+        self.details = QLabel("Select a note type to see its settings.")
+        self.details.setWordWrap(True)
+        self.edit_button = QPushButton("Edit settings…")
+        self.edit_button.setEnabled(False)
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
         create = QPushButton("Create note type…")
         self.update_button = QPushButton("Update note types")
         buttons.addButton(create, QDialogButtonBox.ButtonRole.ActionRole)
+        buttons.addButton(self.edit_button, QDialogButtonBox.ButtonRole.ActionRole)
         buttons.addButton(self.update_button, QDialogButtonBox.ButtonRole.ActionRole)
         create.clicked.connect(self.create)
+        self.edit_button.clicked.connect(self.edit_selected)
         self.update_button.clicked.connect(self.update_note_types)
         buttons.rejected.connect(self.reject)
 
         layout = QVBoxLayout(self)
         layout.addWidget(QLabel("Material note types in this collection"))
         layout.addWidget(self.note_types)
+        layout.addWidget(self.details)
         layout.addWidget(self.empty_message)
         layout.addWidget(buttons)
+        self.note_types.currentItemChanged.connect(self.show_selected_details)
         self.refresh()
 
     def refresh(self):
@@ -521,11 +727,64 @@ class NoteTypesDialog(QDialog):
             version = css_version(model.get("css", ""))
             label = f"CSS v{version}" if version else "CSS version unknown"
             self.note_types.addItem(f"{model['name']} — {label}")
+            self.note_types.item(self.note_types.count() - 1).setData(
+                Qt.ItemDataRole.UserRole, model["name"]
+            )
         self.empty_message.setVisible(not note_types)
         self.update_button.setEnabled(bool(note_types))
+        if note_types:
+            self.note_types.setCurrentRow(0)
+        else:
+            self.show_selected_details()
+
+    def show_selected_details(self, *_):
+        item = self.note_types.currentItem()
+        name = item.data(Qt.ItemDataRole.UserRole) if item else None
+        model = self.models.byName(name) if name else None
+        self.edit_button.setEnabled(model is not None)
+        if model is None:
+            self.details.setText("Select a note type to see its settings.")
+            return
+
+        kind = model.get("mfc_kind", "basic")
+        appearance = model.get("mfc_appearance", {})
+        if model.get("mfc_style_application", "fixed") == "tags":
+            style = "Style using tags"
+        else:
+            palette = PALETTE_NAMES.get(appearance.get("palette", "base"), "Default")
+            finish = FINISHES.get(appearance.get("finish", "base"), "Base")
+            style = f"{palette} · {finish}"
+            if appearance.get("centered"):
+                style += " · centered"
+        lines = [f"Template: {NOTE_TYPES[kind]['label']}", f"Style: {style}"]
+        if kind == MULTIPLE_CHOICE_KIND:
+            lines.append(f"Options: {multiple_choice_option_count(model)}")
+            policy = model.get("mfc_shuffle_policy", SHUFFLE_POLICY_FIELD)
+            if policy == SHUFFLE_POLICY_ALWAYS:
+                shuffle = "always"
+            elif policy == SHUFFLE_POLICY_NEVER:
+                shuffle = "never"
+            else:
+                fallback = "shuffle" if model.get("mfc_shuffle_default", False) else "keep order"
+                shuffle = f"per note (blank: {fallback})"
+            lines.append(f"Shuffle: {shuffle}")
+            coloring = model.get("mfc_answer_coloring", ANSWER_COLORING_ALL)
+            lines.append(
+                "Answer feedback: " +
+                ("highlight only mistakes" if coloring == ANSWER_COLORING_MISTAKES else "show all correct answers")
+            )
+        self.details.setText("\n".join(lines))
 
     def create(self):
         if CreateNoteTypeDialog(self, self.models).exec():
+            self.refresh()
+            mw.reset()
+
+    def edit_selected(self):
+        item = self.note_types.currentItem()
+        name = item.data(Qt.ItemDataRole.UserRole) if item else None
+        model = self.models.byName(name) if name else None
+        if model and EditNoteTypeDialog(self, self.models, model, self.confirm_overwrite).exec():
             self.refresh()
             mw.reset()
 

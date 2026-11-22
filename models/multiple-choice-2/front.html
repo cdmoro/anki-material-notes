@@ -77,8 +77,11 @@
         const options = Array.from(root.querySelectorAll("[data-choice]"));
         const config = root.querySelector("[data-mc2-config]");
         const defaults = false;
+        const shufflePolicy = "field";
         const override = config.textContent.trim().toLowerCase();
-        const shuffle = override === "true" ? true : override === "false" ? false : defaults;
+        const shuffle = shufflePolicy === "always" ? true
+            : shufflePolicy === "never" ? false
+            : override === "true" ? true : override === "false" ? false : defaults;
         const stateKey = "mc2";
         const isAnswerSide = Boolean(root.closest("[data-mc2-back]"));
 
