@@ -700,8 +700,8 @@ body.card {
 
 .choice-answer-card .question-options [data-choice] {
   box-sizing: border-box;
-  margin-block: 0;
-  padding: 0 .25em;
+  margin-block: .05em;
+  padding: .1em 0;
   border-radius: .15em;
 }
 
