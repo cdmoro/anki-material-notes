@@ -1,4 +1,4 @@
-/* Material Notes · Carlos Bonadeo · 1.0.0
+/* Material Notes · Carlos Bonadeo · 1.0.1
  * https://github.com/cdmoro/anki-material-notes
  * Generated from src/styles/ by make build-css.
  */
@@ -686,16 +686,23 @@ body.card {
 }
 
 .note .question-options label {
-  display: inline-flex;
-  align-items: baseline;
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  align-items: center;
   gap: .45em;
+  cursor: pointer;
 }
 
 .note .question-options [data-choice] {
   box-sizing: border-box;
   margin-block: .2em;
-  padding: .1em 0;
+  padding: .4em .6em;
   border-radius: .15em;
+}
+
+.note.front.question-card .question-options [data-choice] {
+  background: rgba(128, 128, 128, .14);
 }
 
 .note .question-options input {
