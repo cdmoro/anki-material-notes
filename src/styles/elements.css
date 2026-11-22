@@ -151,7 +151,6 @@
   box-sizing: border-box;
   margin-block: .2em;
   padding: .1em 0;
-  border: 2px solid transparent;
   border-radius: .15em;
 }
 
@@ -169,10 +168,6 @@
   color: var(--feedback-incorrect-foreground);
   opacity: 1;
   text-decoration: none;
-}
-
-.choice-answer-card .question-options [data-choice].missed-answer {
-  border-color: var(--feedback-correct-foreground);
 }
 
 .choice-answer-card .question-options input:disabled {
