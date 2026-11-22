@@ -11,7 +11,9 @@ const keys = {
     theme: "note-dark-theme",
     view: "note-view",
     centered: "note-centered",
+    templateStyle: "note-template-style",
 };
+let templateStyle = readPreference(keys.templateStyle) === "tags" ? "tags" : "classes";
 
 async function updateProjectVersion() {
     try {
@@ -77,7 +79,14 @@ let appliedVariant = "";
 
 function updateTemplatePreviews() {
     for (const [note, { code, content, raw }] of templatePreviews) {
-        code.textContent = raw ? content : '<div class="' + note.className + '">\n' + content + '\n</div>';
+        if (raw) {
+            const classes = Array.from(note.classList)
+                .filter(name => name.startsWith("note-") || name.startsWith("Material::note-"))
+                .join(" ");
+            code.textContent = content.replace(/\{\{Tags\}\}/g, templateStyle === "tags" ? "{{Tags}}" : classes);
+        } else {
+            code.textContent = '<div class="' + note.className + '">\n' + content + '\n</div>';
+        }
     }
 }
 
@@ -480,6 +489,25 @@ examples.forEach(example => {
     heading.textContent = "Card setup";
     setup.setAttribute("aria-labelledby", heading.id);
     setup.append(heading);
+
+    if (example.dataset.templateDirectory) {
+        const styleControl = document.createElement("label");
+        const styleCheckbox = document.createElement("input");
+        styleControl.className = "template-style-toggle";
+        styleCheckbox.type = "checkbox";
+        styleCheckbox.checked = templateStyle === "tags";
+        styleCheckbox.setAttribute("role", "switch");
+        styleControl.append(styleCheckbox, document.createTextNode(" Use {{Tags}} instead of classes in templates"));
+        styleCheckbox.addEventListener("change", () => {
+            templateStyle = styleCheckbox.checked ? "tags" : "classes";
+            document.querySelectorAll(".template-style-toggle input").forEach(input => {
+                input.checked = styleCheckbox.checked;
+            });
+            savePreference(keys.templateStyle, templateStyle);
+            updateTemplatePreviews();
+        });
+        setup.append(styleControl);
+    }
 
     const tabList = document.createElement("div");
     tabList.className = "example-setup-tabs";
