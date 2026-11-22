@@ -718,10 +718,6 @@ body.card {
   opacity: 1;
 }
 
-.note.back > #answer.choice-answer-anchor {
-  border: 0;
-}
-
 .note .small {
   font-size: .85rem;
 }

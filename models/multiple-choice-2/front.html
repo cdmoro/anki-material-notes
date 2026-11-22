@@ -32,7 +32,7 @@
         const stateKey = "mc2:" + (root.closest(".card")?.dataset.cardId || location.href);
 
         let saved = null;
-        if (document.getElementById("answer")) {
+        if (root.closest("[data-mc2-back]")) {
             try { saved = JSON.parse(sessionStorage.getItem(stateKey) || "null"); } catch (_) {}
         }
         let order = saved && Array.isArray(saved.order) ? saved.order : options.map(option => option.dataset.choice);
