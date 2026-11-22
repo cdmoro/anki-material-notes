@@ -147,15 +147,11 @@
   font-weight: 700;
 }
 
-.note .missed-answer {
-  outline: 2px solid var(--feedback-correct-foreground);
-  outline-offset: 2px;
-}
-
 .choice-answer-card .question-options [data-choice] {
   box-sizing: border-box;
   margin-block: .05em;
   padding: .1em 0;
+  border: 2px solid transparent;
   border-radius: .15em;
 }
 
@@ -176,7 +172,7 @@
 }
 
 .choice-answer-card .question-options [data-choice].missed-answer {
-  box-shadow: inset 0 0 0 2px var(--feedback-correct-foreground);
+  border-color: var(--feedback-correct-foreground);
 }
 
 .choice-answer-card .question-options input:disabled {
