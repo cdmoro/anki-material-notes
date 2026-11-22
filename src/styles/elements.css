@@ -133,6 +133,13 @@
   gap: .45em;
 }
 
+.note .question-options [data-choice] {
+  box-sizing: border-box;
+  margin-block: .2em;
+  padding: .1em 0;
+  border-radius: .15em;
+}
+
 .note .question-options input {
   accent-color: var(--accent-color);
 }
@@ -147,25 +154,19 @@
   font-weight: 700;
 }
 
-.choice-answer-card .question-options [data-choice] {
-  box-sizing: border-box;
-  margin-block: .2em;
-  padding: .1em 0;
-  border-radius: .15em;
-}
-
 .choice-answer-card .question-options [data-choice]::marker {
   color: var(--font-color);
 }
 
 .choice-answer-card .question-options [data-choice].correct-answer {
   background: var(--feedback-correct-background);
-  color: var(--feedback-correct-foreground);
+  color: inherit;
+  font-weight: inherit;
 }
 
 .choice-answer-card .question-options [data-choice].wrong-answer {
   background: var(--feedback-incorrect-background);
-  color: var(--feedback-incorrect-foreground);
+  color: inherit;
   opacity: 1;
   text-decoration: none;
 }
