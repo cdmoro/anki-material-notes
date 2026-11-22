@@ -8,6 +8,7 @@ GUIDE = ROOT / "docs" / "using-style-tags.md"
 CATALOG_START = "<!-- BEGIN STYLE TAG CATALOG -->"
 CATALOG_END = "<!-- END STYLE TAG CATALOG -->"
 TAG_SELECTOR = re.compile(r"\.note:is\(\.(note-[a-z0-9-]+), \.Material\\:\\:\1\)")
+CARD_SETUP_TEMPLATES = "multiple-choice-2"
 
 
 def style_tags(css):
@@ -41,6 +42,15 @@ def update_guide_catalog(guide, css):
     return before + start + "\n\n" + render_catalog(style_tags(css)) + "\n\n" + end + after
 
 
+def render_card_setup_sources(css):
+    templates = {
+        name: (ROOT / "models" / CARD_SETUP_TEMPLATES / f"{name}.html").read_text(encoding="utf-8")
+        for name in ("front", "back")
+    }
+    payload = json.dumps({"styles": css, "templates": {CARD_SETUP_TEMPLATES: templates}})
+    return f"window.materialNotesSources = {payload};\n"
+
+
 def build_css():
     manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
     sections = [
@@ -57,6 +67,9 @@ def build_css():
     css = "\n\n".join(sections) + "\n"
     output.write_text(css, encoding="utf-8")
     print(output.relative_to(ROOT))
+    sources = ROOT / "src" / "js" / "card-setup-sources.js"
+    sources.write_text(render_card_setup_sources(css), encoding="utf-8")
+    print(sources.relative_to(ROOT))
     guide = GUIDE.read_text(encoding="utf-8")
     updated_guide = update_guide_catalog(guide, css)
     if updated_guide != guide:

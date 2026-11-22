@@ -76,8 +76,8 @@ if (!colorSelect.value) colorSelect.value = "base";
 let appliedVariant = "";
 
 function updateTemplatePreviews() {
-    for (const [note, { code, content }] of templatePreviews) {
-        code.textContent = '<div class="' + note.className + '">\n' + content + '\n</div>';
+    for (const [note, { code, content, raw }] of templatePreviews) {
+        code.textContent = raw ? content : '<div class="' + note.className + '">\n' + content + '\n</div>';
     }
 }
 
@@ -319,6 +319,14 @@ function renderTemplatePreview(panel, label, note, content) {
         return;
     }
 
+    const templateName = directory.split("/").pop();
+    const localTemplate = window.materialNotesSources?.templates?.[templateName]?.[label.toLowerCase()];
+    if (localTemplate) {
+        templatePreviews.set(note, { code, content: localTemplate.trim(), raw: true });
+        updateTemplatePreviews();
+        return;
+    }
+
     button.disabled = true;
     fetch(directory + "/" + label.toLowerCase() + ".html").then(async response => {
         if (!response.ok) throw new Error("Template unavailable");
@@ -391,10 +399,12 @@ function renderExampleFields(panel, example, fields) {
 }
 
 const stylesheetUrl = document.getElementById("card-styles").href;
-const stylesheetText = fetch(stylesheetUrl).then(response => {
-    if (!response.ok) throw new Error("Couldn’t load the stylesheet.");
-    return response.text();
-});
+const stylesheetText = window.materialNotesSources?.styles
+    ? Promise.resolve(window.materialNotesSources.styles)
+    : fetch(stylesheetUrl).then(response => {
+        if (!response.ok) throw new Error("Couldn’t load the stylesheet.");
+        return response.text();
+    });
 
 function renderStylePanel(panel) {
     const description = document.createElement("p");

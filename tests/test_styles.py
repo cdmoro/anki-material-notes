@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from utils.build_css import GUIDE, ROOT, style_tags, update_guide_catalog
+from utils.build_css import GUIDE, ROOT, render_card_setup_sources, style_tags, update_guide_catalog
 
 try:
     from anki.collection import Collection
@@ -20,6 +20,11 @@ class StyleCatalogTests(unittest.TestCase):
         self.assertIn("note-centered", style_tags(css))
         self.assertIn("note-flag-uk-filled", style_tags(css))
         self.assertNotIn("note-white-filled", style_tags(css))
+
+    def test_card_setup_sources_are_current(self):
+        css = (ROOT / "models" / "styles.css").read_text(encoding="utf-8")
+        sources = (ROOT / "src" / "js" / "card-setup-sources.js").read_text(encoding="utf-8")
+        self.assertEqual(sources, render_card_setup_sources(css))
 
 
 @unittest.skipIf(Collection is None, "Anki's Python modules are required")
