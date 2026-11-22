@@ -1,11 +1,66 @@
-<div class="note front question-card {{Tags}}">
+<div class="note front question-card {{Tags}}" data-mc2-front>
     <div class="body question">{{Question}}</div>
     <div class="body question-options">
         <ol type="A">
-            <li value="1" data-choice="A">{{Option A}}</li>
-            <li value="2" data-choice="B">{{Option B}}</li>
-            {{#Option C}}<li value="3" data-choice="C">{{Option C}}</li>{{/Option C}}
-            {{#Option D}}<li value="4" data-choice="D">{{Option D}}</li>{{/Option D}}
+            <li data-choice="A">{{Option A}}</li>
+            <li data-choice="B">{{Option B}}</li>
+            {{#Option C}}<li data-choice="C">{{Option C}}</li>{{/Option C}}
+            {{#Option D}}<li data-choice="D">{{Option D}}</li>{{/Option D}}
         </ol>
     </div>
+    <div data-mc2-answer-key hidden>{{text:Correct Answers}}</div>
+    <div data-mc2-config hidden>{{text:Shuffle Options}}</div>
 </div>
+<script>
+    (function () {
+        const roots = document.querySelectorAll("[data-mc2-front]");
+        const root = roots[roots.length - 1];
+        if (!root || root.dataset.mc2Initialized) return;
+        root.dataset.mc2Initialized = "true";
+
+        const options = Array.from(root.querySelectorAll("[data-choice]"));
+        const answerKey = root.querySelector("[data-mc2-answer-key]").textContent.trim().toUpperCase();
+        const letters = "ABCD";
+        const legacy = /^[01](?:\s+[01]){3}$/.test(answerKey);
+        const correctCount = legacy
+            ? answerKey.split(/\s+/).filter(bit => bit === "1").length
+            : answerKey.split(/[\s,]+/).filter(Boolean).length;
+        const config = root.querySelector("[data-mc2-config]");
+        const defaults = "{{mfc_shuffle_default}}" === "true";
+        const override = config.textContent.trim().toLowerCase();
+        const shuffle = override === "true" ? true : override === "false" ? false : defaults;
+        const stateKey = "mc2:" + (root.closest(".card")?.dataset.cardId || location.href);
+
+        let saved = null;
+        if (document.getElementById("answer")) {
+            try { saved = JSON.parse(sessionStorage.getItem(stateKey) || "null"); } catch (_) {}
+        }
+        let order = saved && Array.isArray(saved.order) ? saved.order : options.map(option => option.dataset.choice);
+        if (!saved && shuffle) {
+            for (let i = order.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [order[i], order[j]] = [order[j], order[i]];
+            }
+        }
+        const byLetter = new Map(options.map(option => [option.dataset.choice, option]));
+        const list = root.querySelector("ol");
+        order.filter(letter => byLetter.has(letter)).forEach(letter => list.appendChild(byLetter.get(letter)));
+        const selected = new Set(saved?.selected || []);
+        options.forEach(option => {
+            const label = document.createElement("label");
+            const input = document.createElement("input");
+            input.type = correctCount > 1 ? "checkbox" : "radio";
+            input.name = "mc2-answer";
+            input.value = option.dataset.choice;
+            input.checked = selected.has(input.value);
+            input.addEventListener("change", () => {
+                if (input.type === "radio") selected.clear();
+                if (input.checked) selected.add(input.value); else selected.delete(input.value);
+                try { sessionStorage.setItem(stateKey, JSON.stringify({ order, selected: Array.from(selected) })); } catch (_) {}
+            });
+            label.append(input, document.createTextNode(" "), ...Array.from(option.childNodes));
+            option.replaceChildren(label);
+        });
+        try { sessionStorage.setItem(stateKey, JSON.stringify({ order, selected: Array.from(selected) })); } catch (_) {}
+    })();
+</script>

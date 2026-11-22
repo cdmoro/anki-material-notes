@@ -23,6 +23,7 @@ from aqt.qt import (
     QLineEdit,
     QListWidget,
     QPushButton,
+    QSettings,
     Qt,
     QVBoxLayout,
     QWidget,
@@ -30,6 +31,7 @@ from aqt.qt import (
 from aqt.utils import askUser, showInfo
 
 MODEL_DIR = Path(__file__).resolve().parent / "models"
+ADDON_CONFIG_KEY = "shuffle_answers_by_default"
 NOTE_TYPES = json.loads((MODEL_DIR / "presets.json").read_text(encoding="utf-8"))
 GUIDE_URL = "https://github.com/cdmoro/anki-material-notes/blob/main/docs/using-style-tags.md"
 STYLE_TAG_EXAMPLES = (
@@ -91,13 +93,14 @@ def appearance_classes(palette="base", finish="base", centered=False):
     return classes
 
 
-def template_content(preset, appearance=None, style_application="fixed"):
+def template_content(preset, appearance=None, style_application="fixed", shuffle_default=False):
     classes = [] if style_application == "tags" else appearance_classes(**(appearance or {}))
     if style_application != "fixed":
         classes.append("{{Tags}}")
     replacement = " " + " ".join(classes) if classes else ""
     return {
         key: read_model_file(MODEL_DIR / preset[side]).replace(" {{Tags}}", replacement, 1)
+        .replace("{{mfc_shuffle_default}}", str(bool(shuffle_default)).lower())
         for key, side in (("qfmt", "front"), ("afmt", "back"))
     }
 
@@ -125,7 +128,7 @@ def record_installed_content(model, kind, css, template):
     model["mfc_template_hash"] = content_hash(template["qfmt"], template["afmt"])
 
 
-def create_note_type(models, kind, name, appearance=None, style_application="fixed"):
+def create_note_type(models, kind, name, appearance=None, style_application="fixed", shuffle_default=False):
     preset = NOTE_TYPES[kind]
     model = models.new(name)
     for field in preset["fields"]:
@@ -133,10 +136,11 @@ def create_note_type(models, kind, name, appearance=None, style_application="fix
 
     css = read_model_file(MODEL_DIR / "styles.css")
     template = models.newTemplate("Card 1")
-    template.update(template_content(preset, appearance, style_application))
+    template.update(template_content(preset, appearance, style_application, shuffle_default))
     models.addTemplate(model, template)
     model["css"] = css
     model["mfc_style_application"] = style_application
+    model["mfc_shuffle_default"] = bool(shuffle_default)
     if appearance and style_application == "fixed":
         model["mfc_appearance"] = appearance
     record_installed_content(model, kind, css, template)
@@ -156,13 +160,20 @@ def update_note_type(models, model, css, confirm_overwrite):
         return "incompatible"
 
     preset = NOTE_TYPES[kind]
+    missing_fields = set(preset["fields"]) - {field["name"] for field in model["flds"]}
+    if kind == "multiple-choice-2" and missing_fields == {"Shuffle Options"}:
+        updated = deepcopy(model)
+        models.addField(updated, models.newField("Shuffle Options"))
+        models.save(updated)
+        model = models.byName(model["name"])
     model_fields = {field["name"] for field in model["flds"]}
     if not model_fields.issuperset(preset["fields"]) or len(model["tmpls"]) != 1:
         return "incompatible"
 
     installed = model["tmpls"][0]
     latest = template_content(
-        preset, model.get("mfc_appearance"), model.get("mfc_style_application", "legacy")
+        preset, model.get("mfc_appearance"), model.get("mfc_style_application", "legacy"),
+        model.get("mfc_shuffle_default", False),
     )
     css_changed = css != model["css"]
     template_changed = any(installed[key] != value for key, value in latest.items())
@@ -218,6 +229,8 @@ class CreateNoteTypeDialog(QDialog):
 
         self.finish = QComboBox()
         self.centered = QCheckBox("Center card content")
+        self.shuffle_default = QCheckBox("Shuffle answers by default")
+        self.shuffle_default.setChecked(bool(QSettings("Material Notes", "Material Notes").value(ADDON_CONFIG_KEY, False, type=bool)))
         self.update_finishes()
 
         buttons = QDialogButtonBox(
@@ -248,6 +261,7 @@ class CreateNoteTypeDialog(QDialog):
         fixed_layout.addRow("Finish", self.finish)
         fixed_layout.addRow("", self.centered)
         appearance_layout.addRow(self.fixed_controls)
+        appearance_layout.addRow("Multiple Choice 2", self.shuffle_default)
 
         self.tag_controls = QWidget()
         tag_layout = QVBoxLayout(self.tag_controls)
@@ -318,6 +332,7 @@ class CreateNoteTypeDialog(QDialog):
     def update_style_application(self):
         using_tags = self.style_application.currentData() == "tags"
         self.fixed_controls.setVisible(not using_tags)
+        self.shuffle_default.setVisible(self.kind.currentData() == "multiple-choice-2")
         self.tag_controls.setVisible(using_tags)
         self.update_suggested_name()
         self.adjustSize()
@@ -335,13 +350,16 @@ class CreateNoteTypeDialog(QDialog):
 
         try:
             style_application = self.style_application.currentData()
+            shuffle_default = self.shuffle_default.isChecked()
+            QSettings("Material Notes", "Material Notes").setValue(ADDON_CONFIG_KEY, shuffle_default)
             appearance = {
                 "palette": self.palette.currentData(),
                 "finish": self.finish.currentData(),
                 "centered": self.centered.isChecked(),
             } if style_application == "fixed" else None
             create_note_type(
-                self.models, self.kind.currentData(), name, appearance, style_application
+                self.models, self.kind.currentData(), name, appearance, style_application,
+                shuffle_default,
             )
         except (AnkiError, OSError) as error:
             showInfo(str(error), parent=self, textFormat=Qt.TextFormat.PlainText)

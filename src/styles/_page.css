@@ -31,7 +31,7 @@ h1 {
   display: none;
 }
 
-.front-side .note.back > .question-card > .question-options {
+.front-side .note.back:not(.choice-answer-card) > .question-card > .question-options {
   display: block;
 }
 

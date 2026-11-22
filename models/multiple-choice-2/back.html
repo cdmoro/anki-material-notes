@@ -1,8 +1,8 @@
-<div class="note back choice-answer-card {{Tags}}">
+<div class="note back choice-answer-card {{Tags}}" data-mc2-back>
     <hr id="answer" class="choice-answer-anchor">
     {{FrontSide}}
     <div id="choice-answer-key" hidden>{{text:Correct Answers}}</div>
-    <div class="body question-results" hidden>Check the Correct Answers field. Enter letters such as B D or a key such as 0 1 0 1.</div>
+    <div class="body question-results" data-mc2-feedback hidden></div>
     {{#Explanation}}
     <div class="body question-results">
         <div class="subtitle">Explanation</div>
@@ -14,24 +14,49 @@
     {{/Source}}
     <script>
         (function () {
-            const key = document.getElementById("choice-answer-key");
-            const choices = Array.from(key.parentElement.querySelectorAll(".question-options [data-choice]"));
+            const backs = document.querySelectorAll("[data-mc2-back]");
+            const back = backs[backs.length - 1];
+            if (!back) return;
+            const key = back.querySelector("#choice-answer-key");
+            const options = Array.from(back.querySelectorAll(".question-options [data-choice]"));
             const letters = "ABCD";
-            const answers = key.textContent.trim().toUpperCase();
-            const tokens = answers.split(/\s+/);
-            const correct = /^[01](?:\s+[01]){3}$/.test(answers)
-                ? tokens.flatMap((bit, index) => bit === "1" ? [letters[index]] : [])
-                : tokens;
-
-            const available = new Set(choices.map(choice => choice.dataset.choice));
-            if (!correct.length || correct.some(letter => !available.has(letter))) {
-                key.nextElementSibling.hidden = false;
+            const raw = key.textContent.trim().toUpperCase();
+            const legacy = /^[01](?:\s+[01]){3}$/.test(raw);
+            const correct = new Set(legacy
+                ? raw.split(/\s+/).flatMap((bit, index) => bit === "1" ? [letters[index]] : [])
+                : raw.split(/[\s,]+/).filter(Boolean));
+            const available = new Set(options.map(option => option.dataset.choice));
+            const feedback = back.querySelector("[data-mc2-feedback]");
+            if (!correct.size || Array.from(correct).some(letter => !available.has(letter))) {
+                feedback.hidden = false;
+                feedback.textContent = "Check the Correct Answers field. Enter letters such as A or A,C.";
                 return;
             }
 
-            choices.forEach(choice => {
-                choice.classList.toggle("wrong-answer", !correct.includes(choice.dataset.choice));
+            const stateKey = "mc2:" + (back.closest(".card")?.dataset.cardId || location.href);
+            let saved = null;
+            try { saved = JSON.parse(sessionStorage.getItem(stateKey) || "null"); } catch (_) {}
+            const selected = new Set(saved?.selected || []);
+            if (saved && Array.isArray(saved.order)) {
+                const byLetter = new Map(options.map(option => [option.dataset.choice, option]));
+                const list = options[0]?.parentElement;
+                if (list) saved.order.filter(letter => byLetter.has(letter)).forEach(letter => list.appendChild(byLetter.get(letter)));
+            }
+            options.forEach(option => {
+                const letter = option.dataset.choice;
+                const isCorrect = correct.has(letter);
+                const wasSelected = selected.has(letter);
+                option.classList.toggle("correct-answer", isCorrect);
+                option.classList.toggle("wrong-answer", wasSelected && !isCorrect);
+                option.classList.toggle("missed-answer", !wasSelected && isCorrect);
+                const input = option.querySelector("input");
+                if (input) input.disabled = true;
             });
+            feedback.hidden = false;
+            const right = Array.from(selected).filter(letter => correct.has(letter)).length;
+            const wrong = Array.from(selected).filter(letter => !correct.has(letter)).length;
+            const missed = Array.from(correct).filter(letter => !selected.has(letter)).length;
+            feedback.textContent = `Correct selections: ${right}. Incorrect selections: ${wrong}. Missed answers: ${missed}.`;
         })();
     </script>
 </div>

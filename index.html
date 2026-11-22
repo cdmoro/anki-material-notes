@@ -457,25 +457,26 @@
         </section>
         <section class="card-example" id="multiple-choice-2" aria-labelledby="multiple-choice-2-title"
             data-template-directory="./models/multiple-choice-2"
-            data-fields-help="Option A and Option B are required. Enter correct choices as letters separated by spaces (B D), or as four digits separated by spaces (0 1 0 1).">
+            data-fields-help="Option A and Option B are required. Enter correct choices as letters separated by spaces or commas (A or A,C). Shuffle Options can override the add-on default.">
             <header class="example-intro">
                 <h2 id="multiple-choice-2-title">Multiple choice 2</h2>
-                <p>Enter each option in its own field. Show Answer strikes through the incorrect choices.</p>
+                <p>Select one or more answers, then use Show Answer to see correct, incorrect, and missed choices.</p>
             </header>
             <div class="note back choice-answer-card">
                 <div class="note front question-card">
                     <div class="body question" data-example-field="Question">Which two planets in our solar system are classified as ice giants?</div>
                     <div class="body question-options">
                         <ol type="A">
-                            <li data-preview-wrong-choice data-example-field="Option A">Jupiter</li>
-                            <li data-example-field="Option B">Uranus</li>
-                            <li data-preview-wrong-choice data-example-field="Option C" data-example-if="Option C">Saturn</li>
-                            <li data-example-field="Option D" data-example-if="Option D">Neptune</li>
+                            <li data-choice="A" data-example-field="Option A">Jupiter</li>
+                            <li data-choice="B" data-example-field="Option B">Uranus</li>
+                            <li data-choice="C" data-example-field="Option C" data-example-if="Option C">Saturn</li>
+                            <li data-choice="D" data-example-field="Option D" data-example-if="Option D">Neptune</li>
                         </ol>
                     </div>
                 </div>
                 <hr class="answer-divider">
-                <div data-example-field="Correct Answers" hidden>B D</div>
+                <div data-example-field="Correct Answers" hidden>B,D</div>
+                <div class="body question-results small" data-mc2-feedback hidden></div>
                 <div class="body question-results" data-example-if="Explanation">
                     <div class="subtitle">Explanation</div>
                     <div class="small" data-example-field="Explanation">Uranus and Neptune are ice giants. Jupiter and Saturn are gas giants.</div>

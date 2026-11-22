@@ -171,6 +171,43 @@ const wrongChoices = document.querySelectorAll("[data-preview-wrong-choice]");
 const setAnswerVisible = setupToggle("side", keys.view, showAnswer, enabled => {
     card.classList.toggle("front-side", !enabled);
     wrongChoices.forEach(choice => choice.classList.toggle("wrong-answer", enabled));
+    updateMultipleChoice2Preview(enabled);
+});
+
+function updateMultipleChoice2Preview(showAnswer) {
+    const options = Array.from(document.querySelectorAll("#multiple-choice-2 [data-choice]"));
+    options.forEach(option => {
+        const input = option.querySelector("input");
+        if (!input) return;
+        const isCorrect = ["B", "D"].includes(option.dataset.choice);
+        const wasSelected = input.checked;
+        option.classList.toggle("correct-answer", showAnswer && isCorrect);
+        option.classList.toggle("wrong-answer", showAnswer && wasSelected && !isCorrect);
+        option.classList.toggle("missed-answer", showAnswer && !wasSelected && isCorrect);
+        input.disabled = showAnswer;
+    });
+
+    const feedback = document.querySelector("#multiple-choice-2 [data-mc2-feedback]");
+    if (!feedback) return;
+    feedback.hidden = !showAnswer;
+    if (showAnswer) {
+        const selected = options.filter(option => option.querySelector("input")?.checked)
+            .map(option => option.dataset.choice);
+        feedback.textContent = `Correct selections: ${selected.filter(letter => ["B", "D"].includes(letter)).length}. `
+            + `Incorrect selections: ${selected.filter(letter => !["B", "D"].includes(letter)).length}. `
+            + `Missed answers: ${["B", "D"].filter(letter => !selected.includes(letter)).length}.`;
+    }
+}
+
+document.querySelectorAll("#multiple-choice-2 [data-choice]").forEach(option => {
+    const label = document.createElement("label");
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.name = "multiple-choice-2-preview";
+    input.value = option.dataset.choice;
+    input.addEventListener("change", () => updateMultipleChoice2Preview(false));
+    label.append(input, document.createTextNode(" "), ...Array.from(option.childNodes));
+    option.replaceChildren(label);
 });
 
 document.querySelectorAll("[data-hint-field] .hint").forEach(link => {

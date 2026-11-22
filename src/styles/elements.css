@@ -116,6 +116,16 @@
   padding-inline-start: 2em;
 }
 
+.note .question-options label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .45em;
+}
+
+.note .question-options input {
+  accent-color: var(--accent-color);
+}
+
 .note .wrong-answer {
   text-decoration: line-through;
   opacity: .6;

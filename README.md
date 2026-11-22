@@ -69,13 +69,14 @@ Use the add-on to create the note type, or copy [Front](models/multiple-choice-2
 | `Option B` | Uranus |
 | `Option C` | Saturn |
 | `Option D` | Neptune |
-| `Correct Answers` | `B D` |
+| `Correct Answers` | `B,D` |
+| `Shuffle Options` | `true` (optional) |
 | `Explanation` | Uranus and Neptune are ice giants. |
 | `Source` | Solar system quiz · Question 4 |
 
-Fill in Option A and Option B. Option C, Option D, Explanation, and Source are optional. If you leave an optional choice blank, its letter stays reserved so the answer key still matches the named fields. Enter one letter for a single correct answer or separate multiple letters with spaces. The four-position key `0 1 0 1` also works. A `1` marks the corresponding option as correct.
+Fill in Option A and Option B. Option C, Option D, Shuffle Options, Explanation, and Source are optional. Enter `A` for one correct answer or `A,C` (commas or spaces) for several. Blank optional choices keep their letter positions. In the add-on dialog, **Shuffle answers by default** sets the initial preference for new Multiple Choice 2 note types; a note's `Shuffle Options` field can override it with `true` or `false`.
 
-**Show Answer** strikes through the incorrect choices. The template uses JavaScript to read the answer key. Use Anki’s review buttons to grade yourself.
+Select answers with radio buttons for a single-answer question or checkboxes when the answer key has multiple answers. **Show Answer** keeps the selected choices and their order, then marks correct, incorrect, and missed options. The choices are shuffled once per review when enabled, so the same order remains on the back. Use Anki’s review buttons to grade yourself.
 
 ## Build locally
 

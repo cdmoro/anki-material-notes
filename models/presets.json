@@ -71,8 +71,8 @@
   },
   "multiple-choice-2": {
     "label": "Multiple Choice 2",
-    "description": "Enter choices in separate fields and use letters such as B D to indicate the correct answers.",
-    "fields": ["Question", "Option A", "Option B", "Option C", "Option D", "Correct Answers", "Explanation", "Source"],
+    "description": "Choose answers interactively, then use Show Answer to see correct, incorrect and missed choices.",
+    "fields": ["Question", "Option A", "Option B", "Option C", "Option D", "Correct Answers", "Shuffle Options", "Explanation", "Source"],
     "front": "multiple-choice-2/front.html",
     "back": "multiple-choice-2/back.html"
   }
