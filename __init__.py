@@ -100,7 +100,7 @@ def template_content(preset, appearance=None, style_application="fixed", shuffle
     replacement = " " + " ".join(classes) if classes else ""
     return {
         key: read_model_file(MODEL_DIR / preset[side]).replace(" {{Tags}}", replacement, 1)
-        .replace("{{mfc_shuffle_default}}", str(bool(shuffle_default)).lower())
+        .replace("const defaults = false;", f"const defaults = {str(bool(shuffle_default)).lower()};")
         for key, side in (("qfmt", "front"), ("afmt", "back"))
     }
 

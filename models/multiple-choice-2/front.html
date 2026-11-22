@@ -26,7 +26,7 @@
             ? answerKey.split(/\s+/).filter(bit => bit === "1").length
             : answerKey.split(/[\s,]+/).filter(Boolean).length;
         const config = root.querySelector("[data-mc2-config]");
-        const defaults = "{{mfc_shuffle_default}}" === "true";
+        const defaults = false;
         const override = config.textContent.trim().toLowerCase();
         const shuffle = override === "true" ? true : override === "false" ? false : defaults;
         const stateKey = "mc2:" + (root.closest(".card")?.dataset.cardId || location.href);
