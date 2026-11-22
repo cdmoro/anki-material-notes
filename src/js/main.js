@@ -57,6 +57,7 @@ showSelectedExample();
 exampleSelect.disabled = false;
 exampleSelect.addEventListener("change", () => {
     showSelectedExample();
+    if (exampleSelect.value === "multiple-choice-2") setAnswerVisible(false);
     savePreference(keys.example, exampleSelect.value);
     window.scrollTo(0, 0);
 });
