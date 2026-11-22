@@ -185,19 +185,22 @@ function updateMultipleChoice2Preview(showAnswer) {
         option.classList.toggle("correct-answer", showAnswer && isCorrect);
         option.classList.toggle("wrong-answer", showAnswer && wasSelected && !isCorrect);
         option.classList.toggle("missed-answer", showAnswer && !wasSelected && isCorrect);
+        option.querySelector(".mc2-feedback")?.remove();
+        if (showAnswer) {
+            const marker = document.createElement("span");
+            marker.className = "mc2-feedback";
+            marker.textContent = wasSelected && isCorrect ? "✓ Correct"
+                : wasSelected ? "✗ Incorrect" : isCorrect ? "Missed" : "";
+            marker.setAttribute("aria-label", wasSelected && isCorrect ? "Correct"
+                : wasSelected ? "Incorrect" : isCorrect ? "Missed correct answer" : "");
+            option.appendChild(marker);
+        }
         input.disabled = showAnswer;
     });
 
     const feedback = document.querySelector("#multiple-choice-2 [data-mc2-feedback]");
     if (!feedback) return;
-    feedback.hidden = !showAnswer;
-    if (showAnswer) {
-        const selected = options.filter(option => option.querySelector("input")?.checked)
-            .map(option => option.dataset.choice);
-        feedback.textContent = `Correct selections: ${selected.filter(letter => ["B", "D"].includes(letter)).length}. `
-            + `Incorrect selections: ${selected.filter(letter => !["B", "D"].includes(letter)).length}. `
-            + `Missed answers: ${["B", "D"].filter(letter => !selected.includes(letter)).length}.`;
-    }
+    feedback.hidden = true;
 }
 
 document.querySelectorAll("#multiple-choice-2 [data-choice]").forEach(option => {

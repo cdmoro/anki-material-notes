@@ -49,14 +49,17 @@
                 option.classList.toggle("correct-answer", isCorrect);
                 option.classList.toggle("wrong-answer", wasSelected && !isCorrect);
                 option.classList.toggle("missed-answer", !wasSelected && isCorrect);
+                const marker = document.createElement("span");
+                marker.className = "mc2-feedback";
+                marker.setAttribute("aria-label", wasSelected && isCorrect ? "Correct"
+                    : wasSelected ? "Incorrect" : isCorrect ? "Missed correct answer" : "");
+                marker.textContent = wasSelected && isCorrect ? "✓ Correct"
+                    : wasSelected ? "✗ Incorrect" : isCorrect ? "Missed" : "";
+                option.appendChild(marker);
                 const input = option.querySelector("input");
                 if (input) input.disabled = true;
             });
-            feedback.hidden = false;
-            const right = Array.from(selected).filter(letter => correct.has(letter)).length;
-            const wrong = Array.from(selected).filter(letter => !correct.has(letter)).length;
-            const missed = Array.from(correct).filter(letter => !selected.has(letter)).length;
-            feedback.textContent = `Correct selections: ${right}. Incorrect selections: ${wrong}. Missed answers: ${missed}.`;
+            feedback.hidden = true;
         })();
     </script>
 </div>

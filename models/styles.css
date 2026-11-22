@@ -669,6 +669,32 @@ body.card {
   opacity: .6;
 }
 
+.note .correct-answer {
+  color: #238636;
+  font-weight: 700;
+}
+
+.note .missed-answer {
+  outline: 2px solid #238636;
+  outline-offset: 2px;
+}
+
+.note .mc2-feedback {
+  margin-inline-start: .5em;
+  font-size: .8em;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.note .correct-answer .mc2-feedback,
+.note .missed-answer .mc2-feedback {
+  color: #238636;
+}
+
+.note .wrong-answer .mc2-feedback {
+  color: #b42318;
+}
+
 .note.back > #answer.choice-answer-anchor {
   border: 0;
 }
