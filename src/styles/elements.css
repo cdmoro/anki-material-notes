@@ -137,7 +137,7 @@
 }
 
 .note .missed-answer {
-  outline: 2px solid #238636;
+  outline: 2px solid var(--feedback-correct-foreground);
   outline-offset: 2px;
 }
 
@@ -153,15 +153,19 @@
 }
 
 .choice-answer-card .question-options [data-choice].correct-answer {
-  background: #15803d;
-  color: #fff;
+  background: var(--feedback-correct-background);
+  color: var(--feedback-correct-foreground);
 }
 
 .choice-answer-card .question-options [data-choice].wrong-answer {
-  background: #b91c1c;
-  color: #fff;
+  background: var(--feedback-incorrect-background);
+  color: var(--feedback-incorrect-foreground);
   opacity: 1;
   text-decoration: none;
+}
+
+.choice-answer-card .question-options [data-choice].missed-answer {
+  box-shadow: inset 0 0 0 2px var(--feedback-correct-foreground);
 }
 
 .choice-answer-card .question-options input:disabled {
