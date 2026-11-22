@@ -54,7 +54,7 @@ Front content aligns to the start by default. A `class="body question"` block is
 
 ### Multiple Choice — Single and Multiple
 
-Use the add-on to create the note type, or copy [Front](models/multiple-choice-2/front.html), [Back](models/multiple-choice-2/back.html), and the shared [Styling](models/styles.css) into a note type with these fields.
+Use the add-on to create the note type, or copy [Front](models/multiple-choice-2/front.html), [Back](models/multiple-choice-2/back.html), and the shared [Styling](models/styles.css) into a note type with these fields. The add-on lets you choose between 2 and 10 answer options when creating the note type; it creates only the fields needed for that count. The default is four options.
 
 | Field | Example |
 | --- | --- |
@@ -68,7 +68,7 @@ Use the add-on to create the note type, or copy [Front](models/multiple-choice-2
 | `Explanation` | Uranus and Neptune are ice giants. |
 | `Source` | Solar system quiz · Question 4 |
 
-Fill in Option A and Option B. Option C, Option D, Shuffle Options, Explanation, and Source are optional. Enter `A` for one correct answer or `A,C` (commas or spaces) for several. Blank optional choices keep their letter positions. In the add-on dialog, **Shuffle answers by default** sets the initial preference for new Multiple Choice 2 note types; a note's `Shuffle Options` field can override it with `true` or `false`.
+Fill in Option A and Option B. Every option after B up to the number created for the note type is optional, as are Shuffle Options, Explanation, and Source. The add-on supports 2–10 options, named Option A through Option J. Enter `A` for one correct answer or `A,C` (commas or spaces) for several. Blank optional choices keep their letter positions. In the add-on dialog, **Shuffle answers by default** sets the initial preference for new Multiple Choice 2 note types; a note's `Shuffle Options` field can override it with `true` or `false`.
 
 When a field is empty in Anki’s editor, its description gives a short hint. For example, **Correct Answers** explains the `A` / `A,C` format, and **Shuffle Options** explains how `true`, `false`, and a blank value behave.
 

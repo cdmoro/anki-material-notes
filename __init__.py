@@ -24,6 +24,7 @@ from aqt.qt import (
     QListWidget,
     QPushButton,
     QSettings,
+    QSpinBox,
     Qt,
     QVBoxLayout,
     QWidget,
@@ -57,6 +58,9 @@ PALETTE_NAMES = {
     **{f"flag-{slug}": country for country, _, slug in COUNTRIES},
 }
 FINISHES = {"base": "Base", "filled": "Filled", "outlined": "Outlined"}
+MULTIPLE_CHOICE_KIND = "multiple-choice-2"
+MULTIPLE_CHOICE_DEFAULT_COUNT = 4
+MULTIPLE_CHOICE_MAX_COUNT = 10
 
 
 def read_model_file(path):
@@ -93,16 +97,54 @@ def appearance_classes(palette="base", finish="base", centered=False):
     return classes
 
 
-def template_content(preset, appearance=None, style_application="fixed", shuffle_default=False):
+def multiple_choice_option_count(model=None, requested=None, default=MULTIPLE_CHOICE_DEFAULT_COUNT):
+    if requested is not None:
+        return max(2, min(MULTIPLE_CHOICE_MAX_COUNT, int(requested)))
+    if model and model.get("mfc_option_count"):
+        return max(2, min(MULTIPLE_CHOICE_MAX_COUNT, int(model["mfc_option_count"])))
+    if model:
+        option_fields = {
+            field["name"] for field in model["flds"]
+            if re.fullmatch(r"Option [A-J]", field["name"])
+        }
+        if option_fields:
+            return max(ord(name[-1]) - ord("A") + 1 for name in option_fields)
+    return default
+
+
+def preset_fields(kind, preset=None, option_count=None):
+    preset = preset or NOTE_TYPES[kind]
+    if kind != MULTIPLE_CHOICE_KIND:
+        return list(preset["fields"])
+    count = multiple_choice_option_count(
+        requested=option_count, default=preset.get("option_count_default", MULTIPLE_CHOICE_DEFAULT_COUNT)
+    )
+    options = [f"Option {chr(ord('A') + index)}" for index in range(count)]
+    return ["Question", *options, "Correct Answers", "Shuffle Options", "Explanation", "Source"]
+
+
+def template_content(
+    preset, appearance=None, style_application="fixed", shuffle_default=False, option_count=None,
+):
     classes = [] if style_application == "tags" else appearance_classes(**(appearance or {}))
     if style_application != "fixed":
         classes.append("{{Tags}}")
     replacement = " " + " ".join(classes) if classes else ""
-    return {
+    templates = {
         key: read_model_file(MODEL_DIR / preset[side]).replace(" {{Tags}}", replacement, 1)
         .replace("const defaults = false;", f"const defaults = {str(bool(shuffle_default)).lower()};")
         for key, side in (("qfmt", "front"), ("afmt", "back"))
     }
+    if preset.get("front") == "multiple-choice-2/front.html":
+        count = multiple_choice_option_count(
+            requested=option_count, default=preset.get("option_count_default", MULTIPLE_CHOICE_DEFAULT_COUNT)
+        )
+        for letter in "CDEFGHIJ"[max(0, count - 2):]:
+            block = re.escape(f"{{{{#Option {letter}}}}}") + ".*?" + re.escape(f"{{{{/Option {letter}}}}}")
+            templates["qfmt"] = re.sub(
+                block, "", templates["qfmt"], flags=re.DOTALL,
+            )
+    return templates
 
 
 def suggest_note_type_name(models, kind, style_application, palette, finish):
@@ -128,22 +170,30 @@ def record_installed_content(model, kind, css, template):
     model["mfc_template_hash"] = content_hash(template["qfmt"], template["afmt"])
 
 
-def create_note_type(models, kind, name, appearance=None, style_application="fixed", shuffle_default=False):
+def create_note_type(
+    models, kind, name, appearance=None, style_application="fixed", shuffle_default=False,
+    option_count=None,
+):
     preset = NOTE_TYPES[kind]
     model = models.new(name)
+    count = multiple_choice_option_count(
+        requested=option_count, default=preset.get("option_count_default", MULTIPLE_CHOICE_DEFAULT_COUNT)
+    ) if kind == MULTIPLE_CHOICE_KIND else None
     descriptions = preset.get("field_descriptions", {})
-    for field_name in preset["fields"]:
+    for field_name in preset_fields(kind, preset, count):
         field = models.newField(field_name)
         field["description"] = descriptions.get(field_name, "")
         models.addField(model, field)
 
     css = read_model_file(MODEL_DIR / "styles.css")
     template = models.newTemplate("Card 1")
-    template.update(template_content(preset, appearance, style_application, shuffle_default))
+    template.update(template_content(preset, appearance, style_application, shuffle_default, count))
     models.addTemplate(model, template)
     model["css"] = css
     model["mfc_style_application"] = style_application
     model["mfc_shuffle_default"] = bool(shuffle_default)
+    if count is not None:
+        model["mfc_option_count"] = count
     if appearance and style_application == "fixed":
         model["mfc_appearance"] = appearance
     record_installed_content(model, kind, css, template)
@@ -163,14 +213,18 @@ def update_note_type(models, model, css, confirm_overwrite):
         return "incompatible"
 
     preset = NOTE_TYPES[kind]
-    missing_fields = set(preset["fields"]) - {field["name"] for field in model["flds"]}
+    option_count = multiple_choice_option_count(
+        model, default=preset.get("option_count_default", MULTIPLE_CHOICE_DEFAULT_COUNT)
+    ) if kind == MULTIPLE_CHOICE_KIND else None
+    required_fields = preset_fields(kind, preset, option_count)
+    missing_fields = set(required_fields) - {field["name"] for field in model["flds"]}
     if kind == "multiple-choice-2" and missing_fields == {"Shuffle Options"}:
         updated = deepcopy(model)
         models.addField(updated, models.newField("Shuffle Options"))
         models.save(updated)
         model = models.byName(model["name"])
     model_fields = {field["name"] for field in model["flds"]}
-    if not model_fields.issuperset(preset["fields"]) or len(model["tmpls"]) != 1:
+    if not model_fields.issuperset(required_fields) or len(model["tmpls"]) != 1:
         return "incompatible"
 
     # Fill in descriptions for addon-managed fields without replacing text the
@@ -187,7 +241,7 @@ def update_note_type(models, model, css, confirm_overwrite):
     installed = model["tmpls"][0]
     latest = template_content(
         preset, model.get("mfc_appearance"), model.get("mfc_style_application", "legacy"),
-        model.get("mfc_shuffle_default", False),
+        model.get("mfc_shuffle_default", False), option_count,
     )
     css_changed = css != model["css"]
     template_changed = any(installed[key] != value for key, value in latest.items())
@@ -206,6 +260,8 @@ def update_note_type(models, model, css, confirm_overwrite):
 
     updated["css"] = css
     updated["tmpls"][0].update(latest)
+    if option_count is not None:
+        updated["mfc_option_count"] = option_count
     record_installed_content(updated, kind, css, latest)
     models.save(updated)
     return "updated"
@@ -229,6 +285,9 @@ class CreateNoteTypeDialog(QDialog):
         self.fields = QLabel()
         self.fields.setWordWrap(True)
         self.fields.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        self.option_count = QSpinBox()
+        self.option_count.setRange(2, MULTIPLE_CHOICE_MAX_COUNT)
+        self.option_count.setValue(MULTIPLE_CHOICE_DEFAULT_COUNT)
 
         self.style_application = QComboBox()
         self.style_application.addItem("Fixed style", "fixed")
@@ -263,6 +322,7 @@ class CreateNoteTypeDialog(QDialog):
         template_layout.addRow("Template", self.kind)
         template_layout.addRow("", self.description)
         template_layout.addRow("Note type name (optional)", self.name)
+        template_layout.addRow("Number of answer options", self.option_count)
         template_layout.addRow("Fields to create", self.fields)
 
         appearance_group = QGroupBox("Appearance")
@@ -315,6 +375,7 @@ class CreateNoteTypeDialog(QDialog):
         layout.addWidget(appearance_group)
         layout.addWidget(buttons)
         self.kind.currentIndexChanged.connect(self.update_preview)
+        self.option_count.valueChanged.connect(self.update_preview)
         self.style_application.currentIndexChanged.connect(self.update_style_application)
         self.palette.currentIndexChanged.connect(self.update_finishes)
         self.finish.currentIndexChanged.connect(self.update_suggested_name)
@@ -331,10 +392,14 @@ class CreateNoteTypeDialog(QDialog):
         self.name.setPlaceholderText(self.suggested_name())
 
     def update_preview(self):
-        preset = NOTE_TYPES[self.kind.currentData()]
+        kind = self.kind.currentData()
+        preset = NOTE_TYPES[kind]
         self.update_suggested_name()
         self.description.setText(preset["description"])
-        self.fields.setText(", ".join(preset["fields"]))
+        self.option_count.setVisible(kind == MULTIPLE_CHOICE_KIND)
+        self.fields.setText(", ".join(preset_fields(
+            kind, preset, self.option_count.value() if kind == MULTIPLE_CHOICE_KIND else None
+        )))
 
     def update_finishes(self):
         selected = self.finish.currentData()
@@ -377,6 +442,7 @@ class CreateNoteTypeDialog(QDialog):
             create_note_type(
                 self.models, self.kind.currentData(), name, appearance, style_application,
                 shuffle_default,
+                self.option_count.value() if self.kind.currentData() == MULTIPLE_CHOICE_KIND else None,
             )
         except (AnkiError, OSError) as error:
             showInfo(str(error), parent=self, textFormat=Qt.TextFormat.PlainText)
