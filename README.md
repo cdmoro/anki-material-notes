@@ -48,7 +48,7 @@ Use the field's HTML editor for accessories such as headings, labels, and cover 
 
 For a hint, add a field such as `Pronunciation` to the note type. Put the hint text in that field and use `{{hint:Pronunciation}}` in the card template. The other examples use `{{hint:Variants}}` and `{{hint:Translation}}`.
 
-Other classes include `header`, `subheader`, `symbol`, `emoji`, `cover`, `text-center`, `flex`, `flex-row`, `flex-col`, and `gap-sm`.
+Other classes include `header`, `subheader`, `symbol`, `emoji`, `cover`, `text-sm`, `text-md`, `text-base`, `text-center`, `flex`, `flex-row`, `flex-col`, and `gap-sm`. Use `text-sm` for small labels, `text-md` for explanatory copy, and `text-base` for the note’s regular text size.
 
 Front content aligns to the start by default. A `class="body question"` block is centered, as are front blocks marked with `center` or `text-center`. Lists align to the start inside centered blocks.
 

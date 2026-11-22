@@ -585,6 +585,18 @@ body.card {
   opacity: .75;
 }
 
+.note .text-sm {
+  font-size: .84rem;
+}
+
+.note .text-md {
+  font-size: 1rem;
+}
+
+.note .text-base {
+  font-size: var(--note-font-size);
+}
+
 .note .text-block + .text-block,
 .note .body > .subtitle:not(:first-child) {
   margin-top: 1rem;
