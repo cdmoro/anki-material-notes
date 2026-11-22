@@ -31,6 +31,7 @@
                         <option value="grammar">Grammar and usage</option>
                         <option value="multiple-choice">Multiple Choice (HTML)</option>
                         <option value="multiple-choice-2">Multiple Choice (JS)</option>
+                        <option value="multiple-choice-2-single">Multiple Choice (JS) — Single answer</option>
                     </select>
                 </div>
                 <div class="input-group">
@@ -455,7 +456,7 @@
                 </div>
             </div>
         </section>
-        <section class="card-example" id="multiple-choice-2" aria-labelledby="multiple-choice-2-title"
+        <section class="card-example multiple-choice-js-example" id="multiple-choice-2" aria-labelledby="multiple-choice-2-title"
             data-template-directory="./models/multiple-choice-2"
             data-fields-help="Option A and Option B are required. Enter correct choices as letters separated by spaces or commas (A or A,C). Shuffle Options can override the add-on default.">
             <header class="example-intro">
@@ -482,6 +483,34 @@
                     <div data-example-field="Explanation">Uranus and Neptune are ice giants. Jupiter and Saturn are gas giants.</div>
                 </div>
                 <div class="body question-results question-source small" data-example-field="Source" data-example-if="Source">Solar system quiz · Question 4</div>
+            </div>
+        </section>
+        <section class="card-example multiple-choice-js-example" id="multiple-choice-2-single" aria-labelledby="multiple-choice-2-single-title"
+            data-template-directory="./models/multiple-choice-2"
+            data-fields-help="Option A and Option B are required. This example has one correct answer; enter its letter in Correct Answers. Shuffle Options can override the add-on default.">
+            <header class="example-intro">
+                <h2 id="multiple-choice-2-single-title">Multiple Choice (JS) — Single answer</h2>
+                <p>Choose one answer with a radio button, then use Show Answer to see which options were right or wrong.</p>
+            </header>
+            <div class="note back choice-answer-card">
+                <div class="note front question-card">
+                    <div class="body question" data-example-field="Question">Which planet is known as the Red Planet?</div>
+                    <div class="body question-options">
+                        <ol type="A">
+                            <li data-choice="A" data-example-field="Option A">Venus</li>
+                            <li data-choice="B" data-example-field="Option B">Mars</li>
+                            <li data-choice="C" data-example-field="Option C" data-example-if="Option C">Jupiter</li>
+                            <li data-choice="D" data-example-field="Option D" data-example-if="Option D">Mercury</li>
+                        </ol>
+                    </div>
+                </div>
+                <hr class="answer-divider">
+                <div data-example-field="Correct Answers" hidden>B</div>
+                <div class="body question-results small" data-mc2-feedback hidden></div>
+                <div class="body question-results" data-example-if="Explanation">
+                    <div class="subtitle">Explanation</div>
+                    <div data-example-field="Explanation">Iron minerals on Mars' surface give it a reddish appearance.</div>
+                </div>
             </div>
         </section>
     </div>

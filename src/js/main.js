@@ -57,7 +57,7 @@ showSelectedExample();
 exampleSelect.disabled = false;
 exampleSelect.addEventListener("change", () => {
     showSelectedExample();
-    if (exampleSelect.value === "multiple-choice-2") setAnswerVisible(false);
+    if (exampleSelect.value.startsWith("multiple-choice-2")) setAnswerVisible(false);
     savePreference(keys.example, exampleSelect.value);
     window.scrollTo(0, 0);
 });
@@ -176,34 +176,40 @@ const setAnswerVisible = setupToggle("side", keys.view, showAnswer, enabled => {
 });
 
 function updateMultipleChoice2Preview(showAnswer) {
-    const options = Array.from(document.querySelectorAll("#multiple-choice-2 [data-choice]"));
-    options.forEach(option => {
-        const input = option.querySelector("input");
-        if (!input) return;
-        const isCorrect = ["B", "D"].includes(option.dataset.choice);
-        const wasSelected = input.checked;
-        option.classList.toggle("correct-answer", showAnswer && isCorrect);
-        option.classList.toggle("wrong-answer", showAnswer && !isCorrect);
-        option.classList.toggle("missed-answer", showAnswer && !wasSelected && isCorrect);
-        option.querySelector(".mc2-feedback")?.remove();
-        input.disabled = showAnswer;
+    document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
+        const answers = example.querySelector('[data-example-field="Correct Answers"]')?.textContent.trim().toUpperCase() || "";
+        const correct = new Set(answers.split(/[\s,]+/).filter(Boolean));
+        const options = Array.from(example.querySelectorAll("[data-choice]"));
+        options.forEach(option => {
+            const input = option.querySelector("input");
+            if (!input) return;
+            const isCorrect = correct.has(option.dataset.choice);
+            const wasSelected = input.checked;
+            option.classList.toggle("correct-answer", showAnswer && isCorrect);
+            option.classList.toggle("wrong-answer", showAnswer && !isCorrect);
+            option.classList.toggle("missed-answer", showAnswer && !wasSelected && isCorrect);
+            input.disabled = showAnswer;
+        });
+        const feedback = example.querySelector("[data-mc2-feedback]");
+        if (feedback) feedback.hidden = true;
     });
-
-    const feedback = document.querySelector("#multiple-choice-2 [data-mc2-feedback]");
-    if (!feedback) return;
-    feedback.hidden = true;
 }
 
-document.querySelectorAll("#multiple-choice-2 [data-choice]").forEach(option => {
-    const label = document.createElement("label");
-    const input = document.createElement("input");
-    input.type = "checkbox";
-    input.name = "multiple-choice-2-preview";
-    input.value = option.dataset.choice;
-    input.addEventListener("change", () => updateMultipleChoice2Preview(false));
-    label.append(input, document.createTextNode(" "), ...Array.from(option.childNodes));
-    option.replaceChildren(label);
+document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
+    const answers = example.querySelector('[data-example-field="Correct Answers"]')?.textContent.trim().toUpperCase() || "";
+    const correctCount = answers.split(/[\s,]+/).filter(Boolean).length;
+    example.querySelectorAll("[data-choice]").forEach(option => {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = correctCount > 1 ? "checkbox" : "radio";
+        input.name = example.id + "-preview-answer";
+        input.value = option.dataset.choice;
+        input.addEventListener("change", () => updateMultipleChoice2Preview(false));
+        label.append(input, document.createTextNode(" "), ...Array.from(option.childNodes));
+        option.replaceChildren(label);
+    });
 });
+updateMultipleChoice2Preview(showAnswer);
 
 document.querySelectorAll("[data-hint-field] .hint").forEach(link => {
     const hint = document.getElementById(link.getAttribute("aria-controls"));
