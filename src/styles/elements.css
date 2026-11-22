@@ -143,9 +143,13 @@
 
 .choice-answer-card .question-options [data-choice] {
   box-sizing: border-box;
-  margin-block: .15em;
-  padding: .3em .45em;
-  border-radius: .2em;
+  margin-block: .05em;
+  padding: .1em .4em;
+  border-radius: .15em;
+}
+
+.choice-answer-card .question-options [data-choice]::marker {
+  color: var(--font-color);
 }
 
 .choice-answer-card .question-options [data-choice].correct-answer {
