@@ -652,6 +652,17 @@ body.card {
   padding: 0;
 }
 
+.note.back.choice-answer-card > #answer.choice-answer-anchor {
+  display: block !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  visibility: hidden !important;
+  overflow: hidden !important;
+}
+
 .note.back > .question-results {
   text-align: start;
 }
