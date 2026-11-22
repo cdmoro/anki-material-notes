@@ -183,18 +183,9 @@ function updateMultipleChoice2Preview(showAnswer) {
         const isCorrect = ["B", "D"].includes(option.dataset.choice);
         const wasSelected = input.checked;
         option.classList.toggle("correct-answer", showAnswer && isCorrect);
-        option.classList.toggle("wrong-answer", showAnswer && wasSelected && !isCorrect);
+        option.classList.toggle("wrong-answer", showAnswer && !isCorrect);
         option.classList.toggle("missed-answer", showAnswer && !wasSelected && isCorrect);
         option.querySelector(".mc2-feedback")?.remove();
-        if (showAnswer) {
-            const marker = document.createElement("span");
-            marker.className = "mc2-feedback";
-            marker.textContent = wasSelected && isCorrect ? "✓ Correct"
-                : wasSelected ? "✗ Incorrect" : isCorrect ? "Missed" : "";
-            marker.setAttribute("aria-label", wasSelected && isCorrect ? "Correct"
-                : wasSelected ? "Incorrect" : isCorrect ? "Missed correct answer" : "");
-            option.appendChild(marker);
-        }
         input.disabled = showAnswer;
     });
 

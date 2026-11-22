@@ -47,15 +47,8 @@
                 const isCorrect = correct.has(letter);
                 const wasSelected = selected.has(letter);
                 option.classList.toggle("correct-answer", isCorrect);
-                option.classList.toggle("wrong-answer", wasSelected && !isCorrect);
+                option.classList.toggle("wrong-answer", !isCorrect);
                 option.classList.toggle("missed-answer", !wasSelected && isCorrect);
-                const marker = document.createElement("span");
-                marker.className = "mc2-feedback";
-                marker.setAttribute("aria-label", wasSelected && isCorrect ? "Correct"
-                    : wasSelected ? "Incorrect" : isCorrect ? "Missed correct answer" : "");
-                marker.textContent = wasSelected && isCorrect ? "✓ Correct"
-                    : wasSelected ? "✗ Incorrect" : isCorrect ? "Missed" : "";
-                option.appendChild(marker);
                 const input = option.querySelector("input");
                 if (input) input.disabled = true;
             });

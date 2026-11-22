@@ -141,20 +141,27 @@
   outline-offset: 2px;
 }
 
-.note .mc2-feedback {
-  margin-inline-start: .5em;
-  font-size: .8em;
-  font-weight: 700;
-  white-space: nowrap;
+.choice-answer-card .question-options [data-choice] {
+  box-sizing: border-box;
+  margin-block: .15em;
+  padding: .3em .45em;
+  border-radius: .2em;
 }
 
-.note .correct-answer .mc2-feedback,
-.note .missed-answer .mc2-feedback {
-  color: #238636;
+.choice-answer-card .question-options [data-choice].correct-answer {
+  background: #15803d;
+  color: #fff;
 }
 
-.note .wrong-answer .mc2-feedback {
-  color: #b42318;
+.choice-answer-card .question-options [data-choice].wrong-answer {
+  background: #b91c1c;
+  color: #fff;
+  opacity: 1;
+  text-decoration: none;
+}
+
+.choice-answer-card .question-options input:disabled {
+  opacity: 1;
 }
 
 .note.back > #answer.choice-answer-anchor {
