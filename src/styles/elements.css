@@ -149,7 +149,7 @@
 
 .choice-answer-card .question-options [data-choice] {
   box-sizing: border-box;
-  margin-block: .05em;
+  margin-block: .2em;
   padding: .1em 0;
   border: 2px solid transparent;
   border-radius: .15em;
