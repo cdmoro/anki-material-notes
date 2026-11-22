@@ -204,7 +204,8 @@ class CreateNoteTypeDialog(QDialog):
 
         self.kind = QComboBox()
         for kind, preset in NOTE_TYPES.items():
-            self.kind.addItem(preset["label"], kind)
+            if not preset.get("deprecated"):
+                self.kind.addItem(preset["label"], kind)
         self.description = QLabel()
         self.description.setWordWrap(True)
         self.description.setMinimumHeight(44)

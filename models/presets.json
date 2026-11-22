@@ -65,6 +65,7 @@
   "multiple-choice": {
     "label": "Multiple Choice (HTML)",
     "description": "Use two HTML lists to show the choices and mark incorrect answers on the back.",
+    "deprecated": true,
     "fields": ["Question", "Options", "Correct Options", "Explanation"],
     "front": "multiple-choice/front.html",
     "back": "multiple-choice/back.html"

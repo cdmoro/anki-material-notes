@@ -52,12 +52,6 @@ Other classes include `header`, `subheader`, `symbol`, `emoji`, `cover`, `text-c
 
 Front content aligns to the start by default. A `class="body question"` block is centered, as are front blocks marked with `center` or `text-center`. Lists align to the start inside centered blocks.
 
-### Read-only multiple choice
-
-Copy the **Front** and **Back** templates from **Card setup** in the demo’s **Multiple Choice (HTML)** example into a note type with the fields `Question`, `Options`, `Correct Options`, and `Explanation`. Use the same [stylesheet](models/styles.css) as the basic card.
-
-Copy the HTML snippets for **Options** and **Correct Options** from the **Fields** tab into the corresponding fields using Anki’s HTML editor. Both fields contain the full list in the same order, using `<ol type="A">` for lettered choices. In `Correct Options`, add `class="wrong-answer"` to each incorrect choice so it appears struck through on the back.
-
 ### Multiple Choice — Single and Multiple
 
 Use the add-on to create the note type, or copy [Front](models/multiple-choice-2/front.html), [Back](models/multiple-choice-2/back.html), and the shared [Styling](models/styles.css) into a note type with these fields.
@@ -77,6 +71,8 @@ Use the add-on to create the note type, or copy [Front](models/multiple-choice-2
 Fill in Option A and Option B. Option C, Option D, Shuffle Options, Explanation, and Source are optional. Enter `A` for one correct answer or `A,C` (commas or spaces) for several. Blank optional choices keep their letter positions. In the add-on dialog, **Shuffle answers by default** sets the initial preference for new Multiple Choice 2 note types; a note's `Shuffle Options` field can override it with `true` or `false`.
 
 The demo includes **Multiple Choice — Single** and **Multiple Choice — Multiple** examples. Both use the same interactive note type: Anki shows radio buttons when `Correct Answers` contains one letter and checkboxes when it contains several. **Show Answer** keeps the selected choices and their order, then colors each option as correct or incorrect. The choices are shuffled once per review when enabled, so the same order remains on the back. Use Anki’s review buttons to grade yourself.
+
+The older HTML multiple-choice note type remains supported for existing collections, but is no longer offered when creating new note types.
 
 ## Build locally
 
