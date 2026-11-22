@@ -83,7 +83,8 @@ function updateTemplatePreviews() {
             const classes = Array.from(note.classList)
                 .filter(name => name.startsWith("note-") || name.startsWith("Material::note-"))
                 .join(" ");
-            code.textContent = content.replace(/\{\{Tags\}\}/g, templateStyle === "tags" ? "{{Tags}}" : classes);
+            const standalone = content.replace(/\{\{mfc_shuffle_default\}\}/g, "false");
+            code.textContent = standalone.replace(/\{\{Tags\}\}/g, templateStyle === "tags" ? "{{Tags}}" : classes);
         } else {
             code.textContent = '<div class="' + note.className + '">\n' + content + '\n</div>';
         }

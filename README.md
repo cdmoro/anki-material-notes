@@ -76,6 +76,8 @@ The demo includes **Multiple Choice — Single** and **Multiple Choice — Multi
 
 The **Card setup** section shows all fields, including optional `Shuffle Options`. Its template switch uses the selected palette and finish as fixed CSS classes by default; turn on **Use `{{Tags}}` instead of classes in templates** to copy templates that take their styling from note tags.
 
+Templates copied from the demo are standalone: a blank `Shuffle Options` keeps the listed order, and `true` shuffles the answers. The add-on’s **Shuffle answers by default** setting is applied when creating a note type in Anki.
+
 The older HTML multiple-choice note type remains supported for existing collections, but is no longer offered when creating new note types.
 
 ## Build locally
