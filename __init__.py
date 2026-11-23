@@ -155,7 +155,7 @@ def template_content(
         .replace("const defaults = false;", f"const defaults = {str(bool(shuffle_default)).lower()};")
         .replace('const answerColoring = "all";', f'const answerColoring = "{answer_coloring}";')
         .replace('const shufflePolicy = "field";', f'const shufflePolicy = "{shuffle_policy}";')
-        .replace('const optionLabels = "letters";', f'const optionLabels = "{option_labels}";')
+        .replace('const optionLabels = "";', f'const optionLabels = "{option_labels}";')
         for key, side in (("qfmt", "front"), ("afmt", "back"))
     }
     if preset.get("front") == "multiple-choice-2/front.html":

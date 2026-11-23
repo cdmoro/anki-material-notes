@@ -1,57 +1,28 @@
     <script>
-        // Persistence strategy based on Simon Lammer's MIT-licensed anki-persistence:
-        // https://github.com/SimonLammer/anki-persistence
         if (typeof window.Persistence === "undefined") {
-            // This is our storage namespace; the compatibility layer follows anki-persistence.
             const prefix = "github.com/cdmoro/anki-material-notes/multiple-choice/";
-            const makeStore = storage => ({
-                isAvailable: () => storage.available,
-                getItem(key) {
-                    const value = storage.get(key || "_default");
-                    return value == null ? null : JSON.parse(value);
-                },
-                setItem(key, value) {
-                    if (value === undefined) { value = key; key = "_default"; }
-                    storage.set(key || "_default", JSON.stringify(value));
-                },
-                clear() { storage.clear(); }
-            });
-            let store = { available: false };
+            let storage;
             try {
-                if (typeof window.sessionStorage === "object") {
-                    store = {
-                        available: true,
-                        get: key => window.sessionStorage.getItem(prefix + key),
-                        set: (key, value) => window.sessionStorage.setItem(prefix + key, value),
-                        clear() {
-                            Object.keys(window.sessionStorage).filter(key => key.startsWith(prefix))
-                                .forEach(key => window.sessionStorage.removeItem(key));
-                        }
-                    };
-                }
+                storage = window.sessionStorage;
             } catch (_) {}
-            window.Persistence = makeStore(store);
-            if (!window.Persistence.isAvailable()) {
-                const persistentWindow = window.py && typeof window.py === "object" ? window.py :
-                    (window.qt && typeof window.qt === "object" ? window.qt : null);
-                if (persistentWindow) {
-                    const state = persistentWindow[prefix] || (persistentWindow[prefix] = {});
-                    window.Persistence = {
-                        isAvailable: () => true,
-                        getItem: key => state[key || "_default"] ?? null,
-                        setItem(key, value) {
-                            if (value === undefined) { value = key; key = "_default"; }
-                            state[key || "_default"] = value;
-                        },
-                        clear() { Object.keys(state).forEach(key => delete state[key]); }
+            if (!storage) {
+                const host = window.py || window.qt;
+                if (host) {
+                    const state = host[prefix] || (host[prefix] = {});
+                    storage = {
+                        getItem: key => state[key] ?? null,
+                        setItem: (key, value) => { state[key] = value; }
                     };
                 }
             }
+            if (storage) window.Persistence = {
+                getItem: key => JSON.parse(storage.getItem(prefix + key) ?? "null"),
+                setItem: (key, value) => storage.setItem(prefix + key, JSON.stringify(value))
+            };
         }
     </script>
 <div class="note back choice-answer-card {{Tags}}" data-mc2-back>
     {{FrontSide}}
-    <hr id="answer" class="answer-divider choice-answer-anchor">
     <div id="choice-answer-key" hidden>{{text:Correct Answers}}</div>
     <div class="body question-results" data-mc2-feedback hidden></div>
     {{#Explanation}}

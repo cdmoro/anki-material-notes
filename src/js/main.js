@@ -5,6 +5,13 @@ const exampleSelect = document.querySelector("#example");
 const colorSelect = document.querySelector("#color");
 const finishes = document.querySelectorAll("[data-finish]");
 const templatePreviews = new Map();
+const optionLabelPreference = "note-mc2-option-labels";
+const answerFeedbackPreference = "note-mc2-answer-feedback";
+const savedAnswerFeedback = readPreference(answerFeedbackPreference);
+let currentAnswerFeedback = ["all", "mistakes"].includes(savedAnswerFeedback) ? savedAnswerFeedback : "all";
+const labelStyleValues = ["upper-alpha", "decimal", "arabic-indic", "lower-roman", "lower-greek", "georgian", "armenian", "cjk-ideographic", "hebrew", "japanese-informal", "none"];
+const savedOptionLabels = readPreference(optionLabelPreference);
+const initialOptionLabels = labelStyleValues.includes(savedOptionLabels) ? savedOptionLabels : "upper-alpha";
 const keys = {
     example: "note-example",
     style: "note-card-style",
@@ -80,15 +87,36 @@ let appliedVariant = "";
 function updateTemplatePreviews() {
     for (const [note, { code, content, raw }] of templatePreviews) {
         if (raw) {
-            const classes = Array.from(note.classList)
-                .filter(name => name.startsWith("note-") || name.startsWith("Material::note-"))
-                .join(" ");
-            const standalone = content.replace(/\{\{mfc_shuffle_default\}\}/g, "false");
+            const classes = styleClasses(note);
+            const standalone = content
+                .replace(/\{\{mfc_shuffle_default\}\}/g, "false")
+                .replace(/const optionLabels = "[^"]+";/, `const optionLabels = "${selectedOptionLabelStyle()}";`)
+                .replace(/const answerColoring = "[^"]+";/, `const answerColoring = "${currentAnswerFeedback}";`);
             code.textContent = standalone.replace(/\{\{Tags\}\}/g, templateStyle === "tags" ? "{{Tags}}" : classes);
         } else {
-            code.textContent = '<div class="' + note.className + '">\n' + content + '\n</div>';
+            const classes = templateClassName(note);
+            code.textContent = '<div class="' + classes + '">\n' + content + '\n</div>';
         }
     }
+}
+
+function styleClasses(note) {
+    return Array.from(note.classList)
+        .filter(name => name.startsWith("note-") || name.startsWith("Material::note-"))
+        .join(" ");
+}
+
+function templateClassName(note) {
+    const classes = Array.from(note.classList);
+    const structural = classes.filter(name => !name.startsWith("note-") && !name.startsWith("Material::note-"));
+    const styles = classes.filter(name => name.startsWith("note-") || name.startsWith("Material::note-"));
+    if (templateStyle === "tags") structural.push("{{Tags}}");
+    else structural.push(...styles);
+    return structural.join(" ");
+}
+
+function selectedOptionLabelStyle() {
+    return document.querySelector("[data-mc2-label-select]")?.value || initialOptionLabels || "upper-alpha";
 }
 
 function updateVariant() {
@@ -207,8 +235,10 @@ function updateMultipleChoice2Preview(showAnswer) {
             if (!input) return;
             const isCorrect = correct.has(option.dataset.choice);
             const wasSelected = input.checked;
-            option.classList.toggle("correct-answer", showAnswer && isCorrect);
-            option.classList.toggle("wrong-answer", showAnswer && !isCorrect);
+            const highlightCorrect = isCorrect && (currentAnswerFeedback === "all" || !wasSelected);
+            const highlightWrong = !isCorrect && (currentAnswerFeedback === "all" || wasSelected);
+            option.classList.toggle("correct-answer", showAnswer && highlightCorrect);
+            option.classList.toggle("wrong-answer", showAnswer && highlightWrong);
             option.classList.toggle("missed-answer", showAnswer && !wasSelected && isCorrect);
             input.disabled = showAnswer;
         });
@@ -217,12 +247,55 @@ function updateMultipleChoice2Preview(showAnswer) {
     });
 }
 
+const optionLabelSelects = document.querySelectorAll("[data-mc2-label-select]");
+optionLabelSelects.forEach(select => {
+    select.value = initialOptionLabels;
+    select.addEventListener("change", () => {
+        optionLabelSelects.forEach(other => { other.value = select.value; });
+        savePreference(optionLabelPreference, select.value);
+        updateMultipleChoice2Labels(select.value);
+        updateTemplatePreviews();
+    });
+});
+
+const answerFeedbackSelects = document.querySelectorAll("[data-mc2-feedback-select]");
+answerFeedbackSelects.forEach(select => {
+    select.value = currentAnswerFeedback;
+    select.addEventListener("change", () => {
+        answerFeedbackSelects.forEach(other => { other.value = select.value; });
+        currentAnswerFeedback = select.value;
+        savePreference(answerFeedbackPreference, select.value);
+        updateMultipleChoice2Preview(card.classList.contains("front-side") === false);
+        updateTemplatePreviews();
+    });
+});
+
+function updateMultipleChoice2Labels(style) {
+    document.querySelectorAll(".multiple-choice-js-example .question-options ol").forEach(list => {
+        list.style.listStyleType = "none";
+        list.style.setProperty("--mc2-list-style", style);
+        list.classList.toggle("mc2-no-labels", style === "none");
+    });
+    templatePreviews.forEach(({ code, content, raw }, note) => {
+        if (!raw && note.closest(".multiple-choice-js-example")) {
+            const configuredContent = content.replace(/<ol type="A">/, `<ol type="A" style="list-style-type: ${style};" class="${style === "none" ? "mc2-no-labels" : ""}">`);
+            code.textContent = '<div class="' + note.className + '">\n' + configuredContent + '\n</div>';
+        }
+    });
+}
+
 document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
     const answers = example.querySelector('[data-example-field="Correct Answers"]')?.textContent.trim() || "";
     const options = Array.from(example.querySelectorAll("[data-choice]"));
     const available = new Set(options.map(option => option.dataset.choice));
     const correctCount = new Set(normalizeMultipleChoiceAnswers(answers, available)).size;
-    example.querySelector(".question-options ol")?.classList.add("mc2-labeled");
+    const list = example.querySelector(".question-options ol");
+    list?.classList.add("mc2-labeled");
+    if (list) {
+        list.style.listStyleType = "none";
+        list.style.setProperty("--mc2-list-style", initialOptionLabels);
+    }
+    list?.classList.toggle("mc2-no-labels", initialOptionLabels === "none");
     options.forEach(option => {
         const label = document.createElement("label");
         const input = document.createElement("input");
@@ -230,14 +303,11 @@ document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
         input.name = example.id + "-preview-answer";
         input.value = option.dataset.choice;
         input.addEventListener("change", () => updateMultipleChoice2Preview(false));
-        const marker = document.createElement("span");
-        marker.className = "mc2-option-label";
-        marker.textContent = `${option.dataset.choice}.`;
-        label.append(marker);
         label.append(input, document.createTextNode(" "), ...Array.from(option.childNodes));
         option.replaceChildren(label);
     });
 });
+if (initialOptionLabels === "none") updateMultipleChoice2Labels("none");
 updateMultipleChoice2Preview(showAnswer);
 
 document.querySelectorAll("[data-hint-field] .hint").forEach(link => {
@@ -510,24 +580,22 @@ examples.forEach(example => {
     setup.setAttribute("aria-labelledby", heading.id);
     setup.append(heading);
 
-    if (example.dataset.templateDirectory) {
-        const styleControl = document.createElement("label");
-        const styleCheckbox = document.createElement("input");
-        styleControl.className = "template-style-toggle";
-        styleCheckbox.type = "checkbox";
-        styleCheckbox.checked = templateStyle === "tags";
-        styleCheckbox.setAttribute("role", "switch");
-        styleControl.append(styleCheckbox, document.createTextNode(" Use {{Tags}} instead of classes in templates"));
-        styleCheckbox.addEventListener("change", () => {
-            templateStyle = styleCheckbox.checked ? "tags" : "classes";
-            document.querySelectorAll(".template-style-toggle input").forEach(input => {
-                input.checked = styleCheckbox.checked;
-            });
-            savePreference(keys.templateStyle, templateStyle);
-            updateTemplatePreviews();
+    const styleControl = document.createElement("label");
+    const styleCheckbox = document.createElement("input");
+    styleControl.className = "template-style-toggle";
+    styleCheckbox.type = "checkbox";
+    styleCheckbox.checked = templateStyle === "tags";
+    styleCheckbox.setAttribute("role", "switch");
+    styleControl.append(styleCheckbox, document.createTextNode(" Use {{Tags}} instead of classes in templates"));
+    styleCheckbox.addEventListener("change", () => {
+        templateStyle = styleCheckbox.checked ? "tags" : "classes";
+        document.querySelectorAll(".template-style-toggle input").forEach(input => {
+            input.checked = styleCheckbox.checked;
         });
-        setup.append(styleControl);
-    }
+        savePreference(keys.templateStyle, templateStyle);
+        updateTemplatePreviews();
+    });
+    setup.append(styleControl);
 
     const tabList = document.createElement("div");
     tabList.className = "example-setup-tabs";

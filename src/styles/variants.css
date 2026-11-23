@@ -241,6 +241,7 @@
 .note:is(.note-flag-mexico-outlined, .Material\:\:note-flag-mexico-outlined),
 .note:is(.note-flag-uk-outlined, .Material\:\:note-flag-uk-outlined),
 .note:is(.note-flag-usa-outlined, .Material\:\:note-flag-usa-outlined) {
+  --accent-color: color-mix(in srgb, var(--palette-fill) 35%, var(--surface));
   --note-border: 2px solid var(--outline);
   --note-shadow: none;
   --back-accent-color: var(--palette-link);

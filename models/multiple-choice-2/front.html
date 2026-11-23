@@ -1,5 +1,6 @@
 <div class="note front question-card {{Tags}}" data-mc2-front>
     <div class="body question">{{Question}}</div>
+    <div id="answer" class="choice-answer-anchor" data-mc2-answer-anchor aria-hidden="true"></div>
     <div class="body question-options">
         <ol type="A">
             <li data-choice="A">{{Option A}}</li>
@@ -18,54 +19,26 @@
     <div data-mc2-config hidden>{{text:Shuffle Options}}</div>
 </div>
     <script>
-        // Persistence strategy based on Simon Lammer's MIT-licensed anki-persistence:
-        // https://github.com/SimonLammer/anki-persistence
         if (typeof window.Persistence === "undefined") {
-            // This is our storage namespace; the compatibility layer follows anki-persistence.
             const prefix = "github.com/cdmoro/anki-material-notes/multiple-choice/";
-            const makeStore = storage => ({
-                isAvailable: () => storage.available,
-                getItem(key) {
-                    const value = storage.get(key || "_default");
-                    return value == null ? null : JSON.parse(value);
-                },
-                setItem(key, value) {
-                    if (value === undefined) { value = key; key = "_default"; }
-                    storage.set(key || "_default", JSON.stringify(value));
-                },
-                clear() { storage.clear(); }
-            });
-            let store = { available: false };
+            let storage;
             try {
-                if (typeof window.sessionStorage === "object") {
-                    store = {
-                        available: true,
-                        get: key => window.sessionStorage.getItem(prefix + key),
-                        set: (key, value) => window.sessionStorage.setItem(prefix + key, value),
-                        clear() {
-                            Object.keys(window.sessionStorage).filter(key => key.startsWith(prefix))
-                                .forEach(key => window.sessionStorage.removeItem(key));
-                        }
-                    };
-                }
+                storage = window.sessionStorage;
             } catch (_) {}
-            window.Persistence = makeStore(store);
-            if (!window.Persistence.isAvailable()) {
-                const persistentWindow = window.py && typeof window.py === "object" ? window.py :
-                    (window.qt && typeof window.qt === "object" ? window.qt : null);
-                if (persistentWindow) {
-                    const state = persistentWindow[prefix] || (persistentWindow[prefix] = {});
-                    window.Persistence = {
-                        isAvailable: () => true,
-                        getItem: key => state[key || "_default"] ?? null,
-                        setItem(key, value) {
-                            if (value === undefined) { value = key; key = "_default"; }
-                            state[key || "_default"] = value;
-                        },
-                        clear() { Object.keys(state).forEach(key => delete state[key]); }
+            if (!storage) {
+                const host = window.py || window.qt;
+                if (host) {
+                    const state = host[prefix] || (host[prefix] = {});
+                    storage = {
+                        getItem: key => state[key] ?? null,
+                        setItem: (key, value) => { state[key] = value; }
                     };
                 }
             }
+            if (storage) window.Persistence = {
+                getItem: key => JSON.parse(storage.getItem(prefix + key) ?? "null"),
+                setItem: (key, value) => storage.setItem(prefix + key, JSON.stringify(value))
+            };
         }
     </script>
 <script>
@@ -84,7 +57,9 @@
             : shufflePolicy === "never" ? false
             : override === "true" ? true : override === "false" ? false : defaults;
         const stateKey = "mc2";
-        const optionLabels = "letters";
+        const optionLabels = "";
+        const labelStyle = optionLabels === "letters" ? "upper-alpha"
+            : optionLabels === "numbers" ? "decimal" : optionLabels || "none";
         const isAnswerSide = Boolean(root.closest("[data-mc2-back]"));
         const signature = [
             root.querySelector(".question")?.textContent.trim() || "",
@@ -125,6 +100,9 @@
         const byLetter = new Map(options.map(option => [option.dataset.choice, option]));
         const list = root.querySelector("ol");
         list.classList.add("mc2-labeled");
+        list.classList.toggle("mc2-no-labels", labelStyle === "none");
+        list.style.listStyleType = "none";
+        list.style.setProperty("--mc2-list-style", labelStyle);
         order.filter(letter => byLetter.has(letter)).forEach(letter => list.appendChild(byLetter.get(letter)));
         const answerKey = root.querySelector("[data-mc2-answer-key]").textContent;
         const available = new Set(options.map(option => option.dataset.choice));
@@ -157,14 +135,6 @@
             // its native click/change behavior.
             input.addEventListener("touchend", event => event.stopPropagation(), { passive: true });
             label.addEventListener("touchend", event => event.stopPropagation(), { passive: true });
-            if (optionLabels !== "none") {
-                // Labels identify fields, so they stay with their answers when shuffled.
-                const marker = document.createElement("span");
-                marker.className = "mc2-option-label";
-                marker.textContent = optionLabels === "numbers"
-                    ? `${option.dataset.choice.charCodeAt(0) - 64}.` : `${option.dataset.choice}.`;
-                label.append(marker);
-            }
             label.append(input, document.createTextNode(" "), ...Array.from(option.childNodes));
             option.replaceChildren(label);
         });

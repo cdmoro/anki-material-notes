@@ -85,6 +85,10 @@ body.card {
   padding: var(--note-padding);
 }
 
+.note.front > .body.center {
+  padding-inline: calc(var(--note-padding) + 8px);
+}
+
 .note :is(ol, ul) {
   text-align: start;
   text-wrap: wrap;
