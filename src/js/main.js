@@ -185,10 +185,18 @@ const setAnswerVisible = setupToggle("side", keys.view, showAnswer, enabled => {
     updateMultipleChoice2Preview(enabled);
 });
 
+function normalizeMultipleChoiceAnswers(raw) {
+    return raw.toUpperCase().split(/[\s,]+/).filter(Boolean).map(token => {
+        if (/^[A-J]$/.test(token)) return token;
+        if (/^(?:[1-9]|10)$/.test(token)) return String.fromCharCode(64 + Number(token));
+        return token;
+    });
+}
+
 function updateMultipleChoice2Preview(showAnswer) {
     document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
-        const answers = example.querySelector('[data-example-field="Correct Answers"]')?.textContent.trim().toUpperCase() || "";
-        const correct = new Set(answers.split(/[\s,]+/).filter(Boolean));
+        const answers = example.querySelector('[data-example-field="Correct Answers"]')?.textContent.trim() || "";
+        const correct = new Set(normalizeMultipleChoiceAnswers(answers));
         const options = Array.from(example.querySelectorAll("[data-choice]"));
         options.forEach(option => {
             const input = option.querySelector("input");
@@ -206,8 +214,9 @@ function updateMultipleChoice2Preview(showAnswer) {
 }
 
 document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
-    const answers = example.querySelector('[data-example-field="Correct Answers"]')?.textContent.trim().toUpperCase() || "";
-    const correctCount = answers.split(/[\s,]+/).filter(Boolean).length;
+    const answers = example.querySelector('[data-example-field="Correct Answers"]')?.textContent.trim() || "";
+    const correctCount = new Set(normalizeMultipleChoiceAnswers(answers)).size;
+    example.querySelector(".question-options ol")?.classList.add("mc2-labeled");
     example.querySelectorAll("[data-choice]").forEach(option => {
         const label = document.createElement("label");
         const input = document.createElement("input");
@@ -215,6 +224,10 @@ document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
         input.name = example.id + "-preview-answer";
         input.value = option.dataset.choice;
         input.addEventListener("change", () => updateMultipleChoice2Preview(false));
+        const marker = document.createElement("span");
+        marker.className = "mc2-option-label";
+        marker.textContent = `${option.dataset.choice}.`;
+        label.append(marker);
         label.append(input, document.createTextNode(" "), ...Array.from(option.childNodes));
         option.replaceChildren(label);
     });

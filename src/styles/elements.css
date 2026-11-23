@@ -139,6 +139,11 @@
   padding-inline-start: 2em;
 }
 
+.note .question-options ol.mc2-labeled {
+  list-style: none;
+  padding-inline-start: 0;
+}
+
 .note .question-options label {
   box-sizing: border-box;
   display: flex;
@@ -146,6 +151,11 @@
   align-items: center;
   gap: .45em;
   cursor: pointer;
+}
+
+.note .question-options .mc2-option-label {
+  flex: 0 0 1.25em;
+  text-align: end;
 }
 
 .note .question-options [data-choice] {

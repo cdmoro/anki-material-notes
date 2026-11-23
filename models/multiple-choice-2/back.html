@@ -70,13 +70,21 @@
             const key = back.querySelector("#choice-answer-key");
             const options = Array.from(back.querySelectorAll(".question-options [data-choice]"));
             const raw = key.textContent.trim().toUpperCase();
-            const correct = new Set(raw.split(/[\s,]+/).filter(Boolean));
+            const tokens = raw.split(/[\s,]+/).filter(Boolean);
+            const invalidToken = tokens.some(token =>
+                !/^[A-J]$/.test(token) && !/^(?:[1-9]|10)$/.test(token)
+            );
+            const correct = new Set(tokens.map(token => {
+                if (/^[A-J]$/.test(token)) return token;
+                if (/^(?:[1-9]|10)$/.test(token)) return String.fromCharCode(64 + Number(token));
+                return token;
+            }));
             const available = new Set(options.map(option => option.dataset.choice));
             const feedback = back.querySelector("[data-mc2-feedback]");
             const answerColoring = "all";
-            if (!correct.size || Array.from(correct).some(letter => !available.has(letter))) {
+            if (invalidToken || !correct.size || Array.from(correct).some(letter => !available.has(letter))) {
                 feedback.hidden = false;
-                feedback.textContent = "Check the Correct Answers field. Enter letters such as A or A,C.";
+                feedback.textContent = "Check Correct Answers. Enter letters (A or A,C) or option numbers (1 or 1,4), separated by commas or spaces.";
                 try { Persistence.setItem("mc2", null); } catch (_) {}
                 return;
             }
