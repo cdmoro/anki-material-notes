@@ -76,7 +76,7 @@ Choose **Answer feedback** when creating a Multiple Choice note type. **Show all
 
 When a field is empty in Anki’s editor, its description gives a short hint. For example, **Correct Answers** explains the `A` / `A,C` format, and **Shuffle Options** explains how `true`, `false`, and a blank value behave.
 
-The demo includes **Multiple Choice — Single** and **Multiple Choice — Multiple** examples. Both use the same interactive note type: Anki shows radio buttons when `Correct Answers` contains one letter and checkboxes when it contains several. **Show Answer** keeps the selected choices and their order, then colors each option as correct or incorrect. The choices are shuffled once per review when enabled, so the same order remains on the back. Use Anki’s review buttons to grade yourself.
+The demo includes **Multiple Choice — Single** and **Multiple Choice — Multiple** examples. Both use the same interactive note type: Anki shows radio buttons when `Correct Answers` contains one letter and checkboxes when it contains several. **Show Answer** keeps the selected choices and their order, then colors each option as correct or incorrect. When enabled, choices are shuffled each time the question is presented; the previous order is avoided for an immediate repeat, and the current order remains the same on the back. Use Anki’s review buttons to grade yourself.
 
 The **Card setup** section shows all fields, including optional `Shuffle Options`. Its template switch uses the selected palette and finish as fixed CSS classes by default; turn on **Use `{{Tags}}` instead of classes in templates** to copy templates that take their styling from note tags.
 

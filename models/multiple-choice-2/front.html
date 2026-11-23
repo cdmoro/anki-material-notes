@@ -84,15 +84,41 @@
             : override === "true" ? true : override === "false" ? false : defaults;
         const stateKey = "mc2";
         const isAnswerSide = Boolean(root.closest("[data-mc2-back]"));
+        const signature = [
+            root.querySelector(".question")?.textContent.trim() || "",
+            ...options.map(option => `${option.dataset.choice}:${option.textContent.trim()}`).sort()
+        ].join("\u001f");
+        let hash = 2166136261;
+        for (let index = 0; index < signature.length; index++) {
+            hash = Math.imul(hash ^ signature.charCodeAt(index), 16777619);
+        }
+        const lastOrderKey = `mc2-last-order-${(hash >>> 0).toString(36)}`;
 
         let saved;
         try { saved = isAnswerSide ? Persistence.getItem(stateKey) : null; } catch (_) { saved = null; }
-        let order = saved && Array.isArray(saved.order) ? saved.order : options.map(option => option.dataset.choice);
+        const canonicalOrder = options.map(option => option.dataset.choice).sort();
+        let order = saved && Array.isArray(saved.order) ? saved.order : canonicalOrder;
         if (!isAnswerSide && shuffle) {
-            for (let i = order.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [order[i], order[j]] = [order[j], order[i]];
+            let lastOrder;
+            try { lastOrder = Persistence.getItem(lastOrderKey); } catch (_) {}
+            const shuffleOrder = () => {
+                const shuffled = [...canonicalOrder];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            };
+            order = shuffleOrder();
+            let attempts = 0;
+            while (Array.isArray(lastOrder) && order.join() === lastOrder.join() && attempts < 5) {
+                order = shuffleOrder();
+                attempts++;
             }
+            if (Array.isArray(lastOrder) && order.join() === lastOrder.join() && order.length > 1) {
+                [order[0], order[1]] = [order[1], order[0]];
+            }
+            try { Persistence.setItem(lastOrderKey, order); } catch (_) {}
         }
         const byLetter = new Map(options.map(option => [option.dataset.choice, option]));
         const list = root.querySelector("ol");

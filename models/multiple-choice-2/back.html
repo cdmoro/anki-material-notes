@@ -77,7 +77,7 @@
             if (!correct.size || Array.from(correct).some(letter => !available.has(letter))) {
                 feedback.hidden = false;
                 feedback.textContent = "Check the Correct Answers field. Enter letters such as A or A,C.";
-                try { Persistence.clear(); } catch (_) {}
+                try { Persistence.setItem("mc2", null); } catch (_) {}
                 return;
             }
 
@@ -107,7 +107,7 @@
             });
             feedback.hidden = true;
             // Clear only after the back has consumed the front-side selection.
-            try { Persistence.clear(); } catch (_) {}
+            try { Persistence.setItem(stateKey, null); } catch (_) {}
         })();
     </script>
 </div>
