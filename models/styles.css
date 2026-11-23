@@ -697,7 +697,7 @@ body.card {
 .note .question-options [data-choice] {
   box-sizing: border-box;
   margin-block: .2em;
-  padding: .55em .85em;
+  padding: .4em .6em;
   border-radius: .15em;
 }
 
@@ -723,13 +723,13 @@ body.card {
   color: var(--font-color);
 }
 
-.choice-answer-card .question-options [data-choice].correct-answer {
+.note.back.choice-answer-card .question-options [data-choice].correct-answer {
   background: var(--feedback-correct-background);
   color: inherit;
   font-weight: inherit;
 }
 
-.choice-answer-card .question-options [data-choice].wrong-answer {
+.note.back.choice-answer-card .question-options [data-choice].wrong-answer {
   background: var(--feedback-incorrect-background);
   color: inherit;
   opacity: 1;
