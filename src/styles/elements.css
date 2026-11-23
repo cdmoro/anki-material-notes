@@ -100,6 +100,11 @@
   color: var(--front-color);
 }
 
+/* Multiple choice keeps its question/options division on the front too. */
+.note.front.question-card > .question {
+  border-bottom: 1px solid var(--hr-color);
+}
+
 .note.front.question-card > .question-options {
   --control-color: var(--font-color);
   color: var(--font-color);
@@ -110,23 +115,25 @@
   display: none;
 }
 
+.note.front.question-card > [data-mc2-answer-anchor] {
+  display: none;
+}
+
+.note.back > .note.front.question-card > #answer.choice-answer-anchor {
+  display: block;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+}
+
 /* Keep the answer anchor without shifting the options when they are revealed. */
 .note.back > .question-card + :is(#answer, .answer-divider) {
   background: none;
   border: 0;
   height: 0;
   padding: 0;
-}
-
-.note.back.choice-answer-card > #answer.choice-answer-anchor {
-  display: block !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  visibility: hidden !important;
-  overflow: hidden !important;
 }
 
 .note.back > .question-results {
@@ -139,17 +146,55 @@
   padding-inline-start: 2em;
 }
 
-.note .question-options label {
-  display: inline-flex;
-  align-items: baseline;
+.note .question-options ol.mc2-labeled {
+  list-style: none;
+  padding-inline-start: 0;
+  counter-reset: mc2-option;
+}
+
+.note .question-options ol.mc2-labeled > [data-choice] {
+  display: flex;
+  align-items: center;
   gap: .45em;
+  counter-increment: mc2-option;
+  width: 100%;
+}
+
+.note .question-options ol.mc2-labeled > [data-choice]::before {
+  content: counter(mc2-option, var(--mc2-list-style, upper-alpha)) ".";
+  flex: 0 0 1.25em;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.note .question-options ol.mc2-labeled.mc2-no-labels > [data-choice]::before {
+  content: none;
+}
+
+.note .question-options label {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: .45em;
+  cursor: pointer;
+}
+
+.note .question-options input {
+  flex: 0 0 auto;
+  margin: 0;
 }
 
 .note .question-options [data-choice] {
   box-sizing: border-box;
   margin-block: .2em;
-  padding: .1em 0;
+  padding: .3em .5em;
   border-radius: .15em;
+}
+
+.note.front.question-card .question-options [data-choice] {
+  background: rgba(128, 128, 128, .14);
 }
 
 .note .question-options input {
@@ -170,13 +215,13 @@
   color: var(--font-color);
 }
 
-.choice-answer-card .question-options [data-choice].correct-answer {
+.note.back.choice-answer-card .question-options [data-choice].correct-answer {
   background: var(--feedback-correct-background);
   color: inherit;
   font-weight: inherit;
 }
 
-.choice-answer-card .question-options [data-choice].wrong-answer {
+.note.back.choice-answer-card .question-options [data-choice].wrong-answer {
   background: var(--feedback-incorrect-background);
   color: inherit;
   opacity: 1;

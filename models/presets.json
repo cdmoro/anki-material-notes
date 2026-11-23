@@ -77,10 +77,11 @@
   },
   "multiple-choice-2": {
     "label": "Multiple Choice (JS)",
-    "description": "Choose answers interactively, then use Show Answer to see correct, incorrect and missed choices.",
-    "fields": ["Question", "Option A", "Option B", "Option C", "Option D", "Correct Answers", "Shuffle Options", "Explanation", "Source"],
+    "description": "Choose from 2 to 10 interactive answers, then use Show Answer to see correct, incorrect and missed choices.",
+    "fields": ["Question", "Option A", "Option B", "Correct Answers", "Shuffle Options", "Explanation", "Source"],
+    "option_count_default": 4,
     "field_descriptions": {
-      "Correct Answers": "Enter correct option letters, e.g. A or A,C. Separate multiple letters with commas or spaces.",
+      "Correct Answers": "Enter letters (A or A,C) or option numbers (1 or 1,4), separated by commas or spaces. Numbers map to Option A, Option B, and so on. Out-of-range choices are ignored; unparseable text makes the answer key empty.",
       "Shuffle Options": "Optional: true to shuffle choices each review, false to keep their listed order. Blank uses the note type default.",
       "Explanation": "Optional explanation shown on the answer side.",
       "Source": "Optional source or reference for this question."

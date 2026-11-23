@@ -13,6 +13,8 @@ Leave **Note type name** blank to use the suggestion, such as `Basic - Pink Outl
 
 **Update note types** refreshes the templates and CSS while keeping your appearance choices and the field values on existing notes. If you edited the templates or styling, the add-on asks before replacing your changes.
 
+The managed note type list shows each type’s style and, for Multiple Choice, its option count, shuffle behavior, and feedback style. Select a type and choose **Edit settings…** to change those settings for all its cards. Option counts can be increased; existing fields are retained.
+
 ## Copy a card into Anki
 
 Open **Cards…** for a Basic note type with the **Front** and **Back** fields. Use the demo’s **Copy front**, **Copy back**, and **Copy style** buttons to fill the corresponding editor panes below, or copy from the files directly.
@@ -54,7 +56,7 @@ Front content aligns to the start by default. A `class="body question"` block is
 
 ### Multiple Choice — Single and Multiple
 
-Use the add-on to create the note type, or copy [Front](models/multiple-choice-2/front.html), [Back](models/multiple-choice-2/back.html), and the shared [Styling](models/styles.css) into a note type with these fields.
+Use the add-on to create the note type, or copy [Front](models/multiple-choice-2/front.html), [Back](models/multiple-choice-2/back.html), and the shared [Styling](models/styles.css) into a note type with these fields. The add-on lets you choose between 2 and 10 answer options when creating the note type; it creates only the fields needed for that count. The default is four options.
 
 | Field | Example |
 | --- | --- |
@@ -68,11 +70,13 @@ Use the add-on to create the note type, or copy [Front](models/multiple-choice-2
 | `Explanation` | Uranus and Neptune are ice giants. |
 | `Source` | Solar system quiz · Question 4 |
 
-Fill in Option A and Option B. Option C, Option D, Shuffle Options, Explanation, and Source are optional. Enter `A` for one correct answer or `A,C` (commas or spaces) for several. Blank optional choices keep their letter positions. In the add-on dialog, **Shuffle answers by default** sets the initial preference for new Multiple Choice 2 note types; a note's `Shuffle Options` field can override it with `true` or `false`.
+Fill in Option A and Option B. Every option after B up to the number created for the note type is optional, as are Shuffle Options, Explanation, and Source. The add-on supports 2–10 options, named Option A through Option J; the website examples use four. **Option labels** use the ordered list's CSS counter style, such as `upper-alpha`, `decimal`, `arabic-indic`, `lower-roman`, `lower-greek`, `georgian`, `armenian`, `cjk-ideographic`, `hebrew`, or `japanese-informal`; use `none` or an empty `optionLabels` value to hide them. `cjk-ideographic` is the CSS legacy alias for traditional informal Chinese numbering; other CSS styles distinguish simplified/traditional and formal/informal forms. This CSS marker follows the displayed list order after shuffling. In copied templates, set `optionLabels` to one of these CSS counter styles. In **Correct Answers**, enter letters (`A C`, `A,C`, or `A, C`) or numbers (`1 4`, `1,4`, or `1, 4`); commas and spaces can be mixed. Out-of-range options are ignored if other valid answers remain (`A, J, Z` on a four-option note keeps A). If the whole value cannot be parsed, it is treated as empty (`Cat, Dog`). Blank optional choices keep their field identities. In the add-on dialog, **Shuffle answers by default** sets the initial preference for new Multiple Choice 2 note types; a note's `Shuffle Options` field can override it with `true` or `false`.
 
-When a field is empty in Anki’s editor, its description gives a short hint. For example, **Correct Answers** explains the `A` / `A,C` format, and **Shuffle Options** explains how `true`, `false`, and a blank value behave.
+Choose **Answer feedback** when creating a Multiple Choice note type. **Show all correct answers** uses the current coloring, marking all correct choices green and incorrect choices red. **Highlight only mistakes** marks selected incorrect choices red and missed correct choices green, leaving the other choices uncolored.
 
-The demo includes **Multiple Choice — Single** and **Multiple Choice — Multiple** examples. Both use the same interactive note type: Anki shows radio buttons when `Correct Answers` contains one letter and checkboxes when it contains several. **Show Answer** keeps the selected choices and their order, then colors each option as correct or incorrect. The choices are shuffled once per review when enabled, so the same order remains on the back. Use Anki’s review buttons to grade yourself.
+When a field is empty in Anki’s editor, its description gives a short hint. For example, **Correct Answers** explains the letter and number formats, and **Shuffle Options** explains how `true`, `false`, and a blank value behave.
+
+The demo includes **Multiple Choice — Single** and **Multiple Choice — Multiple** examples. Both use the same interactive note type: Anki shows radio buttons when `Correct Answers` identifies one choice and checkboxes when it identifies several. **Show Answer** keeps the selected choices and their order, then colors each option as correct or incorrect. When enabled, choices are shuffled each time the question is presented; the previous order is avoided for an immediate repeat, and the current order remains the same on the back. Use Anki’s review buttons to grade yourself.
 
 The **Card setup** section shows all fields, including optional `Shuffle Options`. Its template switch uses the selected palette and finish as fixed CSS classes by default; turn on **Use `{{Tags}}` instead of classes in templates** to copy templates that take their styling from note tags.
 

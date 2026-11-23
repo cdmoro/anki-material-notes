@@ -244,6 +244,34 @@ h1 {
   font-size: .9rem;
 }
 
+.mc2-preset-settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: .5rem 1rem;
+  margin-top: 1rem;
+  padding: .75rem;
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.mc2-preset-settings h3 {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.mc2-preset-field {
+  display: grid;
+  gap: .25rem;
+  font-size: .9rem;
+}
+
+.mc2-preset-field select {
+  width: 100%;
+  font: inherit;
+}
+
 .example-setup > h3 {
   margin: 0;
   font-size: 1rem;

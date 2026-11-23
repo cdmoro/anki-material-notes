@@ -1,6 +1,28 @@
+    <script>
+        if (typeof window.Persistence === "undefined") {
+            const prefix = "github.com/cdmoro/anki-material-notes/multiple-choice/";
+            let storage;
+            try {
+                storage = window.sessionStorage;
+            } catch (_) {}
+            if (!storage) {
+                const host = window.py || window.qt;
+                if (host) {
+                    const state = host[prefix] || (host[prefix] = {});
+                    storage = {
+                        getItem: key => state[key] ?? null,
+                        setItem: (key, value) => { state[key] = value; }
+                    };
+                }
+            }
+            if (storage) window.Persistence = {
+                getItem: key => JSON.parse(storage.getItem(prefix + key) ?? "null"),
+                setItem: (key, value) => storage.setItem(prefix + key, JSON.stringify(value))
+            };
+        }
+    </script>
 <div class="note back choice-answer-card {{Tags}}" data-mc2-back>
     {{FrontSide}}
-    <hr id="answer" class="answer-divider choice-answer-anchor">
     <div id="choice-answer-key" hidden>{{text:Correct Answers}}</div>
     <div class="body question-results" data-mc2-feedback hidden></div>
     {{#Explanation}}
@@ -19,23 +41,27 @@
             if (!back) return;
             const key = back.querySelector("#choice-answer-key");
             const options = Array.from(back.querySelectorAll(".question-options [data-choice]"));
-            const letters = "ABCD";
-            const raw = key.textContent.trim().toUpperCase();
-            const legacy = /^[01](?:\s+[01]){3}$/.test(raw);
-            const correct = new Set(legacy
-                ? raw.split(/\s+/).flatMap((bit, index) => bit === "1" ? [letters[index]] : [])
-                : raw.split(/[\s,]+/).filter(Boolean));
-            const available = new Set(options.map(option => option.dataset.choice));
+            const raw = key.textContent;
+            const answerPattern = /^\s*(?:[A-Z]|\d+)(?:(?:\s*,\s*|\s+)(?:[A-Z]|\d+))*\s*$/i;
+            const tokens = raw.trim() && answerPattern.test(raw)
+                ? raw.toUpperCase().match(/[A-Z]|\d+/g) || [] : [];
+            const correct = new Set(tokens.map(token => {
+                if (/^[A-Z]$/.test(token)) return token;
+                const number = Number(token);
+                return number >= 1 && number <= 10 ? String.fromCharCode(64 + number) : null;
+            }).filter(choice => choice && options.some(option => option.dataset.choice === choice)));
             const feedback = back.querySelector("[data-mc2-feedback]");
-            if (!correct.size || Array.from(correct).some(letter => !available.has(letter))) {
+            const answerColoring = "all";
+            if (!correct.size) {
                 feedback.hidden = false;
-                feedback.textContent = "Check the Correct Answers field. Enter letters such as A or A,C.";
+                feedback.textContent = "Check Correct Answers. Enter letters (A or A,C) or option numbers (1 or 1,4), separated by commas or spaces.";
+                try { Persistence.setItem("mc2", null); } catch (_) {}
                 return;
             }
 
-            const stateKey = "mc2:" + (back.closest(".card")?.dataset.cardId || location.href);
+            const stateKey = "mc2";
             let saved = null;
-            try { saved = JSON.parse(sessionStorage.getItem(stateKey) || "null"); } catch (_) {}
+            try { saved = Persistence.getItem(stateKey); } catch (_) {}
             const selected = new Set(saved?.selected || []);
             if (saved && Array.isArray(saved.order)) {
                 const byLetter = new Map(options.map(option => [option.dataset.choice, option]));
@@ -46,13 +72,20 @@
                 const letter = option.dataset.choice;
                 const isCorrect = correct.has(letter);
                 const wasSelected = selected.has(letter);
-                option.classList.toggle("correct-answer", isCorrect);
-                option.classList.toggle("wrong-answer", !isCorrect);
+                const highlightCorrect = isCorrect && (answerColoring === "all" || !wasSelected);
+                const highlightWrong = !isCorrect && (answerColoring === "all" || wasSelected);
+                option.classList.toggle("correct-answer", highlightCorrect);
+                option.classList.toggle("wrong-answer", highlightWrong);
                 option.classList.toggle("missed-answer", !wasSelected && isCorrect);
                 const input = option.querySelector("input");
-                if (input) input.disabled = true;
+                if (input) {
+                    input.checked = wasSelected;
+                    input.disabled = true;
+                }
             });
             feedback.hidden = true;
+            // Clear only after the back has consumed the front-side selection.
+            try { Persistence.setItem(stateKey, null); } catch (_) {}
         })();
     </script>
 </div>
