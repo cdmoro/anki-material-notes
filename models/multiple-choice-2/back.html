@@ -2,7 +2,8 @@
         // Persistence strategy based on Simon Lammer's MIT-licensed anki-persistence:
         // https://github.com/SimonLammer/anki-persistence
         if (typeof window.Persistence === "undefined") {
-            const prefix = "github.com/SimonLammer/anki-persistence/";
+            // This is our storage namespace; the compatibility layer follows anki-persistence.
+            const prefix = "github.com/cdmoro/anki-material-notes/multiple-choice/";
             const makeStore = storage => ({
                 isAvailable: () => storage.available,
                 getItem(key) {
@@ -69,20 +70,18 @@
             if (!back) return;
             const key = back.querySelector("#choice-answer-key");
             const options = Array.from(back.querySelectorAll(".question-options [data-choice]"));
-            const raw = key.textContent.trim().toUpperCase();
-            const tokens = raw.split(/[\s,]+/).filter(Boolean);
-            const invalidToken = tokens.some(token =>
-                !/^[A-J]$/.test(token) && !/^(?:[1-9]|10)$/.test(token)
-            );
+            const raw = key.textContent;
+            const answerPattern = /^\s*(?:[A-Z]|\d+)(?:(?:\s*,\s*|\s+)(?:[A-Z]|\d+))*\s*$/i;
+            const tokens = raw.trim() && answerPattern.test(raw)
+                ? raw.toUpperCase().match(/[A-Z]|\d+/g) || [] : [];
             const correct = new Set(tokens.map(token => {
-                if (/^[A-J]$/.test(token)) return token;
-                if (/^(?:[1-9]|10)$/.test(token)) return String.fromCharCode(64 + Number(token));
-                return token;
-            }));
-            const available = new Set(options.map(option => option.dataset.choice));
+                if (/^[A-Z]$/.test(token)) return token;
+                const number = Number(token);
+                return number >= 1 && number <= 10 ? String.fromCharCode(64 + number) : null;
+            }).filter(choice => choice && options.some(option => option.dataset.choice === choice)));
             const feedback = back.querySelector("[data-mc2-feedback]");
             const answerColoring = "all";
-            if (invalidToken || !correct.size || Array.from(correct).some(letter => !available.has(letter))) {
+            if (!correct.size) {
                 feedback.hidden = false;
                 feedback.textContent = "Check Correct Answers. Enter letters (A or A,C) or option numbers (1 or 1,4), separated by commas or spaces.";
                 try { Persistence.setItem("mc2", null); } catch (_) {}

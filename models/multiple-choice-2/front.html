@@ -21,7 +21,8 @@
         // Persistence strategy based on Simon Lammer's MIT-licensed anki-persistence:
         // https://github.com/SimonLammer/anki-persistence
         if (typeof window.Persistence === "undefined") {
-            const prefix = "github.com/SimonLammer/anki-persistence/";
+            // This is our storage namespace; the compatibility layer follows anki-persistence.
+            const prefix = "github.com/cdmoro/anki-material-notes/multiple-choice/";
             const makeStore = storage => ({
                 isAvailable: () => storage.available,
                 getItem(key) {
@@ -125,13 +126,17 @@
         const list = root.querySelector("ol");
         list.classList.add("mc2-labeled");
         order.filter(letter => byLetter.has(letter)).forEach(letter => list.appendChild(byLetter.get(letter)));
-        const answerKey = root.querySelector("[data-mc2-answer-key]").textContent.trim().toUpperCase();
-        const answerTokens = answerKey.split(/[\s,]+/).filter(Boolean).map(token => {
-            if (/^[A-J]$/.test(token)) return token;
-            if (/^(?:[1-9]|10)$/.test(token)) return String.fromCharCode(64 + Number(token));
-            return token;
-        });
-        const multiple = new Set(answerTokens).size > 1;
+        const answerKey = root.querySelector("[data-mc2-answer-key]").textContent;
+        const available = new Set(options.map(option => option.dataset.choice));
+        const answerPattern = /^\s*(?:[A-Z]|\d+)(?:(?:\s*,\s*|\s+)(?:[A-Z]|\d+))*\s*$/i;
+        const answerTokens = answerKey.trim() && answerPattern.test(answerKey)
+            ? answerKey.toUpperCase().match(/[A-Z]|\d+/g) || [] : [];
+        const correct = new Set(answerTokens.map(token => {
+            if (/^[A-Z]$/.test(token)) return token;
+            const number = Number(token);
+            return number >= 1 && number <= 10 ? String.fromCharCode(64 + number) : null;
+        }).filter(choice => choice && available.has(choice)));
+        const multiple = correct.size > 1;
         // Anki reruns FrontSide inside the back. Restore there, but start every
         // newly presented front with no answers selected.
         const selected = new Set(isAnswerSide ? saved?.selected || [] : []);

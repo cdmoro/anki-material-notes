@@ -185,19 +185,23 @@ const setAnswerVisible = setupToggle("side", keys.view, showAnswer, enabled => {
     updateMultipleChoice2Preview(enabled);
 });
 
-function normalizeMultipleChoiceAnswers(raw) {
-    return raw.toUpperCase().split(/[\s,]+/).filter(Boolean).map(token => {
-        if (/^[A-J]$/.test(token)) return token;
-        if (/^(?:[1-9]|10)$/.test(token)) return String.fromCharCode(64 + Number(token));
-        return token;
-    });
+function normalizeMultipleChoiceAnswers(raw, available) {
+    const text = raw.trim();
+    const answerPattern = /^(?:[A-Z]|\d+)(?:(?:\s*,\s*|\s+)(?:[A-Z]|\d+))*$/i;
+    if (!text || !answerPattern.test(text)) return [];
+    return (text.toUpperCase().match(/[A-Z]|\d+/g) || []).map(token => {
+        if (/^[A-Z]$/.test(token)) return token;
+        const number = Number(token);
+        return number >= 1 && number <= 10 ? String.fromCharCode(64 + number) : null;
+    }).filter(choice => choice && available.has(choice));
 }
 
 function updateMultipleChoice2Preview(showAnswer) {
     document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
         const answers = example.querySelector('[data-example-field="Correct Answers"]')?.textContent.trim() || "";
-        const correct = new Set(normalizeMultipleChoiceAnswers(answers));
         const options = Array.from(example.querySelectorAll("[data-choice]"));
+        const available = new Set(options.map(option => option.dataset.choice));
+        const correct = new Set(normalizeMultipleChoiceAnswers(answers, available));
         options.forEach(option => {
             const input = option.querySelector("input");
             if (!input) return;
@@ -215,9 +219,11 @@ function updateMultipleChoice2Preview(showAnswer) {
 
 document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
     const answers = example.querySelector('[data-example-field="Correct Answers"]')?.textContent.trim() || "";
-    const correctCount = new Set(normalizeMultipleChoiceAnswers(answers)).size;
+    const options = Array.from(example.querySelectorAll("[data-choice]"));
+    const available = new Set(options.map(option => option.dataset.choice));
+    const correctCount = new Set(normalizeMultipleChoiceAnswers(answers, available)).size;
     example.querySelector(".question-options ol")?.classList.add("mc2-labeled");
-    example.querySelectorAll("[data-choice]").forEach(option => {
+    options.forEach(option => {
         const label = document.createElement("label");
         const input = document.createElement("input");
         input.type = correctCount > 1 ? "checkbox" : "radio";
