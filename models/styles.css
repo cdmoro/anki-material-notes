@@ -697,7 +697,7 @@ body.card {
 .note .question-options [data-choice] {
   box-sizing: border-box;
   margin-block: .2em;
-  padding: .4em .6em;
+  padding: .3em .5em;
   border-radius: .15em;
 }
 
