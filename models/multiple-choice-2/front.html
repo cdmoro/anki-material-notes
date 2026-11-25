@@ -101,8 +101,7 @@
         const list = root.querySelector("ol");
         list.classList.add("mc2-labeled");
         list.classList.toggle("mc2-no-labels", labelStyle === "none");
-        list.style.removeProperty("--mc2-list-style");
-        list.style.listStyleType = labelStyle;
+        list.style.setProperty("--mc2-list-style", labelStyle);
         order.filter(letter => byLetter.has(letter)).forEach(letter => list.appendChild(byLetter.get(letter)));
         // Keep taps on the options and the gaps between them from triggering
         // AnkiMobile's card-level show-answer gesture.

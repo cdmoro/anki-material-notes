@@ -152,10 +152,23 @@
 
 .note .question-options ol.mc2-labeled {
   list-style-type: upper-alpha;
+  counter-reset: mc2-choice;
 }
 
 .note .question-options ol.mc2-labeled > [data-choice] {
+  position: relative;
   width: 100%;
+  list-style: none;
+  counter-increment: mc2-choice;
+}
+
+.note .question-options ol.mc2-labeled > [data-choice]::before {
+  position: absolute;
+  top: .4em;
+  left: -2em;
+  width: 1.5em;
+  text-align: end;
+  content: counter(mc2-choice, var(--mc2-list-style, upper-alpha)) ".";
 }
 
 .note .question-options label {
@@ -172,6 +185,10 @@
 
 .note .question-options ol.mc2-no-labels {
   padding-inline-start: 0;
+}
+
+.note .question-options ol.mc2-labeled.mc2-no-labels > [data-choice]::before {
+  content: none;
 }
 
 .note .question-options input {
