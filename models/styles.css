@@ -741,6 +741,17 @@ body.card {
   counter-reset: mc2-choice;
 }
 
+.note .question-options ol.mc2-two-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1.25em;
+  row-gap: .15em;
+}
+
+.note .question-options ol.mc2-two-columns label {
+  width: auto;
+}
+
 .note .question-options ol.mc2-labeled > [data-choice] {
   position: relative;
   width: 100%;

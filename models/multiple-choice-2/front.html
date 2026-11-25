@@ -17,6 +17,7 @@
     </div>
     <div data-mc2-answer-key hidden>{{text:Correct Answers}}</div>
     <div data-mc2-config hidden>{{text:Shuffle Options}}</div>
+    <div data-mc2-option-layout hidden>{{text:Option Layout}}</div>
 </div>
     <script>
         if (typeof window.Persistence === "undefined") {
@@ -50,6 +51,7 @@
 
         const options = Array.from(root.querySelectorAll("[data-choice]"));
         const config = root.querySelector("[data-mc2-config]");
+        const layoutConfig = root.querySelector("[data-mc2-option-layout]");
         const defaults = false;
         const shufflePolicy = "field";
         const override = config.textContent.trim().toLowerCase();
@@ -58,6 +60,7 @@
             : override === "true" ? true : override === "false" ? false : defaults;
         const stateKey = "mc2";
         const optionLabels = "";
+        const defaultOptionLayout = 1;
         const labelStyle = optionLabels === "letters" ? "upper-alpha"
             : optionLabels === "numbers" ? "decimal" : optionLabels || "none";
         const isAnswerSide = Boolean(root.closest("[data-mc2-back]"));
@@ -102,6 +105,9 @@
         list.classList.add("mc2-labeled");
         list.classList.toggle("mc2-no-labels", labelStyle === "none");
         list.style.setProperty("--mc2-list-style", labelStyle);
+        const rawLayout = layoutConfig.textContent.trim();
+        const optionLayout = rawLayout === "" ? defaultOptionLayout : rawLayout === "1" || rawLayout === "2" ? Number(rawLayout) : 1;
+        list.classList.toggle("mc2-two-columns", optionLayout === 2);
         order.filter(letter => byLetter.has(letter)).forEach(letter => list.appendChild(byLetter.get(letter)));
         // Keep taps on the options and the gaps between them from triggering
         // AnkiMobile's card-level show-answer gesture.

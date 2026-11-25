@@ -33,6 +33,7 @@ from aqt.utils import askUser, showInfo
 
 MODEL_DIR = Path(__file__).resolve().parent / "models"
 ADDON_CONFIG_KEY = "shuffle_answers_by_default"
+OPTION_LAYOUT_CONFIG_KEY = "multiple_choice_option_layout_default"
 NOTE_TYPES = json.loads((MODEL_DIR / "presets.json").read_text(encoding="utf-8"))
 GUIDE_URL = "https://github.com/cdmoro/anki-material-notes/blob/main/docs/using-style-tags.md"
 STYLE_TAG_EXAMPLES = (
@@ -170,13 +171,13 @@ def preset_fields(kind, preset=None, option_count=None):
         requested=option_count, default=preset.get("option_count_default", MULTIPLE_CHOICE_DEFAULT_COUNT)
     )
     options = [f"Option {chr(ord('A') + index)}" for index in range(count)]
-    return ["Question", *options, "Correct Answers", "Shuffle Options", "Explanation", "Source"]
+    return ["Question", *options, "Correct Answers", "Shuffle Options", "Option Layout", "Explanation", "Source"]
 
 
 def template_content(
     preset, appearance=None, style_application="fixed", shuffle_default=False, option_count=None,
     answer_coloring=ANSWER_COLORING_ALL, shuffle_policy=SHUFFLE_POLICY_FIELD,
-    option_labels=OPTION_LABELS_LETTERS,
+    option_labels=OPTION_LABELS_LETTERS, option_layout_default=1,
 ):
     classes = [] if style_application == "tags" else appearance_classes(**(appearance or {}))
     if style_application != "fixed":
@@ -188,6 +189,7 @@ def template_content(
         .replace('const answerColoring = "all";', f'const answerColoring = "{answer_coloring}";')
         .replace('const shufflePolicy = "field";', f'const shufflePolicy = "{shuffle_policy}";')
         .replace('const optionLabels = "";', f'const optionLabels = "{option_labels}";')
+        .replace('const defaultOptionLayout = 1;', f'const defaultOptionLayout = {option_layout_default if option_layout_default in (1, 2) else 1};')
         for key, side in (("qfmt", "front"), ("afmt", "back"))
     }
     if preset.get("front") == "multiple-choice-2/front.html":
@@ -229,6 +231,7 @@ def create_note_type(
     models, kind, name, appearance=None, style_application="fixed", shuffle_default=False,
     option_count=None, answer_coloring=ANSWER_COLORING_ALL,
     shuffle_policy=SHUFFLE_POLICY_FIELD, option_labels=OPTION_LABELS_LETTERS,
+    option_layout_default=1,
 ):
     preset = NOTE_TYPES[kind]
     if answer_coloring not in {ANSWER_COLORING_ALL, ANSWER_COLORING_MISTAKES}:
@@ -252,6 +255,7 @@ def create_note_type(
     template.update(template_content(
         preset, appearance, style_application, shuffle_default, count, answer_coloring,
         shuffle_policy, option_labels,
+        option_layout_default,
     ))
     models.addTemplate(model, template)
     model["css"] = css
@@ -262,6 +266,7 @@ def create_note_type(
         model["mfc_answer_coloring"] = answer_coloring
         model["mfc_shuffle_policy"] = shuffle_policy
         model["mfc_option_labels"] = option_labels
+        model["mfc_option_layout_default"] = option_layout_default if option_layout_default in (1, 2) else 1
     if appearance and style_application == "fixed":
         model["mfc_appearance"] = appearance
     record_installed_content(model, kind, css, template)
@@ -286,9 +291,11 @@ def update_note_type(models, model, css, confirm_overwrite):
     ) if kind == MULTIPLE_CHOICE_KIND else None
     required_fields = preset_fields(kind, preset, option_count)
     missing_fields = set(required_fields) - {field["name"] for field in model["flds"]}
-    if kind == "multiple-choice-2" and missing_fields == {"Shuffle Options"}:
+    if kind == "multiple-choice-2" and missing_fields and missing_fields <= {"Shuffle Options", "Option Layout"}:
         updated = deepcopy(model)
-        models.addField(updated, models.newField("Shuffle Options"))
+        for field_name in ("Shuffle Options", "Option Layout"):
+            if field_name in missing_fields:
+                models.addField(updated, models.newField(field_name))
         models.save(updated)
         model = models.byName(model["name"])
     model_fields = {field["name"] for field in model["flds"]}
@@ -321,6 +328,7 @@ def update_note_type(models, model, css, confirm_overwrite):
         preset, appearance, model.get("mfc_style_application", "legacy"),
         model.get("mfc_shuffle_default", False), option_count,
         answer_coloring, shuffle_policy, option_labels,
+        model.get("mfc_option_layout_default", 1),
     )
     css_changed = css != model["css"]
     template_changed = any(installed[key] != value for key, value in latest.items())
@@ -346,6 +354,10 @@ def update_note_type(models, model, css, confirm_overwrite):
         updated["mfc_answer_coloring"] = answer_coloring
         updated["mfc_shuffle_policy"] = shuffle_policy
         updated["mfc_option_labels"] = option_labels
+        option_layout_default = model.get("mfc_option_layout_default", 1)
+        if option_layout_default not in (1, 2):
+            option_layout_default = 1
+        updated["mfc_option_layout_default"] = option_layout_default
     record_installed_content(updated, kind, css, latest)
     models.save(updated)
     return "updated"
@@ -353,7 +365,7 @@ def update_note_type(models, model, css, confirm_overwrite):
 
 def edit_note_type_settings(
     models, model, appearance, style_application, shuffle_default, option_count,
-    answer_coloring, shuffle_policy, option_labels, confirm_overwrite,
+    answer_coloring, shuffle_policy, option_labels, option_layout_default, confirm_overwrite,
 ):
     kind = model.get("mfc_kind", "basic")
     if kind not in NOTE_TYPES or model["type"] != MODEL_STD:
@@ -367,6 +379,8 @@ def edit_note_type_settings(
         shuffle_policy = SHUFFLE_POLICY_FIELD
     if option_labels not in OPTION_LABELS:
         option_labels = OPTION_LABELS_LETTERS
+    if option_layout_default not in (1, 2):
+        option_layout_default = 1
 
     updated = deepcopy(model)
     current_count = multiple_choice_option_count(
@@ -387,10 +401,12 @@ def edit_note_type_settings(
         updated["mfc_answer_coloring"] = answer_coloring
         updated["mfc_shuffle_policy"] = shuffle_policy
         updated["mfc_option_labels"] = option_labels
+        updated["mfc_option_layout_default"] = option_layout_default
 
     latest = template_content(
         {**preset, "kind": kind}, updated.get("mfc_appearance"), style_application,
         shuffle_default, option_count, answer_coloring, shuffle_policy, option_labels,
+        updated.get("mfc_option_layout_default", 1),
     )
     installed = model["tmpls"][0]
     template_changed = any(installed[key] != value for key, value in latest.items())
@@ -446,6 +462,11 @@ class CreateNoteTypeDialog(QDialog):
         self.centered = QCheckBox("Center card content")
         self.shuffle_default = QCheckBox("Shuffle answers by default")
         self.shuffle_default.setChecked(bool(QSettings("Material Notes", "Material Notes").value(ADDON_CONFIG_KEY, False, type=bool)))
+        self.option_layout_default = QComboBox()
+        self.option_layout_default.addItem("1 column", 1)
+        self.option_layout_default.addItem("2 columns", 2)
+        configured_layout = QSettings("Material Notes", "Material Notes").value(OPTION_LAYOUT_CONFIG_KEY, 1, type=int)
+        self.option_layout_default.setCurrentIndex(max(0, self.option_layout_default.findData(configured_layout if configured_layout in (1, 2) else 1)))
         self.answer_coloring = QComboBox()
         self.answer_coloring.addItem("Show all correct answers", ANSWER_COLORING_ALL)
         self.answer_coloring.addItem("Highlight only mistakes", ANSWER_COLORING_MISTAKES)
@@ -492,6 +513,7 @@ class CreateNoteTypeDialog(QDialog):
         fixed_layout.addRow("", self.centered)
         appearance_layout.addRow(self.fixed_controls)
         appearance_layout.addRow("Shuffle answers by default", self.shuffle_default)
+        appearance_layout.addRow("Option layout by default", self.option_layout_default)
         appearance_layout.addRow("Answer feedback", self.answer_coloring)
         appearance_layout.addRow("Option labels", self.option_labels)
 
@@ -573,6 +595,7 @@ class CreateNoteTypeDialog(QDialog):
         self.shuffle_default.setVisible(is_multiple_choice)
         self.answer_coloring.setVisible(is_multiple_choice)
         self.option_labels.setVisible(is_multiple_choice)
+        self.option_layout_default.setVisible(is_multiple_choice)
         self.tag_controls.setVisible(using_tags)
         self.update_suggested_name()
         self.adjustSize()
@@ -592,6 +615,8 @@ class CreateNoteTypeDialog(QDialog):
             style_application = self.style_application.currentData()
             shuffle_default = self.shuffle_default.isChecked()
             QSettings("Material Notes", "Material Notes").setValue(ADDON_CONFIG_KEY, shuffle_default)
+            option_layout_default = self.option_layout_default.currentData()
+            QSettings("Material Notes", "Material Notes").setValue(OPTION_LAYOUT_CONFIG_KEY, option_layout_default)
             answer_coloring = self.answer_coloring.currentData()
             if self.kind.currentData() == MULTIPLE_CHOICE_KIND:
                 QSettings("Material Notes", "Material Notes").setValue(
@@ -608,6 +633,7 @@ class CreateNoteTypeDialog(QDialog):
                 self.option_count.value() if self.kind.currentData() == MULTIPLE_CHOICE_KIND else None,
                 answer_coloring,
                 option_labels=self.option_labels.currentData(),
+                option_layout_default=option_layout_default,
             )
         except (AnkiError, OSError) as error:
             showInfo(str(error), parent=self, textFormat=Qt.TextFormat.PlainText)
@@ -699,6 +725,11 @@ class EditNoteTypeDialog(QDialog):
         )
         labels = model.get("mfc_option_labels", OPTION_LABELS_LETTERS)
         self.option_labels.setCurrentIndex(max(0, self.option_labels.findData(labels)))
+        self.option_layout_default = QComboBox()
+        self.option_layout_default.addItem("1 column", 1)
+        self.option_layout_default.addItem("2 columns", 2)
+        layout_default = model.get("mfc_option_layout_default", 1)
+        self.option_layout_default.setCurrentIndex(max(0, self.option_layout_default.findData(layout_default if layout_default in (1, 2) else 1)))
 
         note_group = QGroupBox("Note type")
         note_layout = QFormLayout(note_group)
@@ -715,6 +746,7 @@ class EditNoteTypeDialog(QDialog):
         mc_layout.addRow("Shuffle behavior", self.shuffle_policy)
         mc_layout.addRow("Answer feedback", self.answer_coloring)
         mc_layout.addRow("Option labels", self.option_labels)
+        mc_layout.addRow("Default option layout", self.option_layout_default)
         note_layout.addRow(self.multiple_choice_controls)
 
         buttons = QDialogButtonBox(
@@ -767,7 +799,8 @@ class EditNoteTypeDialog(QDialog):
                 self.models, self.model, appearance, style_application,
                 self.shuffle_default.isChecked(), self.option_count.value(),
                 self.answer_coloring.currentData(), self.shuffle_policy.currentData(),
-                self.option_labels.currentData(), self.confirm_overwrite,
+                self.option_labels.currentData(), self.option_layout_default.currentData(),
+                self.confirm_overwrite,
             )
         except (AnkiError, OSError) as error:
             showInfo(str(error), parent=self, textFormat=Qt.TextFormat.PlainText)

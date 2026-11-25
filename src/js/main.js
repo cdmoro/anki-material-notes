@@ -7,6 +7,7 @@ const finishes = document.querySelectorAll("[data-finish]");
 const templatePreviews = new Map();
 const optionLabelPreference = "note-mc2-option-labels";
 const answerFeedbackPreference = "note-mc2-answer-feedback";
+const optionLayoutPreference = "note-mc2-option-layout";
 const initialOptionCount = 4;
 const savedAnswerFeedback = readPreference(answerFeedbackPreference);
 let currentAnswerFeedback = ["all", "mistakes"].includes(savedAnswerFeedback) ? savedAnswerFeedback : "all";
@@ -92,6 +93,7 @@ function updateTemplatePreviews() {
             const standalone = content
                 .replace(/\{\{mfc_shuffle_default\}\}/g, "false")
                 .replace(/const optionLabels = "[^"]+";/, `const optionLabels = "${selectedOptionLabelStyle()}";`)
+                .replace(/const defaultOptionLayout = \d+;/, `const defaultOptionLayout = ${selectedOptionLayout(note)};`)
                 .replace(/const answerColoring = "[^"]+";/, `const answerColoring = "${currentAnswerFeedback}";`);
             const styled = standalone.replace(/\{\{Tags\}\}/g, templateStyle === "tags" ? "{{Tags}}" : classes);
             code.textContent = note.closest(".multiple-choice-js-example") ? limitMultipleChoiceTemplate(styled) : styled;
@@ -135,6 +137,11 @@ function templateClassName(note) {
 
 function selectedOptionLabelStyle() {
     return document.querySelector("[data-mc2-label-select]")?.value || initialOptionLabels || "upper-alpha";
+}
+
+function selectedOptionLayout(note) {
+    const value = note.closest(".card-example")?.querySelector("[data-mc2-layout-select]")?.value;
+    return value === "2" ? 2 : 1;
 }
 
 function selectedOptionCount() {
@@ -315,6 +322,25 @@ answerFeedbackSelects.forEach(select => {
     });
 });
 
+const optionLayoutSelects = document.querySelectorAll("[data-mc2-layout-select]");
+optionLayoutSelects.forEach(select => {
+    const example = select.closest(".card-example");
+    const preference = `${optionLayoutPreference}-${example?.id || "default"}`;
+    const saved = readPreference(preference);
+    select.value = saved === "2" ? "2" : "1";
+    example?.querySelectorAll(".question-options ol").forEach(list => {
+        list.classList.toggle("mc2-two-columns", select.value === "2");
+    });
+    select.addEventListener("change", () => {
+        const layout = select.value === "2" ? "2" : "1";
+        savePreference(preference, layout);
+        example?.querySelectorAll(".question-options ol").forEach(list => {
+            list.classList.toggle("mc2-two-columns", layout === "2");
+        });
+        updateTemplatePreviews();
+    });
+});
+
 function updateMultipleChoice2Labels(style) {
     document.querySelectorAll(".multiple-choice-js-example .question-options ol").forEach(list => {
         list.style.listStyleType = style;
@@ -411,6 +437,7 @@ document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
     const correctCount = new Set(normalizeMultipleChoiceAnswers(answers, available)).size;
     const list = example.querySelector(".question-options ol");
     list?.classList.add("mc2-labeled");
+    list?.classList.toggle("mc2-two-columns", selectedOptionLayout(example) === 2);
     if (list) {
         list.style.listStyleType = initialOptionLabels;
     }

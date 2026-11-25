@@ -78,11 +78,12 @@
   "multiple-choice-2": {
     "label": "Multiple Choice (JS)",
     "description": "Choose from 2 to 10 interactive answers, then use Show Answer to see correct, incorrect and missed choices.",
-    "fields": ["Question", "Option A", "Option B", "Correct Answers", "Shuffle Options", "Explanation", "Source"],
+    "fields": ["Question", "Option A", "Option B", "Correct Answers", "Shuffle Options", "Option Layout", "Explanation", "Source"],
     "option_count_default": 4,
     "field_descriptions": {
       "Correct Answers": "Enter letters (A or A,C) or option numbers (1 or 1,4), separated by commas or spaces. Numbers map to Option A, Option B, and so on. Out-of-range choices are ignored; unparseable text makes the answer key empty.",
       "Shuffle Options": "Optional: true to shuffle choices each review, false to keep their listed order. Blank uses the note type default.",
+      "Option Layout": "Optional: enter 1 for one column or 2 for two columns. Blank uses the note type default.",
       "Explanation": "Optional explanation shown on the answer side.",
       "Source": "Optional source or reference for this question."
     },
