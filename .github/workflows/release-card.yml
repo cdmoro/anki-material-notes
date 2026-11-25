@@ -3,6 +3,10 @@ name: Build Material Notes
 on:
   pull_request:
   push:
+    branches:
+      - main
+    paths:
+      - manifest.json
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
@@ -18,13 +22,19 @@ jobs:
           persist-credentials: false
 
       - name: Check the release version
-        if: github.ref_type == 'tag'
+        if: github.ref_type == 'tag' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
         run: |
           version=$(python3 -c 'import json; print(json.load(open("manifest.json"))["version"])')
-          if [[ "$GITHUB_REF_NAME" != "v$version" ]]; then
+          if [[ "$GITHUB_REF_TYPE" == "tag" && "$GITHUB_REF_NAME" != "v$version" ]]; then
             echo "::error::Tag $GITHUB_REF_NAME must match manifest.json version $version"
             exit 1
           fi
+          if [[ "$GITHUB_REF_TYPE" == "branch" && "$GITHUB_REF_NAME" == "main" ]]; then
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run tests
+        run: make test
 
       - name: Build the card and add-on packages
         run: make build-card build-addon
@@ -36,14 +46,11 @@ jobs:
           if-no-files-found: error
           overwrite: true
           path: |
-            models/front.html
-            models/back.html
-            models/styles.css
             dist/material-notes-card.zip
             dist/material-notes.ankiaddon
 
   release:
-    if: github.ref_type == 'tag'
+    if: github.ref_type == 'tag' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -58,7 +65,21 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          package="dist/material-notes-card-${GITHUB_REF_NAME}.zip"
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            tag="$GITHUB_REF_NAME"
+          else
+            version=$(python3 -c 'import json; print(json.load(open("manifest.json"))["version"])')
+            tag="v$version"
+            if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              echo "Release $tag already exists; skipping duplicate publication."
+              exit 0
+            fi
+            if ! gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" >/dev/null 2>&1; then
+              gh api "repos/$GITHUB_REPOSITORY/git/refs" \
+                -f "ref=refs/tags/$tag" -f "sha=$GITHUB_SHA"
+            fi
+          fi
+          package="dist/material-notes-card-${tag}.zip"
           mv dist/material-notes-card.zip "$package"
-          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes \
-            models/front.html models/back.html models/styles.css "$package" dist/material-notes.ankiaddon
+          gh release create "$tag" --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes \
+            "$package" dist/material-notes.ankiaddon
