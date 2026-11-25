@@ -744,12 +744,26 @@ body.card {
 .note .question-options ol.mc2-two-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 1.25em;
-  row-gap: .15em;
+  gap: 1em;
+}
+
+.note .question-options ol.mc2-two-columns > [data-choice] {
+  display: flex;
+  min-height: 7em;
+  aspect-ratio: 1.4;
+  margin: 0;
+  padding: .75em;
+  align-items: stretch;
+  border: 1.5px solid color-mix(in srgb, var(--font-color) 18%, var(--surface));
+  border-radius: .7em;
 }
 
 .note .question-options ol.mc2-two-columns label {
   width: auto;
+  margin: 0;
+  padding: .5em;
+  justify-content: center;
+  text-align: center;
 }
 
 .note .question-options ol.mc2-labeled > [data-choice] {
