@@ -143,7 +143,10 @@
             // its native click/change behavior.
             input.addEventListener("touchend", event => event.stopPropagation(), { passive: true });
             label.addEventListener("touchend", event => event.stopPropagation(), { passive: true });
-            label.append(input, document.createTextNode(" "), ...Array.from(option.childNodes));
+            const content = document.createElement("span");
+            content.className = "mc2-option-content";
+            content.append(...Array.from(option.childNodes));
+            label.append(input, content);
             option.replaceChildren(label);
         });
         try { Persistence.setItem(stateKey, { order, selected: Array.from(selected) }); } catch (_) {}

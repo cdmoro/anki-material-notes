@@ -391,7 +391,10 @@ function ensureMultipleChoicePreviewOptions(example) {
             updateMultipleChoice2Preview(false);
         });
         const label = document.createElement("label");
-        label.append(input, document.createTextNode(" "), document.createTextNode(optionSamples[index - 2]));
+        const content = document.createElement("span");
+        content.className = "mc2-option-content";
+        content.textContent = optionSamples[index - 2];
+        label.append(input, content);
         option.replaceChildren(label);
     }
 }
@@ -459,7 +462,10 @@ document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
             multipleChoicePreviewSelections.set(example.id, selected);
             updateMultipleChoice2Preview(false);
         });
-        label.append(input, document.createTextNode(" "), ...Array.from(option.childNodes));
+        const content = document.createElement("span");
+        content.className = "mc2-option-content";
+        content.append(...Array.from(option.childNodes));
+        label.append(input, content);
         option.replaceChildren(label);
     });
 });

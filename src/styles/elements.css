@@ -176,14 +176,19 @@
 }
 
 .note .question-options ol.mc2-two-columns label {
+  display: grid;
   position: relative;
   width: auto;
   margin: 0;
   padding: 1.25em .5em .5em;
-  align-items: center;
-  justify-content: center;
+  place-items: center;
   text-align: center;
   text-wrap: balance;
+}
+
+.note .question-options ol.mc2-two-columns .mc2-option-content {
+  max-width: 100%;
+  grid-area: 1 / 1;
 }
 
 .note .question-options ol.mc2-two-columns input {
