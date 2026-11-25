@@ -93,7 +93,6 @@ function updateTemplatePreviews() {
             const standalone = content
                 .replace(/\{\{mfc_shuffle_default\}\}/g, "false")
                 .replace(/const optionLabels = "[^"]+";/, `const optionLabels = "${selectedOptionLabelStyle()}";`)
-                .replace(/const defaultOptionLayout = \d+;/, `const defaultOptionLayout = ${selectedOptionLayout(note)};`)
                 .replace(/const answerColoring = "[^"]+";/, `const answerColoring = "${currentAnswerFeedback}";`);
             const styled = standalone.replace(/\{\{Tags\}\}/g, templateStyle === "tags" ? "{{Tags}}" : classes);
             code.textContent = note.closest(".multiple-choice-js-example") ? limitMultipleChoiceTemplate(styled) : styled;
