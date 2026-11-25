@@ -143,6 +143,35 @@
   --fill-dark: #2b2a2e;
 }
 
+.note:is(.note-inverted, .Material\:\:note-inverted),
+.note:is(.note-inverted-base, .Material\:\:note-inverted-base),
+.note:is(.note-inverted-filled, .Material\:\:note-inverted-filled),
+.note:is(.note-inverted-outlined, .Material\:\:note-inverted-outlined) {
+  --palette-light: #000;
+  --palette-dark: #fff;
+  --fill-light: #e8e8e8;
+  --fill-dark: #292929;
+  --ink-light: #fff;
+  --ink-dark: #000;
+  --front-light: #000;
+  --front-dark: #fff;
+  --link-light: #000;
+}
+
+.note:is(.note-inverted, .Material\:\:note-inverted),
+.note:is(.note-inverted-base, .Material\:\:note-inverted-base) {
+  --accent-color: var(--palette-front);
+  --front-color: var(--palette-ink);
+  --back-accent-color: var(--palette-link);
+}
+
+.note:is(.note-inverted, .Material\:\:note-inverted),
+.note:is(.note-inverted-base, .Material\:\:note-inverted-base),
+.note:is(.note-inverted-filled, .Material\:\:note-inverted-filled),
+.note:is(.note-inverted-outlined, .Material\:\:note-inverted-outlined) {
+  --outline: var(--palette-accent);
+}
+
 /* Presentation rules for each variant family. */
 .note:is(.note-blue-base, .Material\:\:note-blue-base),
 .note:is(.note-purple-base, .Material\:\:note-purple-base),
@@ -202,6 +231,7 @@
 .note:is(.note-brown-filled, .Material\:\:note-brown-filled),
 .note:is(.note-lime-filled, .Material\:\:note-lime-filled),
 .note:is(.note-red-filled, .Material\:\:note-red-filled),
+.note:is(.note-inverted-filled, .Material\:\:note-inverted-filled),
 .note:is(.note-flag-argentina-filled, .Material\:\:note-flag-argentina-filled),
 .note:is(.note-flag-brazil-filled, .Material\:\:note-flag-brazil-filled),
 .note:is(.note-flag-china-filled, .Material\:\:note-flag-china-filled),
@@ -229,6 +259,7 @@
 .note:is(.note-brown-outlined, .Material\:\:note-brown-outlined),
 .note:is(.note-lime-outlined, .Material\:\:note-lime-outlined),
 .note:is(.note-red-outlined, .Material\:\:note-red-outlined),
+.note:is(.note-inverted-outlined, .Material\:\:note-inverted-outlined),
 .note:is(.note-base-outlined, .Material\:\:note-base-outlined),
 .note:is(.note-flag-argentina-outlined, .Material\:\:note-flag-argentina-outlined),
 .note:is(.note-flag-brazil-outlined, .Material\:\:note-flag-brazil-outlined),
@@ -249,6 +280,7 @@
 
 .note:is(.note-base-outlined, .Material\:\:note-base-outlined) {
   --outline: #d9d3de;
+  --accent-color: color-mix(in srgb, var(--outline) 35%, var(--surface));
   --back-accent-color: var(--font-color);
 }
 
@@ -257,9 +289,12 @@
   --outline: #3d3a43;
 }
 
-.note:is(.note-white-base, .Material\:\:note-white-base) {
-  --accent-color: #fff;
-  --front-color: var(--light-font-color);
+.note:is(.note-inverted, .Material\:\:note-inverted) .question,
+.note:is(.note-inverted-base, .Material\:\:note-inverted-base) .question,
+.note:is(.note-inverted-filled, .Material\:\:note-inverted-filled) .question,
+.note:is(.note-inverted-outlined, .Material\:\:note-inverted-outlined) .question {
+  background: var(--palette-front);
+  color: var(--palette-ink);
 }
 
 /* Country tags keep their original Accent aliases. */

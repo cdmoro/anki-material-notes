@@ -13,13 +13,15 @@ Leave **Note type name** blank to use the suggestion, such as `Basic - Pink Outl
 
 **Update note types** refreshes the templates and CSS while keeping your appearance choices and the field values on existing notes. If you edited the templates or styling, the add-on asks before replacing your changes.
 
-The managed note type list shows each type’s style and, for Multiple Choice, its option count, shuffle behavior, and feedback style. Select a type and choose **Edit settings…** to change those settings for all its cards. Option counts can be increased; existing fields are retained.
+The managed note type list shows each type’s style and the decks containing its notes. For types styled using tags, **Change style…** can replace the style tag across all notes or notes that appear in one deck. Tags belong to notes, so cards from those notes in other decks change too. For Multiple Choice, the list also shows the option count, shuffle behavior, and feedback style. Select a type and choose **Edit settings…** to change those settings for all its cards. Option counts can be increased; existing fields are retained.
 
 ## Copy a card into Anki
 
 Open **Cards…** for a Basic note type with the **Front** and **Back** fields. Use the demo’s **Copy front**, **Copy back**, and **Copy style** buttons to fill the corresponding editor panes below, or copy from the files directly.
 
 Download a versioned copy of the three files, together or individually, from [GitHub Releases](https://github.com/cdmoro/anki-material-notes/releases).
+
+See [CHANGELOG.md](CHANGELOG.md) for the current release’s palette changes.
 
 | Anki editor pane | File |
 | --- | --- |
@@ -32,6 +34,8 @@ If you want these templates for a single deck, clone the note type before editin
 ### Customize with classes or tags
 
 For a style shared by a whole note type, choose an appearance in the add-on or add a class such as `note-green-filled` to the outer `.note` element in both templates.
+
+The **Inverted** palette uses a black question header in light mode and a white one in dark mode. It supports Base, Filled, and Outlined finishes. Existing managed note types saved with the former White palette are updated to Inverted when their styling is refreshed.
 
 For styling individual notes, put `{{Tags}}` in the class list of the outer `.note` element in both templates in place of any fixed palette class. The Basic templates linked above already use `{{Tags}}`. Add one palette tag per note, such as `note-green-filled` or `Material::note-green-filled`. See [How to use style tags](docs/using-style-tags.md) for step-by-step instructions and the list of colors, finishes, and country palettes.
 
@@ -101,11 +105,11 @@ The demo uses the [field horsetail photograph by H. Zell](https://commons.wikime
 
 ## Publish a version
 
-Set `version` in `manifest.json`, run `make build-css`, then commit and push the release changes. Tag that commit with the same version prefixed by `v`. For example, for `1.0.0`, run the following commands on the release commit.
+Set `version` in `manifest.json`, run `make build-css`, then commit and merge the release changes into `main`. A push to `main` that changes `manifest.json` builds the packages and publishes a GitHub Release tagged with the manifest version. The workflow creates that tag if needed. If you publish by pushing a version tag directly, it still checks that the tag matches the manifest.
 
 ```sh
-git tag -a v1.0.0 -m "Release v1.0.0"
-git push origin v1.0.0
+git tag -a v1.1.0 -m "Release v1.1.0"
+git push origin v1.1.0
 ```
 
-On pull requests and version tags, GitHub Actions uploads `material-notes-packages` with the card files, the card ZIP, and `material-notes.ankiaddon`. A version tag also publishes a GitHub Release with the installable add-on, the three card files, and a versioned card ZIP such as `material-notes-card-v1.0.0.zip`.
+On pull requests, manifest updates merged to `main`, and version tags, GitHub Actions builds the packages and uploads `material-notes-packages` with the card files, the card ZIP, and `material-notes.ankiaddon`. Manifest updates on `main` and version tags also publish a GitHub Release with the installable add-on, the three card files, and a versioned card ZIP such as `material-notes-card-v1.0.0.zip`. The demo deployment remains managed separately by Netlify.

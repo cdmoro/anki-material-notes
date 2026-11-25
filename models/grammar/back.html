@@ -2,7 +2,18 @@
     {{FrontSide}}
     <hr id="answer">
     <div class="body">
-        <div class="text-block">{{Back}}</div>
+        <div class="text-block">
+            <div class="subtitle">{{Type}}</div>
+            <div class="text-block">
+                <div class="text-sm font-mono">
+                    {{Structure}}
+                </div>
+            </div>
+            <div class="text-block">
+                <div class="subtitle">Uses</div>
+                {{Uses}}
+            </div>
+        </div>
         {{#Translation}}<div class="text-block">{{hint:Translation}}</div>{{/Translation}}
     </div>
 </div>

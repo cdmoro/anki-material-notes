@@ -1,4 +1,4 @@
-/* Material Notes · Carlos Bonadeo · 1.0.1
+/* Material Notes · Carlos Bonadeo · 1.3.0
  * https://github.com/cdmoro/anki-material-notes
  * Generated from src/styles/ by make build-css.
  */
@@ -13,9 +13,9 @@ body.card {
   --background: #fefefe;
   --surface: #fefefe;
   --divider: #ddd;
-  --feedback-correct-background: #c8e6c9;
+  --feedback-correct-background: #a5d6a7;
   --feedback-correct-foreground: #1b5e20;
-  --feedback-incorrect-background: #ffcdd2;
+  --feedback-incorrect-background: #ef9a9a;
   --feedback-incorrect-foreground: #b71c1c;
   --border-radius: 8px;
   --note-font-size: 19px;
@@ -37,9 +37,9 @@ body.card {
   --background: #121212;
   --surface: #1d1d1d;
   --divider: #333;
-  --feedback-correct-background: #1b5e20;
+  --feedback-correct-background: #285b2b;
   --feedback-correct-foreground: #c8e6c9;
-  --feedback-incorrect-background: #b71c1c;
+  --feedback-incorrect-background: #8f2929;
   --feedback-incorrect-foreground: #ffcdd2;
 }
 
@@ -255,6 +255,35 @@ body.card {
   --fill-dark: #2b2a2e;
 }
 
+.note:is(.note-inverted, .Material\:\:note-inverted),
+.note:is(.note-inverted-base, .Material\:\:note-inverted-base),
+.note:is(.note-inverted-filled, .Material\:\:note-inverted-filled),
+.note:is(.note-inverted-outlined, .Material\:\:note-inverted-outlined) {
+  --palette-light: #000;
+  --palette-dark: #fff;
+  --fill-light: #e8e8e8;
+  --fill-dark: #292929;
+  --ink-light: #fff;
+  --ink-dark: #000;
+  --front-light: #000;
+  --front-dark: #fff;
+  --link-light: #000;
+}
+
+.note:is(.note-inverted, .Material\:\:note-inverted),
+.note:is(.note-inverted-base, .Material\:\:note-inverted-base) {
+  --accent-color: var(--palette-front);
+  --front-color: var(--palette-ink);
+  --back-accent-color: var(--palette-link);
+}
+
+.note:is(.note-inverted, .Material\:\:note-inverted),
+.note:is(.note-inverted-base, .Material\:\:note-inverted-base),
+.note:is(.note-inverted-filled, .Material\:\:note-inverted-filled),
+.note:is(.note-inverted-outlined, .Material\:\:note-inverted-outlined) {
+  --outline: var(--palette-accent);
+}
+
 /* Presentation rules for each variant family. */
 .note:is(.note-blue-base, .Material\:\:note-blue-base),
 .note:is(.note-purple-base, .Material\:\:note-purple-base),
@@ -314,6 +343,7 @@ body.card {
 .note:is(.note-brown-filled, .Material\:\:note-brown-filled),
 .note:is(.note-lime-filled, .Material\:\:note-lime-filled),
 .note:is(.note-red-filled, .Material\:\:note-red-filled),
+.note:is(.note-inverted-filled, .Material\:\:note-inverted-filled),
 .note:is(.note-flag-argentina-filled, .Material\:\:note-flag-argentina-filled),
 .note:is(.note-flag-brazil-filled, .Material\:\:note-flag-brazil-filled),
 .note:is(.note-flag-china-filled, .Material\:\:note-flag-china-filled),
@@ -341,6 +371,7 @@ body.card {
 .note:is(.note-brown-outlined, .Material\:\:note-brown-outlined),
 .note:is(.note-lime-outlined, .Material\:\:note-lime-outlined),
 .note:is(.note-red-outlined, .Material\:\:note-red-outlined),
+.note:is(.note-inverted-outlined, .Material\:\:note-inverted-outlined),
 .note:is(.note-base-outlined, .Material\:\:note-base-outlined),
 .note:is(.note-flag-argentina-outlined, .Material\:\:note-flag-argentina-outlined),
 .note:is(.note-flag-brazil-outlined, .Material\:\:note-flag-brazil-outlined),
@@ -361,6 +392,7 @@ body.card {
 
 .note:is(.note-base-outlined, .Material\:\:note-base-outlined) {
   --outline: #d9d3de;
+  --accent-color: color-mix(in srgb, var(--outline) 35%, var(--surface));
   --back-accent-color: var(--font-color);
 }
 
@@ -369,9 +401,12 @@ body.card {
   --outline: #3d3a43;
 }
 
-.note:is(.note-white-base, .Material\:\:note-white-base) {
-  --accent-color: #fff;
-  --front-color: var(--light-font-color);
+.note:is(.note-inverted, .Material\:\:note-inverted) .question,
+.note:is(.note-inverted-base, .Material\:\:note-inverted-base) .question,
+.note:is(.note-inverted-filled, .Material\:\:note-inverted-filled) .question,
+.note:is(.note-inverted-outlined, .Material\:\:note-inverted-outlined) .question {
+  background: var(--palette-front);
+  color: var(--palette-ink);
 }
 
 /* Country tags keep their original Accent aliases. */
@@ -556,13 +591,17 @@ body.card {
 
 /* Direct images on the front also act as covers in older templates. */
 .note > .cover,
-.note > .cover img,
+.note > .cover > img,
 .note.front > img,
 .note.back > .body > img {
   display: block;
   width: 100%;
   max-height: 200px;
   object-fit: cover;
+}
+
+.note > .cover > img {
+  height: 200px;
 }
 
 .note.front .body img {
@@ -698,38 +737,44 @@ body.card {
 }
 
 .note .question-options ol.mc2-labeled {
-  list-style: none;
-  padding-inline-start: 0;
-  counter-reset: mc2-option;
+  list-style-type: upper-alpha;
+  counter-reset: mc2-choice;
 }
 
 .note .question-options ol.mc2-labeled > [data-choice] {
-  display: flex;
-  align-items: center;
-  gap: .45em;
-  counter-increment: mc2-option;
+  position: relative;
   width: 100%;
+  list-style: none;
+  counter-increment: mc2-choice;
 }
 
 .note .question-options ol.mc2-labeled > [data-choice]::before {
-  content: counter(mc2-option, var(--mc2-list-style, upper-alpha)) ".";
-  flex: 0 0 1.25em;
+  position: absolute;
+  top: .4em;
+  left: -2em;
+  width: 1.5em;
   text-align: end;
-  font-variant-numeric: tabular-nums;
-}
-
-.note .question-options ol.mc2-labeled.mc2-no-labels > [data-choice]::before {
-  content: none;
+  content: counter(mc2-choice, var(--mc2-list-style, upper-alpha)) ".";
 }
 
 .note .question-options label {
   box-sizing: border-box;
   display: flex;
-  flex: 1;
+  width: calc(100% + 1em);
+  margin: -.4em -.5em;
+  padding: .4em .5em;
   min-width: 0;
   align-items: center;
   gap: .45em;
   cursor: pointer;
+}
+
+.note .question-options ol.mc2-no-labels {
+  padding-inline-start: 0;
+}
+
+.note .question-options ol.mc2-labeled.mc2-no-labels > [data-choice]::before {
+  content: none;
 }
 
 .note .question-options input {
@@ -739,17 +784,159 @@ body.card {
 
 .note .question-options [data-choice] {
   box-sizing: border-box;
-  margin-block: .2em;
-  padding: .3em .5em;
+  margin-block: 4px;
+  padding: .4em .5em;
   border-radius: .15em;
+}
+
+.note.front.question-card .question-options [data-choice],
+.note.front.question-card .question-options label {
+  cursor: pointer;
 }
 
 .note.front.question-card .question-options [data-choice] {
   background: rgba(128, 128, 128, .14);
 }
 
+.note.front.question-card .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer) {
+  background: color-mix(in srgb, var(--palette-fill) 85%, var(--surface));
+}
+
+.note.front:is(.note-base-filled, .Material\:\:note-base-filled) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer),
+.note.front:is(.note-blue-filled, .Material\:\:note-blue-filled) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer),
+.note.front:is(.note-purple-filled, .Material\:\:note-purple-filled) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer),
+.note.front:is(.note-pink-filled, .Material\:\:note-pink-filled) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer),
+.note.front:is(.note-teal-filled, .Material\:\:note-teal-filled) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer),
+.note.front:is(.note-green-filled, .Material\:\:note-green-filled) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer),
+.note.front:is(.note-orange-filled, .Material\:\:note-orange-filled) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer),
+.note.front:is(.note-indigo-filled, .Material\:\:note-indigo-filled) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer),
+.note.front:is(.note-brown-filled, .Material\:\:note-brown-filled) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer),
+.note.front:is(.note-lime-filled, .Material\:\:note-lime-filled) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer),
+.note.front:is(.note-red-filled, .Material\:\:note-red-filled) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer),
+.note.front:is([class*="note-flag-"][class$="-filled"], [class*="Material::note-flag-"][class$="-filled"]) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer) {
+  background: color-mix(in srgb, var(--palette-accent) 24%, var(--note-background));
+}
+
+.note.front:is(.mc2-base-default, .note-base, .Material\:\:note-base) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer) {
+  background: color-mix(in srgb, var(--font-color) 22%, var(--surface));
+}
+
+.note.front:is(.note-base-outlined, .Material\:\:note-base-outlined) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer) {
+  background: color-mix(in srgb, var(--font-color) 22%, var(--surface));
+}
+
+.note.front:is(.note-inverted, .Material\:\:note-inverted) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer),
+.note.front:is(.note-inverted-base, .Material\:\:note-inverted-base) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer),
+.note.front:is(.note-inverted-filled, .Material\:\:note-inverted-filled) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer),
+.note.front:is(.note-inverted-outlined, .Material\:\:note-inverted-outlined) .question-options [data-choice]:has(input:checked):not(.correct-answer):not(.wrong-answer) {
+  background: color-mix(in srgb, var(--font-color) 22%, var(--surface));
+}
+
 .note .question-options input {
-  accent-color: var(--accent-color);
+  appearance: none;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+  color: var(--palette-accent);
+  border: 2px solid rgba(0, 0, 0, .54);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.note .question-options input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.note .question-options input[type="radio"] {
+  border-radius: 50%;
+}
+
+.note .question-options input:checked {
+  border-color: currentColor;
+  background: currentColor;
+}
+
+.note .question-options input[type="checkbox"]:checked::before {
+  width: 12px;
+  height: 10px;
+  background: var(--surface);
+  clip-path: polygon(35% 100%, 0 51%, 10% 38%, 35% 71%, 90% 0, 100% 13%);
+  content: "";
+}
+
+.note .question-options input:disabled:checked[type="checkbox"]::before {
+  opacity: .5;
+}
+
+.note .question-options input[type="radio"]:checked::before {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+
+.note .question-options input[type="radio"]:checked {
+  background: transparent;
+}
+
+.note .question-options input:focus-visible {
+  outline: 2px solid var(--palette-accent);
+  outline-offset: 2px;
+}
+
+.note .question-options input:disabled {
+  color: color-mix(in srgb, var(--font-color) 38%, var(--surface));
+  border-color: rgba(0, 0, 0, .38);
+  cursor: default;
+  opacity: 1;
+}
+
+.note.back.choice-answer-card .question-options label:has(input:disabled),
+.note.back.choice-answer-card .question-options [data-choice]:has(input:disabled) {
+  cursor: default;
+}
+
+.note .question-options input:disabled:checked {
+  color: rgba(0, 0, 0, .38);
+  border-color: rgba(0, 0, 0, .38);
+  background-color: rgba(0, 0, 0, .38);
+  background-clip: padding-box;
+}
+
+.nightMode .note .question-options input:disabled,
+.night_mode .note .question-options input:disabled {
+  color: rgba(255, 255, 255, .38);
+  border-color: rgba(255, 255, 255, .38);
+}
+
+.nightMode .note .question-options input:not(:disabled):not(:checked),
+.night_mode .note .question-options input:not(:disabled):not(:checked) {
+  border-color: rgba(255, 255, 255, .7);
+}
+
+.nightMode .note .question-options input:disabled:checked,
+.night_mode .note .question-options input:disabled:checked {
+  color: rgba(255, 255, 255, .38);
+  border-color: rgba(255, 255, 255, .38);
+  background-color: rgba(255, 255, 255, .38);
+  background-clip: padding-box;
+}
+
+.note .question-options input:disabled:checked[type="radio"]::before {
+  background: currentColor;
+}
+
+.note .question-options input:disabled:checked[type="radio"] {
+  background: transparent;
 }
 
 .note .wrong-answer {
@@ -780,6 +967,7 @@ body.card {
 }
 
 .choice-answer-card .question-options input:disabled {
+  cursor: default;
   opacity: 1;
 }
 
@@ -789,12 +977,6 @@ body.card {
 
 .note .question-source a {
   text-decoration: underline;
-}
-
-.note a[href^="https://"]::after {
-  content: "↗";
-  margin-left: .25em;
-  font-size: .75em;
 }
 
 /* Audio */
@@ -877,6 +1059,10 @@ body.card {
 
 .note .gap-sm {
   gap: .5rem;
+}
+
+.note .font-mono {
+  font-family: monospace;
 }
 
 .note .text-center,

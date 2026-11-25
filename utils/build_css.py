@@ -47,14 +47,6 @@ def render_card_setup_sources(css):
         name: (ROOT / "models" / CARD_SETUP_TEMPLATES / f"{name}.html").read_text(encoding="utf-8")
         for name in ("front", "back")
     }
-    # The website's copyable example uses four choices even though the add-on
-    # preset supports up to ten.
-    templates["front"] = re.sub(
-        r"\s*\{\{#Option [E-J]\}\}.*?\{\{/Option [E-J]\}\}",
-        "",
-        templates["front"],
-        flags=re.DOTALL,
-    )
     payload = json.dumps({"styles": css, "templates": {CARD_SETUP_TEMPLATES: templates}})
     return f"window.materialNotesSources = {payload};\n"
 
