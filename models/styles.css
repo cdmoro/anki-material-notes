@@ -766,8 +766,10 @@ body.card {
   width: auto;
   margin: 0;
   padding: 1.25em .5em .5em;
+  align-items: center;
   justify-content: center;
   text-align: center;
+  text-wrap: balance;
 }
 
 .note .question-options ol.mc2-two-columns input {
