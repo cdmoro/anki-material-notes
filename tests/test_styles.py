@@ -1,3 +1,5 @@
+import ast
+import re
 import runpy
 import unittest
 from pathlib import Path
@@ -19,7 +21,72 @@ class StyleCatalogTests(unittest.TestCase):
         self.assertEqual(guide, update_guide_catalog(guide, css))
         self.assertIn("note-centered", style_tags(css))
         self.assertIn("note-flag-uk-filled", style_tags(css))
-        self.assertNotIn("note-white-filled", style_tags(css))
+        self.assertNotIn("note-white-base", style_tags(css))
+
+    def test_inverted_palette_parity_across_addon_demo_and_css(self):
+        addon_path = ROOT / "__init__.py"
+        addon_tree = ast.parse(addon_path.read_text(encoding="utf-8"))
+        assignments = {
+            target.id: node.value
+            for node in addon_tree.body if isinstance(node, ast.Assign)
+            for target in node.targets if isinstance(target, ast.Name)
+        }
+        colors = ast.literal_eval(assignments["COLORS"])
+        finishes = ast.literal_eval(assignments["FINISHES"])
+        finish_function = next(
+            node for node in addon_tree.body
+            if isinstance(node, ast.FunctionDef) and node.name == "available_finishes"
+        )
+        normalize_function = next(
+            node for node in addon_tree.body
+            if isinstance(node, ast.FunctionDef) and node.name == "normalize_appearance"
+        )
+        namespace = {"FINISHES": finishes}
+        exec(compile(ast.Module(body=[finish_function, normalize_function], type_ignores=[]), str(addon_path), "exec"), namespace)
+
+        html = (ROOT / "index.html").read_text(encoding="utf-8")
+        palette_select = re.search(r'<select id="color"[\s\S]*?</select>', html).group(0)
+        demo_palettes = dict(re.findall(r'<option value="([^"]+)">([^<]+)</option>', palette_select))
+        main_js = (ROOT / "src" / "js" / "main.js").read_text(encoding="utf-8")
+        finish_picker = re.search(r"function availableFinishes\(color\)\s*\{([^}]+)\}", main_js).group(1)
+        css = (ROOT / "models" / "styles.css").read_text(encoding="utf-8")
+        tags = style_tags(css)
+
+        self.assertIn("Inverted", colors)
+        self.assertEqual(demo_palettes.get("inverted"), "Inverted")
+        self.assertNotIn("white", demo_palettes)
+        self.assertIn('["base", "filled", "outlined"]', finish_picker)
+        self.assertEqual(namespace["available_finishes"]("inverted"), tuple(finishes))
+        self.assertEqual(tuple(finishes), ("base", "filled", "outlined"))
+        self.assertEqual(namespace["normalize_appearance"]({"palette": "white", "finish": "filled"}), {
+            "palette": "inverted", "finish": "filled",
+        })
+        for style_tag in (
+            "note-inverted", "note-inverted-base",
+            "note-inverted-filled", "note-inverted-outlined",
+        ):
+            self.assertIn(style_tag, tags)
+        self.assertNotIn("note-white-base", tags)
+        elements_css = (ROOT / "src" / "styles" / "elements.css").read_text(encoding="utf-8")
+        for style_tag in (
+            "note-inverted", "note-inverted-base",
+            "note-inverted-filled", "note-inverted-outlined",
+        ):
+            self.assertIn(f".note.front:is(.{style_tag}, .Material\\:\\:{style_tag}) .question-options", elements_css)
+        self.assertIn("color-mix(in srgb, var(--font-color) 22%, var(--surface));", elements_css)
+        variant_css = (ROOT / "src" / "styles" / "variants.css").read_text(encoding="utf-8")
+        inverted_css = re.search(
+            r"\.note:is\(\.note-inverted, \.Material\\:\\:note-inverted\),[\s\S]*?\n\}",
+            variant_css,
+        ).group(0)
+        self.assertIn("--palette-light: #000", inverted_css)
+        self.assertIn("--palette-dark: #fff", inverted_css)
+        self.assertIn("--ink-light: #fff", inverted_css)
+        self.assertIn("--ink-dark: #000", inverted_css)
+        self.assertIn("background: var(--palette-front)", variant_css)
+        self.assertIn("color: var(--palette-ink)", variant_css)
+        self.assertRegex(variant_css, r"(?s)\.note:is\(\.note-inverted-filled, \.Material\\:\\:note-inverted-filled\),.*?--note-background: var\(--palette-fill\);")
+        self.assertRegex(variant_css, r"(?s)\.note:is\(\.note-inverted-outlined, \.Material\\:\\:note-inverted-outlined\),.*?--note-border: 2px solid var\(--outline\);")
 
     def test_card_setup_sources_are_current(self):
         css = (ROOT / "models" / "styles.css").read_text(encoding="utf-8")
@@ -138,8 +205,9 @@ class AnkiStyleTests(unittest.TestCase):
         app = QApplication.instance() or QApplication([])
         dialog = self.addon["CreateNoteTypeDialog"](None, self.models)
         self.assertEqual(dialog.name.placeholderText(), "Basic - Default Base")
-        dialog.palette.setCurrentIndex(dialog.palette.findData("white"))
-        self.assertEqual(dialog.name.placeholderText(), "Basic - White Base")
+        dialog.palette.setCurrentIndex(dialog.palette.findData("inverted"))
+        self.assertEqual(dialog.name.placeholderText(), "Basic - Inverted Base")
+        self.assertEqual(dialog.finish.count(), 3)
         dialog.style_application.setCurrentIndex(dialog.style_application.findData("tags"))
         self.assertTrue(dialog.fixed_controls.isHidden())
         self.assertFalse(dialog.tag_controls.isHidden())

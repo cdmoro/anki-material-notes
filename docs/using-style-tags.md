@@ -38,6 +38,8 @@ The repository’s [Basic front](../models/front.html) and [Basic back](../model
 2. To change the style, open **Browse**, select the note or one of its cards, and edit **Tags** in the editor. Remove `Material::note-pink-outlined` and add `note-blue-filled`. All cards generated from that note now use the blue filled style.
 3. To return to the default appearance, remove the palette tag from **Tags**. The default palette and Base finish apply when there is no palette tag.
 
+For an add-on note type configured with **Style using tags**, select it in **Tools → Material Notes…** and choose **Change style…** to replace the style tag for all its notes or for notes with cards in one deck. The add-on keeps other tags. Since tags belong to notes, all cards from a selected note change style, including cards in other decks; the add-on explains this before applying the change.
+
 Use the spellings below as shown. Each tag can be entered as written or with the `Material::` prefix. For example, `note-green-base` and `Material::note-green-base` produce the same appearance. The prefix groups the tags under **Material** in Anki.
 
 Use **one palette and finish tag per note**. If several match, the CSS cascade resolves each property according to the stylesheet’s rule order. Reordering tags in Anki has no effect. Mixing styles can combine properties, for example a filled background and an outline. The optional `note-centered` or `Material::note-centered` tag centers card content and can be used alongside a palette tag. Since the template puts Anki tags into its class list, keep organizational tags distinct from template class names such as `front` and `back`.
@@ -46,7 +48,7 @@ Tags belong to the note, so style tags affect all cards generated from it, inclu
 
 ## Available palette tags
 
-The Base aliases produce the same result as the corresponding Base tags. A dash indicates an unavailable tag. The default Base appearance applies with no palette tag. Country palettes add a flag-inspired stripe to the front. White Base keeps the front white in light and dark mode.
+The Base aliases produce the same result as the corresponding Base tags. A dash indicates an unavailable tag. The default Base appearance applies with no palette tag. Country palettes add a flag-inspired stripe to the front. Inverted uses a black question header in light mode and a white question header in dark mode; all three finishes are available.
 
 <!-- BEGIN STYLE TAG CATALOG -->
 
@@ -57,13 +59,13 @@ The Base aliases produce the same result as the corresponding Base tags. A dash 
 | Brown | `note-brown-base` | `note-brown-filled` | `note-brown-outlined` | `note-brown` |
 | Green | `note-green-base` | `note-green-filled` | `note-green-outlined` | `note-green` |
 | Indigo | `note-indigo-base` | `note-indigo-filled` | `note-indigo-outlined` | `note-indigo` |
+| Inverted | `note-inverted-base` | `note-inverted-filled` | `note-inverted-outlined` | `note-inverted` |
 | Lime | `note-lime-base` | `note-lime-filled` | `note-lime-outlined` | `note-lime` |
 | Orange | `note-orange-base` | `note-orange-filled` | `note-orange-outlined` | `note-orange` |
 | Pink | `note-pink-base` | `note-pink-filled` | `note-pink-outlined` | `note-pink` |
 | Purple | `note-purple-base` | `note-purple-filled` | `note-purple-outlined` | `note-purple` |
 | Red | `note-red-base` | `note-red-filled` | `note-red-outlined` | `note-red` |
 | Teal | `note-teal-base` | `note-teal-filled` | `note-teal-outlined` | `note-teal` |
-| White | `note-white-base` | — | — | — |
 | Argentina | `note-flag-argentina-base` | `note-flag-argentina-filled` | `note-flag-argentina-outlined` | `note-flag-argentina` |
 | Brazil | `note-flag-brazil-base` | `note-flag-brazil-filled` | `note-flag-brazil-outlined` | `note-flag-brazil` |
 | China | `note-flag-china-base` | `note-flag-china-filled` | `note-flag-china-outlined` | `note-flag-china` |

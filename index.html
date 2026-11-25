@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Material Notes — Anki Add-on</title>
     <link rel="icon" type="image/x-icon" href="./src/assets/favicon.ico">
-    <link rel="stylesheet" href="./src/styles/_page.css?v=11" />
-    <link id="card-styles" rel="stylesheet" href="./models/styles.css?v=24" />
+    <link rel="stylesheet" href="./src/styles/_page.css?v=12" />
+    <link id="card-styles" rel="stylesheet" href="./models/styles.css?v=59" />
 
 </head>
 
@@ -83,7 +83,7 @@
                     <select id="color" aria-label="Card palette">
                         <option value="base">Default</option>
                         <optgroup label="Colors">
-                            <option value="white">White</option>
+                            <option value="inverted">Inverted</option>
                             <option value="blue">Blue</option>
                             <option value="purple">Purple</option>
                             <option value="pink">Pink</option>
@@ -192,10 +192,11 @@
                     </div>
                 </div>
                 <hr class="answer-divider">
-                <img class="cover" src="https://picsum.photos/id/154/600/600" alt="" loading="lazy"
-                     data-example-field="Image" data-example-html />
+                <div class="cover" data-example-field="Image" data-example-html>
+                    <img src="https://picsum.photos/id/154/600/600" alt="" loading="lazy" />
+                </div>
                 <div class="body">
-                    <div class="flex" data-example-field="Back" data-example-html>
+                    <div class="flex flex-row" data-example-field="Back" data-example-html>
                         Water
                         <a class="replay-button soundLink" href="#" title="Ankiweb replay button" data-example-sound="nero.mp3">
                             <svg class="playImage" viewBox="0 0 64 64" version="1.1">
@@ -219,21 +220,20 @@
             </header>
             <div class="note back">
                 <div class="note front">
-                    <div class="body center" data-example-field="Front" data-example-html>
-                        <div class="flex flex-col">
-                            <div class="emoji">🥣</div>Το πρωινό
-                        </div>
+                    <div class="body center">
+                        <div class="emoji" data-example-field="Emoji">🥣</div>
+                        <div data-example-field="Front">Το πρωινό</div>
                     </div>
                 </div>
                 <hr class="answer-divider">
-                <div class="body" data-example-field="Back" data-example-html>
-                    <div class="text-block">
-                        The breakfast
-                    </div>
-                    <div class="text-block">
+                <div class="body">
+                    <div class="text-block" data-example-field="Back">The breakfast</div>
+                    <div class="text-block" data-example-if="RelatedWords">
                         <div class="subtitle">Related words</div>
-                        <span class="pill">Γεύμα (lunch)</span>
-                        <span class="pill">Το δείπνο (dinner)</span>
+                        <div data-example-field="RelatedWords" data-example-html>
+                            <span class="pill">Γεύμα (lunch)</span>
+                            <span class="pill">Το δείπνο (dinner)</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -246,29 +246,23 @@
             </header>
             <div class="note back">
                 <div class="note front">
-                    <div class="body center" data-example-field="Front" data-example-html>
-                        <div class="symbol">漢字</div>
-                        <div class="subheader">[kaɲdʑi]</div>
+                    <div class="body center">
+                        <div class="symbol" data-example-field="Front">漢字</div>
+                        <div class="subheader" data-example-field="Reading">[kaɲdʑi]</div>
                     </div>
                 </div>
                 <hr class="answer-divider">
-                <div class="body" data-example-field="Back" data-example-html>
-                    <div class="text-block">
-                        <div class="flex">
-                            Kanji (漢字, pronounced [kaɲdʑi]) are the logographic Chinese characters taken from the
-                            Chinese script, and used in the writing of Japanese.
-                            <a href="#" class="replaybutton" title="Android replay button" data-example-sound="kanji.mp3">
-                                <span>
-                                    <svg viewBox="0 0 32 32">
-                                        <polygon points="11,25 25,16 11,7" />Replay
-                                    </svg>
-                                </span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="text-block">
-                        <div class="subtitle">Pronunciation</div>
-                        [kaɲdʑi]
+                <div class="body">
+                    <div class="text-block flex flex-row" data-example-field="Back" data-example-html>
+                        Kanji (漢字, pronounced [kaɲdʑi]) are the logographic Chinese characters taken from the
+                        Chinese script, and used in the writing of Japanese.
+                        <a href="#" class="replaybutton" title="Android replay button" data-example-sound="kanji.mp3">
+                            <span>
+                                <svg viewBox="0 0 32 32">
+                                    <polygon points="11,25 25,16 11,7" />Replay
+                                </svg>
+                            </span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -333,23 +327,27 @@
                 <p>The <code>cover</code> class displays a full-width photo as the prompt, with an identification and explanation on the back. Use it to recognise plants, animals or objects.</p>
             </header>
             <div class="note back">
-                <div class="note front" data-example-field="Front" data-example-html>
-                    <img class="cover"
+                <div class="note front">
+                    <div class="cover" data-example-field="Front" data-example-html>
+                        <img
                         src="https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Equisetum_arvense_001.JPG/960px-Equisetum_arvense_001.JPG?utm_campaign=index&amp;utm_content=thumbnail&amp;utm_source=commons.wikimedia.org" alt="Horsetail plant" loading="lazy" />
+                    </div>
                 </div>
                 <hr class="answer-divider">
-                <div class="body" data-example-field="Back" data-example-html>
-                    <div class="text-block">
+                <div class="body">
+                    <div class="text-block" data-example-field="Back" data-example-html>
                         Equisetaceae, sometimes called the horsetail family, is the only extant family of the order <a
                             href="https://en.wikipedia.org/wiki/Equisetales" target="_blank">Equisetales</a>, with one
                         surviving genus, Equisetum, which comprises about twenty species.
                     </div>
-                    <div class="text-block">
-                        <div class="subtitle">Evolution and systematics</div>
+                    <div class="text-block" data-example-if="Explanation">
+                        <div class="subtitle" data-example-field="ExplanationSubtitle">Evolution and systematics</div>
+                        <div data-example-field="Explanation" data-example-html>
                         Equisetaceae is the only surviving family of the Equisetales, a group with many fossils of large
                         tree-like plants that possessed ribbed stems similar to modern horsetails. <em>Pseudobornia</em>
                         is the oldest known relative of <em>Equisetum</em>; it grew in the late Devonian, about 375
                         million years ago and is assigned to its own order.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -361,9 +359,11 @@
                 <p>A full-width <code>cover</code> photo above a written prompt. Use it to connect a word with its meaning through a visual cue.</p>
             </header>
             <div class="note back">
-                <div class="note front" data-example-field="Front" data-example-html>
-                    <img class="cover" src="https://picsum.photos/id/259/600/600" alt="" loading="lazy" />
-                    <div class="body">
+                <div class="note front">
+                    <div class="cover" data-example-field="ImagenFront" data-example-html>
+                        <img src="https://picsum.photos/id/259/600/600" alt="" loading="lazy" />
+                    </div>
+                    <div class="body" data-example-field="Front">
                         Città
                     </div>
                 </div>
@@ -396,19 +396,14 @@
                 </div>
                 <hr class="answer-divider">
                 <div class="body">
-                    <div class="text-block" data-example-field="Back" data-example-html>
-                        <div class="subtitle">FIRST conditional</div>
+                    <div class="text-block">
+                        <div class="subtitle" data-example-field="Type">FIRST conditional</div>
                         <div class="text-block">
-                            <div class="gap-sm align-items-center">
-                                <span class="pill">PRESENT SIMPLE</span>
-                                +
-                                <span class="pill">WILL/WON'T + VERB</span>
-                            </div>
+                            <div class="text-sm font-mono" data-example-field="Structure">[PRESENT SIMPLE] + [WILL/WON'T + VERB]</div>
                         </div>
                         <div class="text-block">
                             <div class="subtitle">Uses</div>
-                            A possible situation in the future.<br>
-                            Predicting a likely result in the future (if the condition happens).
+                            <div data-example-field="Uses">A possible situation in the future. Predicting a likely result in the future (if the condition happens).</div>
                         </div>
                     </div>
                     <div class="text-block">
@@ -429,6 +424,11 @@
                 <p>Select one or more answers, then use Show Answer to see correct, incorrect, and missed choices.</p>
                 <div class="mc2-preset-settings">
                     <h3>Preset settings</h3>
+                    <label class="mc2-preset-field">Number of options
+                        <select data-mc2-count-select aria-label="Number of options">
+                            <option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+                        </select>
+                    </label>
                     <label class="mc2-preset-field">Option labels
                     <select data-mc2-label-select aria-label="Option labels">
                         <option value="none">None</option>
@@ -454,7 +454,7 @@
             </header>
             <div class="note back choice-answer-card">
                 <div class="note front question-card">
-                    <div class="body question" data-example-field="Question">Which two planets in our solar system are classified as ice giants?</div>
+                    <div class="body question" data-example-field="Question">Which planets in our solar system are classified as ice giants?</div>
                     <div class="body question-options">
                         <ol type="A">
                             <li data-choice="A" data-example-field="Option A">Jupiter</li>
@@ -483,6 +483,11 @@
                 <p>Choose one answer with a radio button, then use Show Answer to see which options were right or wrong.</p>
                 <div class="mc2-preset-settings">
                     <h3>Preset settings</h3>
+                    <label class="mc2-preset-field">Number of options
+                        <select data-mc2-count-select aria-label="Number of options">
+                            <option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+                        </select>
+                    </label>
                     <label class="mc2-preset-field">Option labels
                     <select data-mc2-label-select aria-label="Option labels">
                         <option value="none">None</option>
@@ -529,8 +534,8 @@
             </div>
         </section>
     </div>
-    <script src="./src/js/card-setup-sources.js?v=22"></script>
-    <script src="./src/js/main.js?v=18"></script>
+    <script src="./src/js/card-setup-sources.js?v=57"></script>
+    <script src="./src/js/main.js?v=25"></script>
 </body>
 
 </html>

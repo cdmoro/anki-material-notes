@@ -21,6 +21,10 @@
   gap: .5rem;
 }
 
+.note .font-mono {
+  font-family: monospace;
+}
+
 .note .text-center,
 .note.front .center,
 .note.front .body.question,

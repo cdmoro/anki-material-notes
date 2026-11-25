@@ -6,9 +6,9 @@ body.card {
   --background: #fefefe;
   --surface: #fefefe;
   --divider: #ddd;
-  --feedback-correct-background: #c8e6c9;
+  --feedback-correct-background: #a5d6a7;
   --feedback-correct-foreground: #1b5e20;
-  --feedback-incorrect-background: #ffcdd2;
+  --feedback-incorrect-background: #ef9a9a;
   --feedback-incorrect-foreground: #b71c1c;
   --border-radius: 8px;
   --note-font-size: 19px;
@@ -30,9 +30,9 @@ body.card {
   --background: #121212;
   --surface: #1d1d1d;
   --divider: #333;
-  --feedback-correct-background: #1b5e20;
+  --feedback-correct-background: #285b2b;
   --feedback-correct-foreground: #c8e6c9;
-  --feedback-incorrect-background: #b71c1c;
+  --feedback-incorrect-background: #8f2929;
   --feedback-incorrect-foreground: #ffcdd2;
 }
 

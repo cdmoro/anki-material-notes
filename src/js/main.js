@@ -7,6 +7,7 @@ const finishes = document.querySelectorAll("[data-finish]");
 const templatePreviews = new Map();
 const optionLabelPreference = "note-mc2-option-labels";
 const answerFeedbackPreference = "note-mc2-answer-feedback";
+const initialOptionCount = 4;
 const savedAnswerFeedback = readPreference(answerFeedbackPreference);
 let currentAnswerFeedback = ["all", "mistakes"].includes(savedAnswerFeedback) ? savedAnswerFeedback : "all";
 const labelStyleValues = ["upper-alpha", "decimal", "arabic-indic", "lower-roman", "lower-greek", "georgian", "armenian", "cjk-ideographic", "hebrew", "japanese-informal", "none"];
@@ -72,13 +73,13 @@ exampleSelect.addEventListener("change", () => {
 });
 
 function availableFinishes(color) {
-    if (color === "white") return ["base"];
     return ["base", "filled", "outlined"];
 }
 
 const savedVariant = readPreference(keys.style) ?? readPreference("note-variant") ?? "";
 const savedStyle = /^note-(.+)-(base|filled|outlined)$/.exec(savedVariant);
-colorSelect.value = savedStyle?.[1] || savedVariant.replace(/^note-/, "") || "base";
+const savedPalette = savedStyle?.[1] || savedVariant.replace(/^note-/, "");
+colorSelect.value = (savedPalette === "white" ? "inverted" : savedPalette) || "base";
 
 let finish = (colorSelect.value && savedStyle?.[2]) || "base";
 if (!colorSelect.value) colorSelect.value = "base";
@@ -92,12 +93,29 @@ function updateTemplatePreviews() {
                 .replace(/\{\{mfc_shuffle_default\}\}/g, "false")
                 .replace(/const optionLabels = "[^"]+";/, `const optionLabels = "${selectedOptionLabelStyle()}";`)
                 .replace(/const answerColoring = "[^"]+";/, `const answerColoring = "${currentAnswerFeedback}";`);
-            code.textContent = standalone.replace(/\{\{Tags\}\}/g, templateStyle === "tags" ? "{{Tags}}" : classes);
+            const styled = standalone.replace(/\{\{Tags\}\}/g, templateStyle === "tags" ? "{{Tags}}" : classes);
+            code.textContent = note.closest(".multiple-choice-js-example") ? limitMultipleChoiceTemplate(styled) : styled;
         } else {
             const classes = templateClassName(note);
-            code.textContent = '<div class="' + classes + '">\n' + content + '\n</div>';
+            const optionStyle = note.closest(".multiple-choice-js-example")
+                ? selectedOptionLabelStyle() : null;
+            const configuredContent = optionStyle
+                ? content.replace(/<ol type="A"[^>]*>/, `<ol type="A" style="list-style-type: ${optionStyle};"${optionStyle === "none" ? ' class="mc2-no-labels"' : ""}>`)
+                : content;
+            code.textContent = '<div class="' + classes + '">\n' + configuredContent + '\n</div>';
         }
     }
+}
+
+function limitMultipleChoiceTemplate(template) {
+    const count = selectedOptionCount();
+    let limited = template;
+    for (let index = count; index < 10; index++) {
+        const letter = String.fromCharCode(65 + index);
+        const field = `Option ${letter}`;
+        limited = limited.replace(new RegExp(`\\s*\\{\\{#${field}\\}\\}[\\s\\S]*?\\{\\{/${field}\\}\\}`, "g"), "");
+    }
+    return limited;
 }
 
 function styleClasses(note) {
@@ -108,7 +126,7 @@ function styleClasses(note) {
 
 function templateClassName(note) {
     const classes = Array.from(note.classList);
-    const structural = classes.filter(name => !name.startsWith("note-") && !name.startsWith("Material::note-"));
+    const structural = classes.filter(name => name !== "mc2-base-default" && !name.startsWith("note-") && !name.startsWith("Material::note-"));
     const styles = classes.filter(name => name.startsWith("note-") || name.startsWith("Material::note-"));
     if (templateStyle === "tags") structural.push("{{Tags}}");
     else structural.push(...styles);
@@ -117,6 +135,10 @@ function templateClassName(note) {
 
 function selectedOptionLabelStyle() {
     return document.querySelector("[data-mc2-label-select]")?.value || initialOptionLabels || "upper-alpha";
+}
+
+function selectedOptionCount() {
+    return Number(document.querySelector("[data-mc2-count-select]")?.value) || initialOptionCount;
 }
 
 function updateVariant() {
@@ -129,6 +151,7 @@ function updateVariant() {
         : "note-" + color + "-" + finish;
     notes.forEach(note => {
         if (appliedVariant) note.classList.remove(appliedVariant);
+        note.classList.toggle("mc2-base-default", !variant);
         if (variant) note.classList.add(variant);
     });
     appliedVariant = variant;
@@ -207,6 +230,7 @@ setupToggle("centered", keys.centered, readPreference(keys.centered) === "true",
 const storedView = readPreference(keys.view) ?? readPreference("note-side");
 const showAnswer = storedView === "true" || storedView === "back";
 const wrongChoices = document.querySelectorAll("[data-preview-wrong-choice]");
+const multipleChoicePreviewSelections = new Map();
 const setAnswerVisible = setupToggle("side", keys.view, showAnswer, enabled => {
     card.classList.toggle("front-side", !enabled);
     wrongChoices.forEach(choice => choice.classList.toggle("wrong-answer", enabled));
@@ -226,13 +250,18 @@ function normalizeMultipleChoiceAnswers(raw, available) {
 
 function updateMultipleChoice2Preview(showAnswer) {
     document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
+        const count = selectedOptionCount();
         const answers = example.querySelector('[data-example-field="Correct Answers"]')?.textContent.trim() || "";
-        const options = Array.from(example.querySelectorAll("[data-choice]"));
+        const allOptions = Array.from(example.querySelectorAll("[data-choice]"));
+        const options = allOptions.slice(0, count);
+        allOptions.forEach((option, index) => { option.hidden = index >= count; });
         const available = new Set(options.map(option => option.dataset.choice));
         const correct = new Set(normalizeMultipleChoiceAnswers(answers, available));
+        const selected = multipleChoicePreviewSelections.get(example.id) || new Set();
         options.forEach(option => {
             const input = option.querySelector("input");
             if (!input) return;
+            if (showAnswer) input.checked = selected.has(option.dataset.choice);
             const isCorrect = correct.has(option.dataset.choice);
             const wasSelected = input.checked;
             const highlightCorrect = isCorrect && (currentAnswerFeedback === "all" || !wasSelected);
@@ -258,6 +287,22 @@ optionLabelSelects.forEach(select => {
     });
 });
 
+const optionCountSelects = document.querySelectorAll("[data-mc2-count-select]");
+optionCountSelects.forEach(select => {
+    select.value = String(initialOptionCount);
+    select.addEventListener("change", () => {
+        optionCountSelects.forEach(other => { other.value = select.value; });
+        document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
+            multipleChoicePreviewSelections.set(example.id, new Set());
+            example.querySelectorAll(".question-options input").forEach(input => { input.checked = false; });
+        });
+        document.querySelectorAll(".multiple-choice-js-example").forEach(ensureMultipleChoicePreviewOptions);
+        updateMultipleChoice2Preview(card.classList.contains("front-side") === false);
+        updateTemplatePreviews();
+        updateMultipleChoice2Fields();
+    });
+});
+
 const answerFeedbackSelects = document.querySelectorAll("[data-mc2-feedback-select]");
 answerFeedbackSelects.forEach(select => {
     select.value = currentAnswerFeedback;
@@ -272,8 +317,8 @@ answerFeedbackSelects.forEach(select => {
 
 function updateMultipleChoice2Labels(style) {
     document.querySelectorAll(".multiple-choice-js-example .question-options ol").forEach(list => {
-        list.style.listStyleType = "none";
-        list.style.setProperty("--mc2-list-style", style);
+        list.style.listStyleType = style;
+        list.style.removeProperty("--mc2-list-style");
         list.classList.toggle("mc2-no-labels", style === "none");
     });
     templatePreviews.forEach(({ code, content, raw }, note) => {
@@ -284,7 +329,82 @@ function updateMultipleChoice2Labels(style) {
     });
 }
 
+function ensureMultipleChoicePreviewOptions(example) {
+    const list = example.querySelector(".question-options ol");
+    if (!list) return;
+    const optionSamples = example.id === "multiple-choice-2-single"
+        ? ["Jupiter", "Mercury", "Earth", "Saturn", "Uranus", "Neptune", "Kepler-22b", "Proxima Centauri b"]
+        : ["Saturn", "Neptune", "Earth", "Mars", "Venus", "Mercury", "Kepler-22b", "Proxima Centauri b"];
+    const present = new Set(Array.from(list.querySelectorAll("[data-choice]"), option => option.dataset.choice));
+    for (let index = 2; index < 10; index++) {
+        const letter = String.fromCharCode(65 + index);
+        if (present.has(letter)) continue;
+        const option = document.createElement("li");
+        option.dataset.choice = letter;
+        option.dataset.exampleField = `Option ${letter}`;
+        option.dataset.exampleIf = `Option ${letter}`;
+        option.textContent = optionSamples[index - 2];
+        list.append(option);
+
+        const input = document.createElement("input");
+        const correctCount = new Set(normalizeMultipleChoiceAnswers(
+            example.querySelector('[data-example-field="Correct Answers"]')?.textContent.trim() || "",
+            new Set(Array.from(list.querySelectorAll("[data-choice]"), item => item.dataset.choice))
+        )).size;
+        input.type = correctCount > 1 ? "checkbox" : "radio";
+        input.name = example.id + "-preview-answer";
+        input.value = letter;
+        input.addEventListener("change", () => {
+            const selected = multipleChoicePreviewSelections.get(example.id) || new Set();
+            if (input.type === "radio") selected.clear();
+            if (input.checked) selected.add(letter);
+            else selected.delete(letter);
+            multipleChoicePreviewSelections.set(example.id, selected);
+            updateMultipleChoice2Preview(false);
+        });
+        const label = document.createElement("label");
+        label.append(input, document.createTextNode(" "), document.createTextNode(optionSamples[index - 2]));
+        option.replaceChildren(label);
+    }
+}
+
+function updateMultipleChoice2Fields() {
+    const count = selectedOptionCount();
+    templatePreviews.forEach(({ code, content, raw }, note) => {
+        if (raw && note.closest(".multiple-choice-js-example")) {
+            code.textContent = limitMultipleChoiceTemplate(content
+                .replace(/const optionLabels = "[^"]+";/, `const optionLabels = "${selectedOptionLabelStyle()}";`)
+                .replace(/const answerColoring = "[^"]+";/, `const answerColoring = "${currentAnswerFeedback}";`));
+        }
+    });
+    document.querySelectorAll(".multiple-choice-js-example [data-example-field^='Option ']").forEach(field => {
+        const index = field.dataset.exampleField.charCodeAt(7) - 65;
+        field.hidden = index >= count;
+    });
+    document.querySelectorAll(".multiple-choice-js-example .question-options li[data-example-if]").forEach(field => {
+        field.hidden = field.dataset.exampleIf.charCodeAt(7) - 65 >= count;
+    });
+    document.querySelectorAll(".multiple-choice-js-example .example-fields").forEach(panel => {
+        const example = panel.closest(".card-example");
+        const rows = panel.querySelectorAll("dl > div");
+        rows.forEach(row => {
+            const name = row.querySelector("dt code")?.textContent || "";
+            const match = /^Option ([A-J])$/.exec(name);
+            if (match) row.hidden = match[1].charCodeAt(0) - 65 >= count;
+        });
+        const help = panel.querySelector("p");
+        if (help) {
+            const optionNames = Array.from({ length: Math.max(0, count - 2) }, (_, index) => `Option ${String.fromCharCode(67 + index)}`);
+            const names = new Intl.ListFormat("en").format(optionNames);
+            help.textContent = `Create a note type with the fields listed below. Optional fields can be left blank on individual notes. ${example.dataset.fieldsHelp}`;
+            const fieldInstruction = count > 2 ? `Add ${names} as optional fields.` : "";
+            help.textContent = `${fieldInstruction} ${help.textContent}`.trim();
+        }
+    });
+}
+
 document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
+    ensureMultipleChoicePreviewOptions(example);
     const answers = example.querySelector('[data-example-field="Correct Answers"]')?.textContent.trim() || "";
     const options = Array.from(example.querySelectorAll("[data-choice]"));
     const available = new Set(options.map(option => option.dataset.choice));
@@ -292,22 +412,30 @@ document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
     const list = example.querySelector(".question-options ol");
     list?.classList.add("mc2-labeled");
     if (list) {
-        list.style.listStyleType = "none";
-        list.style.setProperty("--mc2-list-style", initialOptionLabels);
+        list.style.listStyleType = initialOptionLabels;
     }
     list?.classList.toggle("mc2-no-labels", initialOptionLabels === "none");
     options.forEach(option => {
+        if (option.querySelector("input")) return;
         const label = document.createElement("label");
         const input = document.createElement("input");
         input.type = correctCount > 1 ? "checkbox" : "radio";
         input.name = example.id + "-preview-answer";
         input.value = option.dataset.choice;
-        input.addEventListener("change", () => updateMultipleChoice2Preview(false));
+        input.addEventListener("change", () => {
+            const selected = multipleChoicePreviewSelections.get(example.id) || new Set();
+            if (input.type === "radio") selected.clear();
+            if (input.checked) selected.add(option.dataset.choice);
+            else selected.delete(option.dataset.choice);
+            multipleChoicePreviewSelections.set(example.id, selected);
+            updateMultipleChoice2Preview(false);
+        });
         label.append(input, document.createTextNode(" "), ...Array.from(option.childNodes));
         option.replaceChildren(label);
     });
 });
-if (initialOptionLabels === "none") updateMultipleChoice2Labels("none");
+updateMultipleChoice2Labels(initialOptionLabels);
+updateMultipleChoice2Fields();
 updateMultipleChoice2Preview(showAnswer);
 
 document.querySelectorAll("[data-hint-field] .hint").forEach(link => {
@@ -332,6 +460,7 @@ function templateContent(element) {
 
 function readExampleTemplates(preview) {
     const back = preview.cloneNode(true);
+    back.querySelectorAll(".mc2-base-default").forEach(note => note.classList.remove("mc2-base-default"));
     const front = back.querySelector(".note.front");
     const fields = [];
 
@@ -660,4 +789,5 @@ examples.forEach(example => {
     selectTab(0);
     example.append(setup);
 });
+updateMultipleChoice2Fields();
 updateTemplatePreviews();

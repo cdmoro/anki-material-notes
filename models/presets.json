@@ -16,7 +16,7 @@
   "emoji-and-pills": {
     "label": "Emoji and pills",
     "description": "Use an emoji as a cue and show related words as pills on the answer.",
-    "fields": ["Front", "Back", "Emoji", "Related word 1", "Related word 2"],
+    "fields": ["Front", "Back", "Emoji", "RelatedWords"],
     "front": "emoji-and-pills/front.html",
     "back": "emoji-and-pills/back.html"
   },
@@ -44,21 +44,21 @@
   "image-only": {
     "label": "Image-only prompt",
     "description": "Identify a plant, animal or object from a full-width image.",
-    "fields": ["Image", "Back"],
+    "fields": ["Front", "Back", "ExplanationSubtitle", "Explanation"],
     "front": "image-only/front.html",
     "back": "back.html"
   },
   "image-and-text": {
     "label": "Image and text prompt",
     "description": "Associate a written prompt with an image shown above it.",
-    "fields": ["Front", "Back", "Image"],
+    "fields": ["Front", "Back", "ImagenFront"],
     "front": "image-and-text/front.html",
     "back": "back.html"
   },
   "grammar": {
     "label": "Grammar and usage",
     "description": "Learn a grammar pattern from a sentence, usage notes and an optional translation hint.",
-    "fields": ["Front", "Back", "Audio", "Translation"],
+    "fields": ["Front", "Type", "Structure", "Uses", "Audio", "Translation"],
     "front": "grammar/front.html",
     "back": "grammar/back.html"
   },

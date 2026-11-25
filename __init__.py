@@ -41,7 +41,7 @@ STYLE_TAG_EXAMPLES = (
     "Material::note-flag-uk",
 )
 COLORS = (
-    "White", "Blue", "Purple", "Pink", "Teal", "Green",
+    "Inverted", "Blue", "Purple", "Pink", "Teal", "Green",
     "Orange", "Indigo", "Brown", "Lime", "Red",
 )
 COUNTRIES = (
@@ -100,9 +100,14 @@ def css_version(css):
 
 
 def available_finishes(palette):
-    if palette == "white":
-        return ("base",)
     return tuple(FINISHES)
+
+
+def normalize_appearance(appearance):
+    appearance = dict(appearance or {})
+    if appearance.get("palette") == "white":
+        appearance["palette"] = "inverted"
+    return appearance
 
 
 def appearance_classes(palette="base", finish="base", centered=False):
@@ -113,6 +118,33 @@ def appearance_classes(palette="base", finish="base", centered=False):
     if centered:
         classes.append("note-centered")
     return classes
+
+
+def note_ids_by_deck(collection, model_id):
+    note_ids = {}
+    for card_id in collection.find_cards(f"mid:{model_id}"):
+        card = collection.get_card(card_id)
+        note_ids.setdefault(card.did, set()).add(card.nid)
+    return note_ids
+
+
+def style_tag_classes():
+    classes = set()
+    for palette in PALETTE_NAMES:
+        for finish in available_finishes(palette):
+            classes.update(appearance_classes(palette, finish))
+        if palette.startswith("flag-"):
+            classes.add(f"note-{palette}-base")
+    return classes
+
+
+def replace_style_tags(tags, palette, finish):
+    style_classes = style_tag_classes()
+    updated = [tag for tag in tags if tag.removeprefix("Material::") not in style_classes]
+    new_classes = appearance_classes(palette, finish)
+    if new_classes:
+        updated.append(new_classes[0])
+    return updated
 
 
 def multiple_choice_option_count(model=None, requested=None, default=MULTIPLE_CHOICE_DEFAULT_COUNT):
@@ -284,8 +316,9 @@ def update_note_type(models, model, css, confirm_overwrite):
     option_labels = model.get("mfc_option_labels", OPTION_LABELS_LETTERS)
     if option_labels not in OPTION_LABELS:
         option_labels = OPTION_LABELS_LETTERS
+    appearance = normalize_appearance(model.get("mfc_appearance"))
     latest = template_content(
-        preset, model.get("mfc_appearance"), model.get("mfc_style_application", "legacy"),
+        preset, appearance, model.get("mfc_style_application", "legacy"),
         model.get("mfc_shuffle_default", False), option_count,
         answer_coloring, shuffle_policy, option_labels,
     )
@@ -306,6 +339,8 @@ def update_note_type(models, model, css, confirm_overwrite):
 
     updated["css"] = css
     updated["tmpls"][0].update(latest)
+    if model.get("mfc_style_application", "legacy") == "fixed":
+        updated["mfc_appearance"] = appearance
     if option_count is not None:
         updated["mfc_option_count"] = option_count
         updated["mfc_answer_coloring"] = answer_coloring
@@ -345,7 +380,7 @@ def edit_note_type_settings(
 
     updated["mfc_style_application"] = style_application
     if style_application == "fixed":
-        updated["mfc_appearance"] = appearance or {}
+        updated["mfc_appearance"] = normalize_appearance(appearance)
     updated["mfc_shuffle_default"] = bool(shuffle_default)
     if is_multiple_choice:
         updated["mfc_option_count"] = option_count
@@ -600,7 +635,7 @@ class EditNoteTypeDialog(QDialog):
             current_style = "tags"
         self.style_application.setCurrentIndex(self.style_application.findData(current_style))
 
-        old_appearance = model.get("mfc_appearance", {})
+        old_appearance = normalize_appearance(model.get("mfc_appearance", {}))
         self.fixed_appearance = {
             "palette": old_appearance.get("palette", "base"),
             "finish": old_appearance.get("finish", "base"),
@@ -746,10 +781,78 @@ class EditNoteTypeDialog(QDialog):
         self.accept()
 
 
-class NoteTypesDialog(QDialog):
-    def __init__(self, parent, models):
+class BulkStyleDialog(QDialog):
+    def __init__(self, parent, collection, model):
         super().__init__(parent)
-        self.models = models
+        self.collection = collection
+        self.model = model
+        self.setWindowTitle("Change note style")
+        self.setMinimumWidth(420)
+
+        self.scope = QComboBox()
+        self.scope.addItem("All notes of this note type", None)
+        self.deck_note_ids = note_ids_by_deck(collection, model["id"])
+        self.all_note_ids = set(collection.find_notes(f"mid:{model['id']}"))
+        decks = {
+            deck_id: collection.decks.get(deck_id)
+            for deck_id in self.deck_note_ids
+        }
+        for deck_id in sorted(
+            (deck_id for deck_id, deck in decks.items() if deck),
+            key=lambda did: decks[did]["name"].casefold(),
+        ):
+            self.scope.addItem(f"Deck: {decks[deck_id]['name']}", deck_id)
+
+        self.palette = QComboBox()
+        self.palette.addItem(PALETTE_NAMES["base"], "base")
+        for palette, label in PALETTE_NAMES.items():
+            if palette != "base" and not palette.startswith("flag-"):
+                self.palette.addItem(label, palette)
+        for palette, label in PALETTE_NAMES.items():
+            if palette.startswith("flag-"):
+                self.palette.addItem(label, palette)
+        self.finish = QComboBox()
+        self.finish.addItem("Base", "base")
+        self.finish.addItem("Filled", "filled")
+        self.finish.addItem("Outlined", "outlined")
+        self.warning = QLabel(
+            "Tags belong to notes. If a note has cards in other decks, those cards will change style too."
+        )
+        self.warning.setWordWrap(True)
+
+        form = QFormLayout()
+        form.addRow("Apply to", self.scope)
+        form.addRow("Style", self.palette)
+        form.addRow("Finish", self.finish)
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        buttons.button(QDialogButtonBox.StandardButton.Ok).setText("Continue")
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout = QVBoxLayout(self)
+        layout.addLayout(form)
+        layout.addWidget(self.warning)
+        layout.addWidget(buttons)
+
+    def apply_style(self):
+        deck_id = self.scope.currentData()
+        if deck_id is None:
+            note_ids = self.all_note_ids
+        else:
+            note_ids = self.deck_note_ids.get(deck_id, set())
+        for note_id in note_ids:
+            note = self.collection.get_note(note_id)
+            note.tags = replace_style_tags(note.tags, self.palette.currentData(), self.finish.currentData())
+            self.collection.update_note(note)
+        return len(note_ids)
+
+
+class NoteTypesDialog(QDialog):
+    def __init__(self, parent, collection):
+        super().__init__(parent)
+        self.collection = collection
+        self.models = collection.models
         self.setWindowTitle("Material Notes")
         self.resize(460, 300)
 
@@ -760,15 +863,19 @@ class NoteTypesDialog(QDialog):
         self.details.setWordWrap(True)
         self.edit_button = QPushButton("Edit settings…")
         self.edit_button.setEnabled(False)
+        self.style_button = QPushButton("Change style…")
+        self.style_button.setEnabled(False)
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
         create = QPushButton("Create note type…")
         self.update_button = QPushButton("Update note types")
         buttons.addButton(create, QDialogButtonBox.ButtonRole.ActionRole)
         buttons.addButton(self.edit_button, QDialogButtonBox.ButtonRole.ActionRole)
+        buttons.addButton(self.style_button, QDialogButtonBox.ButtonRole.ActionRole)
         buttons.addButton(self.update_button, QDialogButtonBox.ButtonRole.ActionRole)
         create.clicked.connect(self.create)
         self.edit_button.clicked.connect(self.edit_selected)
+        self.style_button.clicked.connect(self.change_style)
         self.update_button.clicked.connect(self.update_note_types)
         buttons.rejected.connect(self.reject)
 
@@ -803,12 +910,15 @@ class NoteTypesDialog(QDialog):
         name = item.data(Qt.ItemDataRole.UserRole) if item else None
         model = self.models.byName(name) if name else None
         self.edit_button.setEnabled(model is not None)
+        self.style_button.setEnabled(
+            model is not None and model.get("mfc_style_application") == "tags"
+        )
         if model is None:
             self.details.setText("Select a note type to see its settings.")
             return
 
         kind = model.get("mfc_kind", "basic")
-        appearance = model.get("mfc_appearance", {})
+        appearance = normalize_appearance(model.get("mfc_appearance", {}))
         if model.get("mfc_style_application", "fixed") == "tags":
             style = "Style using tags"
         else:
@@ -841,7 +951,36 @@ class NoteTypesDialog(QDialog):
                 "Answer feedback: " +
                 ("highlight only mistakes" if coloring == ANSWER_COLORING_MISTAKES else "show all correct answers")
             )
+        decks = note_ids_by_deck(self.collection, model["id"])
+        deck_names = {
+            deck["name"] for deck_id in decks
+            if (deck := self.collection.decks.get(deck_id))
+        }
+        lines.append("Decks: " + (", ".join(sorted(deck_names, key=str.casefold)) if deck_names else "none"))
         self.details.setText("\n".join(lines))
+
+    def change_style(self):
+        item = self.note_types.currentItem()
+        name = item.data(Qt.ItemDataRole.UserRole) if item else None
+        model = self.models.byName(name) if name else None
+        if not model or model.get("mfc_style_application") != "tags":
+            return
+        dialog = BulkStyleDialog(self, self.collection, model)
+        if not dialog.exec():
+            return
+        scope = dialog.scope.currentText()
+        deck_id = dialog.scope.currentData()
+        note_ids = dialog.deck_note_ids.get(deck_id, set()) if deck_id is not None else dialog.all_note_ids
+        if not askUser(
+            f"Change the style tag on {len(note_ids)} notes ({scope})?\n\n"
+            "Because tags belong to notes, every card from those notes will use the new style, "
+            "including cards in other decks.", parent=self
+        ):
+            return
+        count = dialog.apply_style()
+        showInfo(f"Updated the style on {count} notes.", parent=self)
+        mw.reset()
+        self.show_selected_details()
 
     def create(self):
         if CreateNoteTypeDialog(self, self.models).exec():
@@ -891,7 +1030,7 @@ class NoteTypesDialog(QDialog):
 
 def show_note_types():
     if mw.col is not None:
-        NoteTypesDialog(mw, mw.col.models).exec()
+        NoteTypesDialog(mw, mw.col).exec()
 
 
 def setup_menu():
