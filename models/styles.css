@@ -757,6 +757,10 @@ body.card {
   border-radius: .7em;
 }
 
+.note .question-options ol.mc2-two-columns > [data-choice][hidden] {
+  display: none;
+}
+
 .note .question-options ol.mc2-two-columns label {
   position: relative;
   width: auto;
@@ -769,7 +773,7 @@ body.card {
 .note .question-options ol.mc2-two-columns input {
   position: absolute;
   top: .2em;
-  right: .2em;
+  left: .2em;
 }
 
 .note .question-options ol.mc2-two-columns img {
