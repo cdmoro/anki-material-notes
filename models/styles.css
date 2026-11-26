@@ -763,24 +763,24 @@ body.card {
 }
 
 .note .question-options ol.mc2-two-columns label {
-  display: block;
+  position: relative;
+  display: flex;
   flex: 1 1 0;
   width: 100%;
   min-width: 0;
   align-self: stretch;
+  align-items: center;
+  justify-content: center;
   margin: 0;
-  padding: 0;
+  padding: 1em;
   border-radius: inherit;
 }
 
 .note .question-options ol.mc2-two-columns .mc2-option-content {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  box-sizing: border-box;
-  padding: 1em;
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
   pointer-events: none;
-  place-items: center;
   text-align: center;
   text-wrap: balance;
 }
