@@ -10,6 +10,10 @@ const answerFeedbackPreference = "note-mc2-answer-feedback";
 const optionLayoutPreference = "note-mc2-option-layout";
 const initialOptionCount = 4;
 const savedAnswerFeedback = readPreference(answerFeedbackPreference);
+const savedOptionLayout = readPreference(optionLayoutPreference)
+    ?? readPreference(`${optionLayoutPreference}-multiple-choice-2`)
+    ?? readPreference(`${optionLayoutPreference}-multiple-choice-2-single`);
+let currentOptionLayout = savedOptionLayout === "2" ? "2" : "1";
 let currentAnswerFeedback = ["all", "mistakes"].includes(savedAnswerFeedback) ? savedAnswerFeedback : "all";
 const labelStyleValues = ["upper-alpha", "decimal", "arabic-indic", "lower-roman", "lower-greek", "georgian", "armenian", "cjk-ideographic", "hebrew", "japanese-informal", "none"];
 const savedOptionLabels = readPreference(optionLabelPreference);
@@ -323,18 +327,18 @@ answerFeedbackSelects.forEach(select => {
 
 const optionLayoutSelects = document.querySelectorAll("[data-mc2-layout-select]");
 optionLayoutSelects.forEach(select => {
+    select.value = currentOptionLayout;
     const example = select.closest(".card-example");
-    const preference = `${optionLayoutPreference}-${example?.id || "default"}`;
-    const saved = readPreference(preference);
-    select.value = saved === "2" ? "2" : "1";
     example?.querySelectorAll(".question-options ol").forEach(list => {
-        list.classList.toggle("mc2-two-columns", select.value === "2");
+        list.classList.toggle("mc2-two-columns", currentOptionLayout === "2");
         list.classList.toggle("mc2-no-labels", selectedOptionLabelStyle() === "none");
     });
     select.addEventListener("change", () => {
         const layout = select.value === "2" ? "2" : "1";
-        savePreference(preference, layout);
-        example?.querySelectorAll(".question-options ol").forEach(list => {
+        currentOptionLayout = layout;
+        optionLayoutSelects.forEach(other => { other.value = layout; });
+        savePreference(optionLayoutPreference, layout);
+        document.querySelectorAll(".multiple-choice-js-example .question-options ol").forEach(list => {
             list.classList.toggle("mc2-two-columns", layout === "2");
             list.classList.toggle("mc2-no-labels", selectedOptionLabelStyle() === "none");
         });
