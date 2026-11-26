@@ -821,6 +821,7 @@ body.card {
   left: 2em;
   width: 1.25em;
   text-align: start;
+  content: counter(mc2-choice, var(--mc2-list-style, upper-alpha));
 }
 
 .note .question-options label {
