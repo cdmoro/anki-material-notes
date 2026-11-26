@@ -231,7 +231,7 @@
 }
 
 .note .question-options ol.mc2-two-columns.mc2-labeled > [data-choice]::before {
-  top: .33rem;
+  top: .38rem;
   left: 2em;
   width: 1.25em;
   text-align: start;
