@@ -819,7 +819,6 @@ body.card {
   top: .38rem;
   left: 2.2rem;
   width: 2rem;
-  font-size: 1.5rem;
   text-align: start;
   content: counter(mc2-choice, var(--mc2-list-style, upper-alpha));
 }
