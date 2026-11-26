@@ -107,7 +107,7 @@
         const rawLayout = layoutConfig.textContent.trim();
         const optionLayout = rawLayout === "" ? defaultOptionLayout : rawLayout === "1" || rawLayout === "2" ? Number(rawLayout) : 1;
         list.classList.toggle("mc2-two-columns", optionLayout === 2);
-        list.classList.toggle("mc2-no-labels", labelStyle === "none" || optionLayout === 2);
+        list.classList.toggle("mc2-no-labels", labelStyle === "none");
         order.filter(letter => byLetter.has(letter)).forEach(letter => list.appendChild(byLetter.get(letter)));
         // Keep taps on the options and the gaps between them from triggering
         // AnkiMobile's card-level show-answer gesture.

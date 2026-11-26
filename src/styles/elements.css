@@ -159,6 +159,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: .65em;
+  padding-inline-start: 0;
 }
 
 .note .question-options ol.mc2-two-columns > [data-choice] {
@@ -227,6 +228,12 @@
   width: 1.5em;
   text-align: end;
   content: counter(mc2-choice, var(--mc2-list-style, upper-alpha)) ".";
+}
+
+.note .question-options ol.mc2-two-columns.mc2-labeled > [data-choice]::before {
+  top: .8em;
+  left: 2.35em;
+  width: 1.4em;
 }
 
 .note .question-options label {

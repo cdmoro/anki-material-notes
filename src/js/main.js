@@ -329,14 +329,14 @@ optionLayoutSelects.forEach(select => {
     select.value = saved === "2" ? "2" : "1";
     example?.querySelectorAll(".question-options ol").forEach(list => {
         list.classList.toggle("mc2-two-columns", select.value === "2");
-        list.classList.toggle("mc2-no-labels", select.value === "2" || selectedOptionLabelStyle() === "none");
+        list.classList.toggle("mc2-no-labels", selectedOptionLabelStyle() === "none");
     });
     select.addEventListener("change", () => {
         const layout = select.value === "2" ? "2" : "1";
         savePreference(preference, layout);
         example?.querySelectorAll(".question-options ol").forEach(list => {
             list.classList.toggle("mc2-two-columns", layout === "2");
-            list.classList.toggle("mc2-no-labels", layout === "2" || selectedOptionLabelStyle() === "none");
+            list.classList.toggle("mc2-no-labels", selectedOptionLabelStyle() === "none");
         });
         updateTemplatePreviews();
     });
@@ -346,7 +346,7 @@ function updateMultipleChoice2Labels(style) {
     document.querySelectorAll(".multiple-choice-js-example .question-options ol").forEach(list => {
         list.style.listStyleType = style;
         list.style.removeProperty("--mc2-list-style");
-        list.classList.toggle("mc2-no-labels", style === "none" || selectedOptionLayout(list) === 2);
+        list.classList.toggle("mc2-no-labels", style === "none");
     });
     templatePreviews.forEach(({ code, content, raw }, note) => {
         if (!raw && note.closest(".multiple-choice-js-example")) {
@@ -445,7 +445,7 @@ document.querySelectorAll(".multiple-choice-js-example").forEach(example => {
     if (list) {
         list.style.listStyleType = initialOptionLabels;
     }
-    list?.classList.toggle("mc2-no-labels", initialOptionLabels === "none" || selectedOptionLayout(example) === 2);
+    list?.classList.toggle("mc2-no-labels", initialOptionLabels === "none");
     options.forEach(option => {
         if (option.querySelector("input")) return;
         const label = document.createElement("label");
