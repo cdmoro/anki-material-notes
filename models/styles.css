@@ -776,6 +776,10 @@ body.card {
   border-radius: inherit;
 }
 
+.note .question-options .mc2-option-content {
+  font-size: inherit;
+}
+
 .note .question-options ol.mc2-two-columns .mc2-option-content {
   flex: 1;
   min-width: 0;
