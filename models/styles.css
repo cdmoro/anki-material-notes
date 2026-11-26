@@ -818,8 +818,9 @@ body.card {
 
 .note .question-options ol.mc2-two-columns.mc2-labeled > [data-choice]::before {
   top: .8em;
-  left: 2.35em;
-  width: 1.4em;
+  left: 2em;
+  width: 1.25em;
+  text-align: start;
 }
 
 .note .question-options label {

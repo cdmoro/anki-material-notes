@@ -345,7 +345,7 @@ optionLayoutSelects.forEach(select => {
 function updateMultipleChoice2Labels(style) {
     document.querySelectorAll(".multiple-choice-js-example .question-options ol").forEach(list => {
         list.style.listStyleType = style;
-        list.style.removeProperty("--mc2-list-style");
+        list.style.setProperty("--mc2-list-style", style);
         list.classList.toggle("mc2-no-labels", style === "none");
     });
     templatePreviews.forEach(({ code, content, raw }, note) => {
