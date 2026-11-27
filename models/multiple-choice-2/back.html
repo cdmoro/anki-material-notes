@@ -49,11 +49,13 @@
                 .filter(Boolean);
             Array.from(back.classList).filter(token => reservedConfig.test(token.replace(/^Material::/, "")))
                 .forEach(token => back.classList.remove(token));
-            const defaultFeedbackPalette = "green-red";
-            const paletteTags = tagTokens.map(token => /^note-feedback-palette-(green-red|blue-orange|monochrome)$/.exec(token))
-                .filter(Boolean);
+            const defaults = back.querySelector("[data-mc2-front]")?.mc2Defaults ?? {};
+            const palettes = ["green-red", "blue-orange", "monochrome"];
+            const paletteTags = tagTokens.map(token => /^note-feedback-palette-(.+)$/.exec(token)?.[1])
+                .filter(value => palettes.includes(value));
+            const defaultPalette = palettes.includes(defaults.feedbackPalette) ? defaults.feedbackPalette : palettes[0];
             back.dataset.mc2FeedbackPalette = paletteTags.length === 1
-                ? paletteTags[0][1] : defaultFeedbackPalette;
+                ? paletteTags[0] : defaultPalette;
             const showFeedbackSymbols = Boolean(back.querySelector(".mc2-show-feedback-symbols"));
             const key = back.querySelector("#choice-answer-key");
             const options = Array.from(back.querySelectorAll(".question-options [data-choice]"));
@@ -67,11 +69,12 @@
                 return number >= 1 && number <= 10 ? String.fromCharCode(64 + number) : null;
             }).filter(choice => choice && options.some(option => option.dataset.choice === choice)));
             const feedback = back.querySelector("[data-mc2-feedback]");
-            const defaultAnswerColoring = "correct-and-errors";
             const feedbackModes = ["correct-and-errors", "all", "mistakes"];
+            const defaultFeedback = feedbackModes.includes(defaults.answerFeedback)
+                ? defaults.answerFeedback : feedbackModes[0];
             const answerColoring = matches.length === 1
                 ? feedbackModes[Number(matches[0][1]) - 1]
-                : defaultAnswerColoring;
+                : defaultFeedback;
             if (!correct.size) {
                 feedback.hidden = false;
                 feedback.textContent = "Check Correct Answers. Enter letters (A or A,C) or option numbers (1 or 1,4), separated by commas or spaces.";

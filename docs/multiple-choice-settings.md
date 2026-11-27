@@ -71,9 +71,20 @@ Set these defaults when creating a Multiple Choice (JS) note type or through **T
 
 ## Defaults and invalid tags
 
-Each setting falls back independently. If its tag is missing or invalid, the note type’s configured behavior applies. Set the fallback values when creating or editing the note type in **Tools → Material Notes…**. For shuffle, this includes the note type’s default and its **Use each note’s shuffle tag**, **Always shuffle**, or **Never shuffle** policy. A valid shuffle tag overrides that policy for the individual note.
+Open **Cards… → Front Template** in Anki to edit the defaults for the note type. The JSON object at the top supplies settings for both sides. Keep property names and string values in double quotes and omit the comma after the last property. You can also set these defaults in **Tools → Material Notes… → Edit settings…**.
 
-The website demo’s **Shuffle by default**, **Option labels**, **Answer feedback**, **Feedback palette**, **Show feedback symbols**, and **Option layout** controls set these fallback values in the templates it generates. They do not create configuration tags. Add tags to a note in Anki when a particular note should differ from the template defaults.
+| Property | Default | Supported values |
+| --- | --- | --- |
+| `shuffleOptions` | `false` | `true` shuffles the options and `false` keeps their listed order. |
+| `optionLabels` | `"none"` | Use the suffix from any `note-label-option-…` tag listed above, such as `"upper-alpha"` for letters or `"decimal"` for numbers. |
+| `optionLayout` | `1` | `1` or `2` columns. |
+| `answerFeedback` | `"correct-and-errors"` | `"correct-and-errors"`, `"all"`, or `"mistakes"`, corresponding to feedback tags 1, 2, and 3. |
+| `feedbackPalette` | `"green-red"` | `"green-red"`, `"blue-orange"`, or `"monochrome"`. |
+| `showFeedbackSymbols` | `false` | `true` or `false`. |
+
+The website demo fills in this object from its **Preset default settings** controls when you copy the Front template. Each valid per-note tag overrides its corresponding default independently.
+
+If a value is missing or unsupported, the card uses the default in the table for that setting. For example, `"optionLayout": 3` falls back to one column. If the JSON object has a syntax error, the card uses all the defaults in the table. Valid per-note tags still take precedence in both cases.
 
 Tags must use the exact spelling and a supported value shown above. Unsupported values such as `note-layout-3` and `note-answer-feedback-234523` are ignored. If a note has multiple valid tags from one setting family, that setting falls back to the note type behavior; it does not depend on tag order. Invalid tags do not prevent valid tags from other families from applying.
 

@@ -106,13 +106,21 @@ function updateTemplatePreviews() {
     for (const [note, { code, content, raw }] of templatePreviews) {
         if (raw) {
             const classes = styleClasses(note);
-            const standalone = content
-                .replace(/const defaults = (?:true|false);/, `const defaults = ${currentShuffleDefault};`)
-                .replace(/const optionLabels = "[^"]+";/, `const optionLabels = "${selectedOptionLabelStyle()}";`)
-                .replace(/const defaultOptionLayout = 1;/, `const defaultOptionLayout = ${selectedOptionLayout(note)};`)
-                .replace(/const defaultAnswerColoring = "[^"]+";/, `const defaultAnswerColoring = "${currentAnswerFeedback}";`)
-                .replace('const defaultFeedbackPalette = "green-red";', `const defaultFeedbackPalette = "${currentFeedbackPalette}";`)
-                .replace("const defaultFeedbackSymbols = false;", `const defaultFeedbackSymbols = ${showFeedbackSymbols};`);
+            const standalone = content.replace(
+                /(<template data-mc2-defaults>\s*)([\s\S]*?)(\s*<\/template>)/,
+                (_, start, defaults, end) => {
+                    const settings = {
+                        ...JSON.parse(defaults),
+                        shuffleOptions: currentShuffleDefault,
+                        optionLabels: selectedOptionLabelStyle(),
+                        optionLayout: selectedOptionLayout(note),
+                        answerFeedback: currentAnswerFeedback,
+                        feedbackPalette: currentFeedbackPalette,
+                        showFeedbackSymbols,
+                    };
+                    return start + JSON.stringify(settings, null, 4).replace(/\n/g, "\n    ") + end;
+                },
+            );
             const styled = templateStyle === "tags" ? standalone
                 : standalone.replace(/(\bclass="[^"]*)\{\{Tags\}\}([^"]*")/g, `$1${classes}$2`);
             code.textContent = note.closest(".multiple-choice-js-example") ? limitMultipleChoiceTemplate(styled) : styled;
@@ -662,8 +670,7 @@ function renderTemplatePreview(panel, label, note, content) {
     fetch(directory + "/" + label.toLowerCase() + ".html").then(async response => {
         if (!response.ok) throw new Error("Template unavailable");
         const template = (await response.text()).trim();
-        const body = template.slice(template.indexOf("\n") + 1, template.lastIndexOf("\n"));
-        templatePreviews.set(note, { code, content: body });
+        templatePreviews.set(note, { code, content: template, raw: true });
         updateTemplatePreviews();
         button.disabled = false;
     }).catch(() => {

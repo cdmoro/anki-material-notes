@@ -79,14 +79,17 @@ FEEDBACK_PALETTE_LABELS = {
     "blue-orange": "Blue / orange",
     "monochrome": "Monochrome",
 }
-SHUFFLE_POLICY_FIELD = "field"
-SHUFFLE_POLICY_ALWAYS = "always"
-SHUFFLE_POLICY_NEVER = "never"
-SHUFFLE_POLICIES = {SHUFFLE_POLICY_FIELD, SHUFFLE_POLICY_ALWAYS, SHUFFLE_POLICY_NEVER}
 OPTION_LABELS_LETTERS = "letters"
 OPTION_LABELS_NUMBERS = "numbers"
 OPTION_LABELS_NONE = "none"
-OPTION_LABELS = {OPTION_LABELS_LETTERS, OPTION_LABELS_NUMBERS, OPTION_LABELS_NONE}
+OPTION_LABELS = {
+    OPTION_LABELS_LETTERS, OPTION_LABELS_NUMBERS, OPTION_LABELS_NONE,
+    "upper-alpha", "decimal", "arabic-indic", "lower-roman", "lower-greek", "georgian",
+    "armenian", "cjk-ideographic", "hebrew", "japanese-informal",
+}
+MULTIPLE_CHOICE_DEFAULTS_BLOCK = re.compile(
+    r"(<template data-mc2-defaults>\s*)(.*?)(\s*</template>)", re.DOTALL
+)
 
 
 def read_model_file(path):
@@ -202,7 +205,7 @@ def preset_fields(kind, preset=None, option_count=None):
 
 def template_content(
     preset, appearance=None, style_application="fixed", shuffle_default=False, option_count=None,
-    answer_coloring=ANSWER_COLORING_CORRECT_AND_ERRORS, shuffle_policy=SHUFFLE_POLICY_FIELD,
+    answer_coloring=ANSWER_COLORING_CORRECT_AND_ERRORS,
     option_labels=OPTION_LABELS_NONE, option_layout_default=1,
     *, feedback_palette=DEFAULT_FEEDBACK_PALETTE, feedback_symbols=False,
 ):
@@ -212,16 +215,20 @@ def template_content(
     replacement = " " + " ".join(classes) if classes else ""
     templates = {
         key: read_model_file(MODEL_DIR / preset[side]).replace(" {{Tags}}", replacement, 1)
-        .replace("const defaults = false;", f"const defaults = {str(bool(shuffle_default)).lower()};")
-        .replace('const defaultAnswerColoring = "correct-and-errors";', f'const defaultAnswerColoring = "{answer_coloring}";')
-        .replace('const shufflePolicy = "field";', f'const shufflePolicy = "{shuffle_policy}";')
-        .replace('const optionLabels = "none";', f'const optionLabels = "{option_labels}";')
-        .replace('const defaultOptionLayout = 1;', f'const defaultOptionLayout = {option_layout_default if option_layout_default in (1, 2) else 1};')
-        .replace('const defaultFeedbackPalette = "green-red";', f'const defaultFeedbackPalette = "{normalize_feedback_palette(feedback_palette)}";')
-        .replace("const defaultFeedbackSymbols = false;", f"const defaultFeedbackSymbols = {str(feedback_symbols is True).lower()};")
         for key, side in (("qfmt", "front"), ("afmt", "back"))
     }
     if preset.get("front") == "multiple-choice-2/front.html":
+        defaults = json.dumps({
+            "shuffleOptions": bool(shuffle_default),
+            "optionLabels": option_labels,
+            "optionLayout": option_layout_default if option_layout_default in (1, 2) else 1,
+            "answerFeedback": answer_coloring,
+            "feedbackPalette": normalize_feedback_palette(feedback_palette),
+            "showFeedbackSymbols": feedback_symbols is True,
+        }, indent=4).replace("\n", "\n    ")
+        templates["qfmt"] = MULTIPLE_CHOICE_DEFAULTS_BLOCK.sub(
+            lambda match: match[1] + defaults + match[3], templates["qfmt"], count=1,
+        )
         count = multiple_choice_option_count(
             requested=option_count, default=preset.get("option_count_default", MULTIPLE_CHOICE_DEFAULT_COUNT)
         )
@@ -231,6 +238,41 @@ def template_content(
                 block, "", templates["qfmt"], flags=re.DOTALL,
             )
     return templates
+
+
+def multiple_choice_template_settings(model):
+    """Read defaults edited in Anki, falling back to metadata for older templates."""
+    if model.get("mfc_kind") != MULTIPLE_CHOICE_KIND or not model.get("tmpls"):
+        return model
+    block = MULTIPLE_CHOICE_DEFAULTS_BLOCK.search(model["tmpls"][0]["qfmt"])
+    if not block:
+        return model
+
+    def reject_non_json_number(value):
+        raise ValueError(f"Invalid JSON number: {value}")
+
+    try:
+        defaults = json.loads(block[2], parse_constant=reject_non_json_number)
+    except ValueError:
+        defaults = {}
+    if not isinstance(defaults, dict):
+        defaults = {}
+
+    settings = model.copy()
+    for key, metadata_key, allowed, fallback in (
+        ("shuffleOptions", "mfc_shuffle_default", (False, True), False),
+        ("optionLabels", "mfc_option_labels", OPTION_LABELS, OPTION_LABELS_NONE),
+        ("optionLayout", "mfc_option_layout_default", (1, 2), 1),
+        ("answerFeedback", "mfc_answer_coloring", ANSWER_COLORING_LABELS, ANSWER_COLORING_CORRECT_AND_ERRORS),
+        ("feedbackPalette", "mfc_feedback_palette", FEEDBACK_PALETTE_LABELS, DEFAULT_FEEDBACK_PALETTE),
+        ("showFeedbackSymbols", "mfc_feedback_symbols", (False, True), False),
+    ):
+        value = defaults.get(key)
+        if type(value) is float and value.is_integer():
+            value = int(value)
+        valid = any(type(value) is type(choice) and value == choice for choice in allowed)
+        settings[metadata_key] = value if valid else fallback
+    return settings
 
 
 def suggest_note_type_name(models, kind, style_application, palette, finish):
@@ -259,15 +301,12 @@ def record_installed_content(model, kind, css, template):
 def create_note_type(
     models, kind, name, appearance=None, style_application="fixed", shuffle_default=False,
     option_count=None, answer_coloring=ANSWER_COLORING_CORRECT_AND_ERRORS,
-    shuffle_policy=SHUFFLE_POLICY_FIELD, option_labels=OPTION_LABELS_NONE,
-    option_layout_default=1,
+    option_labels=OPTION_LABELS_NONE, option_layout_default=1,
     *, feedback_palette=DEFAULT_FEEDBACK_PALETTE, feedback_symbols=False,
 ):
     preset = NOTE_TYPES[kind]
     if answer_coloring not in ANSWER_COLORING_LABELS:
         answer_coloring = ANSWER_COLORING_CORRECT_AND_ERRORS
-    if shuffle_policy not in SHUFFLE_POLICIES:
-        shuffle_policy = SHUFFLE_POLICY_FIELD
     if option_labels not in OPTION_LABELS:
         option_labels = OPTION_LABELS_NONE
     model = models.new(name)
@@ -284,8 +323,7 @@ def create_note_type(
     template = models.newTemplate("Card 1")
     template.update(template_content(
         preset, appearance, style_application, shuffle_default, count, answer_coloring,
-        shuffle_policy, option_labels,
-        option_layout_default,
+        option_labels, option_layout_default,
         feedback_palette=feedback_palette, feedback_symbols=feedback_symbols,
     ))
     models.addTemplate(model, template)
@@ -297,7 +335,6 @@ def create_note_type(
         model["mfc_answer_coloring"] = answer_coloring
         model["mfc_feedback_palette"] = normalize_feedback_palette(feedback_palette)
         model["mfc_feedback_symbols"] = feedback_symbols is True
-        model["mfc_shuffle_policy"] = shuffle_policy
         model["mfc_option_labels"] = option_labels
         model["mfc_option_layout_default"] = option_layout_default if option_layout_default in (1, 2) else 1
     if appearance and style_application == "fixed":
@@ -340,23 +377,21 @@ def update_note_type(models, model, css, confirm_overwrite):
             fields_changed = True
 
     installed = model["tmpls"][0]
-    answer_coloring = model.get("mfc_answer_coloring", ANSWER_COLORING_ALL)
+    settings = multiple_choice_template_settings(model)
+    answer_coloring = settings.get("mfc_answer_coloring", ANSWER_COLORING_ALL)
     if answer_coloring not in ANSWER_COLORING_LABELS:
         answer_coloring = ANSWER_COLORING_ALL
-    shuffle_policy = model.get("mfc_shuffle_policy", SHUFFLE_POLICY_FIELD)
-    if shuffle_policy not in SHUFFLE_POLICIES:
-        shuffle_policy = SHUFFLE_POLICY_FIELD
-    option_labels = model.get("mfc_option_labels", OPTION_LABELS_NONE)
+    option_labels = settings.get("mfc_option_labels", OPTION_LABELS_NONE)
     if option_labels not in OPTION_LABELS:
         option_labels = OPTION_LABELS_NONE
     appearance = normalize_appearance(model.get("mfc_appearance"))
-    feedback_palette = normalize_feedback_palette(model.get("mfc_feedback_palette"))
-    feedback_symbols = model.get("mfc_feedback_symbols") is True
+    feedback_palette = normalize_feedback_palette(settings.get("mfc_feedback_palette"))
+    feedback_symbols = settings.get("mfc_feedback_symbols") is True
     latest = template_content(
         preset, appearance, model.get("mfc_style_application", "legacy"),
-        model.get("mfc_shuffle_default", False), option_count,
-        answer_coloring, shuffle_policy, option_labels,
-        model.get("mfc_option_layout_default", 1),
+        settings.get("mfc_shuffle_default", False), option_count,
+        answer_coloring, option_labels,
+        settings.get("mfc_option_layout_default", 1),
         feedback_palette=feedback_palette, feedback_symbols=feedback_symbols,
     )
     css_changed = css != model["css"]
@@ -380,12 +415,12 @@ def update_note_type(models, model, css, confirm_overwrite):
         updated["mfc_appearance"] = appearance
     if option_count is not None:
         updated["mfc_option_count"] = option_count
+        updated["mfc_shuffle_default"] = settings.get("mfc_shuffle_default", False)
         updated["mfc_answer_coloring"] = answer_coloring
         updated["mfc_feedback_palette"] = feedback_palette
         updated["mfc_feedback_symbols"] = feedback_symbols
-        updated["mfc_shuffle_policy"] = shuffle_policy
         updated["mfc_option_labels"] = option_labels
-        option_layout_default = model.get("mfc_option_layout_default", 1)
+        option_layout_default = settings.get("mfc_option_layout_default", 1)
         if option_layout_default not in (1, 2):
             option_layout_default = 1
         updated["mfc_option_layout_default"] = option_layout_default
@@ -396,7 +431,7 @@ def update_note_type(models, model, css, confirm_overwrite):
 
 def edit_note_type_settings(
     models, model, appearance, style_application, shuffle_default, option_count,
-    answer_coloring, shuffle_policy, option_labels, option_layout_default, confirm_overwrite,
+    answer_coloring, option_labels, option_layout_default, confirm_overwrite,
     *, feedback_palette=DEFAULT_FEEDBACK_PALETTE, feedback_symbols=False,
 ):
     kind = model.get("mfc_kind", "basic")
@@ -407,8 +442,6 @@ def edit_note_type_settings(
     is_multiple_choice = kind == MULTIPLE_CHOICE_KIND
     if answer_coloring not in ANSWER_COLORING_LABELS:
         answer_coloring = ANSWER_COLORING_ALL
-    if shuffle_policy not in SHUFFLE_POLICIES:
-        shuffle_policy = SHUFFLE_POLICY_FIELD
     if option_labels not in OPTION_LABELS:
         option_labels = OPTION_LABELS_NONE
     if option_layout_default not in (1, 2):
@@ -435,13 +468,12 @@ def edit_note_type_settings(
         updated["mfc_answer_coloring"] = answer_coloring
         updated["mfc_feedback_palette"] = feedback_palette
         updated["mfc_feedback_symbols"] = feedback_symbols
-        updated["mfc_shuffle_policy"] = shuffle_policy
         updated["mfc_option_labels"] = option_labels
         updated["mfc_option_layout_default"] = option_layout_default
 
     latest = template_content(
         {**preset, "kind": kind}, updated.get("mfc_appearance"), style_application,
-        shuffle_default, option_count, answer_coloring, shuffle_policy, option_labels,
+        shuffle_default, option_count, answer_coloring, option_labels,
         updated.get("mfc_option_layout_default", 1),
         feedback_palette=feedback_palette, feedback_symbols=feedback_symbols,
     )
@@ -764,24 +796,19 @@ class EditNoteTypeDialog(QDialog):
         self.option_count.setValue(current_count)
 
         self.shuffle_default = QCheckBox("Shuffle answers by default")
-        self.shuffle_default.setChecked(bool(model.get("mfc_shuffle_default", False)))
-        self.shuffle_policy = QComboBox()
-        self.shuffle_policy.addItem("Use each note’s shuffle tag", SHUFFLE_POLICY_FIELD)
-        self.shuffle_policy.addItem("Always shuffle", SHUFFLE_POLICY_ALWAYS)
-        self.shuffle_policy.addItem("Never shuffle", SHUFFLE_POLICY_NEVER)
-        policy = model.get("mfc_shuffle_policy", SHUFFLE_POLICY_FIELD)
-        self.shuffle_policy.setCurrentIndex(max(0, self.shuffle_policy.findData(policy)))
+        settings = multiple_choice_template_settings(model)
+        self.shuffle_default.setChecked(bool(settings.get("mfc_shuffle_default", False)))
 
         self.answer_coloring = QComboBox()
         for value, label in ANSWER_COLORING_LABELS.items():
             self.answer_coloring.addItem(label, value)
-        coloring = model.get("mfc_answer_coloring", ANSWER_COLORING_ALL)
+        coloring = settings.get("mfc_answer_coloring", ANSWER_COLORING_ALL)
         if coloring not in ANSWER_COLORING_LABELS:
             coloring = ANSWER_COLORING_ALL
         self.answer_coloring.setCurrentIndex(self.answer_coloring.findData(coloring))
-        self.feedback_palette = feedback_palette_picker(model.get("mfc_feedback_palette"))
+        self.feedback_palette = feedback_palette_picker(settings.get("mfc_feedback_palette"))
         self.feedback_symbols = QCheckBox("Show feedback symbols")
-        self.feedback_symbols.setChecked(model.get("mfc_feedback_symbols") is True)
+        self.feedback_symbols.setChecked(settings.get("mfc_feedback_symbols") is True)
         self.option_labels = QComboBox()
         self.option_labels.addItem("Letters (A, B, C…)", OPTION_LABELS_LETTERS)
         self.option_labels.addItem("Numbers (1, 2, 3…)", OPTION_LABELS_NUMBERS)
@@ -790,12 +817,14 @@ class EditNoteTypeDialog(QDialog):
             "Numbers identify fields: 1 = Option A, 2 = Option B, and so on. "
             "Labels stay with each answer when shuffled."
         )
-        labels = model.get("mfc_option_labels", OPTION_LABELS_NONE)
+        labels = settings.get("mfc_option_labels", OPTION_LABELS_NONE)
+        if labels in OPTION_LABELS and self.option_labels.findData(labels) == -1:
+            self.option_labels.addItem(labels, labels)
         self.option_labels.setCurrentIndex(max(0, self.option_labels.findData(labels)))
         self.option_layout_default = QComboBox()
         self.option_layout_default.addItem("1 column", 1)
         self.option_layout_default.addItem("2 columns", 2)
-        layout_default = model.get("mfc_option_layout_default", 1)
+        layout_default = settings.get("mfc_option_layout_default", 1)
         self.option_layout_default.setCurrentIndex(max(0, self.option_layout_default.findData(layout_default if layout_default in (1, 2) else 1)))
 
         note_group = QGroupBox("Note type")
@@ -810,7 +839,6 @@ class EditNoteTypeDialog(QDialog):
         mc_layout.setContentsMargins(0, 0, 0, 0)
         mc_layout.addRow("Number of options", self.option_count)
         mc_layout.addRow("Default shuffle", self.shuffle_default)
-        mc_layout.addRow("Shuffle behavior", self.shuffle_policy)
         mc_layout.addRow("Answer feedback", self.answer_coloring)
         mc_layout.addRow("Feedback palette", self.feedback_palette)
         mc_layout.addRow(self.feedback_symbols)
@@ -867,7 +895,7 @@ class EditNoteTypeDialog(QDialog):
             result = edit_note_type_settings(
                 self.models, self.model, appearance, style_application,
                 self.shuffle_default.isChecked(), self.option_count.value(),
-                self.answer_coloring.currentData(), self.shuffle_policy.currentData(),
+                self.answer_coloring.currentData(),
                 self.option_labels.currentData(), self.option_layout_default.currentData(),
                 self.confirm_overwrite,
                 feedback_palette=self.feedback_palette.currentData(),
@@ -1033,30 +1061,24 @@ class NoteTypesDialog(QDialog):
                 style += " · centered"
         lines = [f"Template: {NOTE_TYPES[kind]['label']}", f"Style: {style}"]
         if kind == MULTIPLE_CHOICE_KIND:
+            settings = multiple_choice_template_settings(model)
             lines.append(f"Options: {multiple_choice_option_count(model)}")
-            labels = model.get("mfc_option_labels", OPTION_LABELS_NONE)
+            labels = settings.get("mfc_option_labels", OPTION_LABELS_NONE)
             label_summary = {
                 OPTION_LABELS_LETTERS: "letters",
                 OPTION_LABELS_NUMBERS: "numbers",
                 OPTION_LABELS_NONE: "none",
-            }.get(labels, "letters")
+            }.get(labels, labels)
             lines.append(f"Option labels: {label_summary}")
-            policy = model.get("mfc_shuffle_policy", SHUFFLE_POLICY_FIELD)
-            if policy == SHUFFLE_POLICY_ALWAYS:
-                shuffle = "always by default (note tag can override)"
-            elif policy == SHUFFLE_POLICY_NEVER:
-                shuffle = "never by default (note tag can override)"
-            else:
-                fallback = "shuffle" if model.get("mfc_shuffle_default", False) else "keep order"
-                shuffle = f"per note tag (default: {fallback})"
-            lines.append(f"Shuffle: {shuffle}")
-            option_layout = model.get("mfc_option_layout_default", 1)
+            shuffle = "shuffle" if settings.get("mfc_shuffle_default", False) else "keep order"
+            lines.append(f"Shuffle: {shuffle} by default (note tag can override)")
+            option_layout = settings.get("mfc_option_layout_default", 1)
             lines.append(f"Option layout: {2 if option_layout == 2 else 1} column{'s' if option_layout == 2 else ''} by default")
-            coloring = model.get("mfc_answer_coloring", ANSWER_COLORING_ALL)
+            coloring = settings.get("mfc_answer_coloring", ANSWER_COLORING_ALL)
             lines.append(f"Answer feedback: {ANSWER_COLORING_LABELS.get(coloring, ANSWER_COLORING_LABELS[ANSWER_COLORING_ALL])}")
-            palette = normalize_feedback_palette(model.get("mfc_feedback_palette"))
+            palette = normalize_feedback_palette(settings.get("mfc_feedback_palette"))
             lines.append(f"Feedback palette: {FEEDBACK_PALETTE_LABELS[palette]}")
-            lines.append(f"Feedback symbols: {'shown' if model.get('mfc_feedback_symbols') is True else 'hidden'}")
+            lines.append(f"Feedback symbols: {'shown' if settings.get('mfc_feedback_symbols') is True else 'hidden'}")
         decks = note_ids_by_deck(self.collection, model["id"])
         deck_names = {
             deck["name"] for deck_id in decks

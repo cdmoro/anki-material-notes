@@ -1,3 +1,16 @@
+<!-- Edit these JSON defaults. Per-note tags take precedence.
+     Change only the values. Editing the HTML or scripts can break the card.
+     Supported values: https://github.com/cdmoro/anki-material-notes/blob/main/docs/multiple-choice-settings.md -->
+<template data-mc2-defaults>
+    {
+        "shuffleOptions": false,
+        "optionLabels": "none",
+        "optionLayout": 1,
+        "answerFeedback": "correct-and-errors",
+        "feedbackPalette": "green-red",
+        "showFeedbackSymbols": false
+    }
+</template>
 <div class="note front question-card {{Tags}}" data-mc2-front>
     <div class="body question">{{Question}}</div>
     <div id="answer" class="choice-answer-anchor" data-mc2-answer-anchor aria-hidden="true"></div>
@@ -62,25 +75,24 @@
         // Configuration tags must never participate in palette/visual CSS matching.
         Array.from(root.classList).filter(token => reservedConfig.test(token.replace(/^Material::/, "")))
             .forEach(token => root.classList.remove(token));
-        const defaults = false;
-        const shufflePolicy = "field";
+        let defaults = {};
+        const config = root.previousElementSibling;
+        if (config?.hasAttribute("data-mc2-defaults")) {
+            try { defaults = JSON.parse(config.content.textContent) ?? {}; } catch (_) {}
+        }
+        root.mc2Defaults = defaults;
         const shuffleTag = validChoice("shuffle-options", 2);
-        const shuffle = shuffleTag ? shuffleTag === 2
-            : shufflePolicy === "always" ? true
-            : shufflePolicy === "never" ? false
-            : defaults;
+        const shuffle = shuffleTag ? shuffleTag === 2 : defaults.shuffleOptions === true;
         const stateKey = "mc2";
-        const optionLabels = "none";
-        const defaultOptionLayout = 1;
-        const defaultFeedbackSymbols = false;
         const symbolsTag = validChoice("feedback-symbols", 2);
-        const showFeedbackSymbols = symbolsTag ? symbolsTag === 2 : defaultFeedbackSymbols;
+        const showFeedbackSymbols = symbolsTag ? symbolsTag === 2 : defaults.showFeedbackSymbols === true;
         const labelStyles = ["upper-alpha", "decimal", "arabic-indic", "lower-roman", "lower-greek", "georgian", "armenian", "cjk-ideographic", "hebrew", "japanese-informal", "none"];
         const labelTagMatches = tagTokens.map(token => /^note-label-option-(.+)$/.exec(token))
             .filter(match => match && labelStyles.includes(match[1]));
         const labelTag = labelTagMatches.length === 1 ? labelTagMatches[0][1] : null;
+        const { optionLabels } = defaults;
         const labelStyle = labelTag || (optionLabels === "letters" ? "upper-alpha"
-            : optionLabels === "numbers" ? "decimal" : optionLabels || "none");
+            : optionLabels === "numbers" ? "decimal" : labelStyles.includes(optionLabels) ? optionLabels : "none");
         const isAnswerSide = Boolean(root.closest("[data-mc2-back]"));
         const signature = [
             root.querySelector(".question")?.textContent.trim() || "",
@@ -122,7 +134,7 @@
         const list = root.querySelector("ol");
         list.classList.add("mc2-labeled");
         list.style.setProperty("--mc2-list-style", labelStyle);
-        const optionLayout = validChoice("layout", 2) || defaultOptionLayout;
+        const optionLayout = validChoice("layout", 2) || defaults.optionLayout;
         list.classList.toggle("mc2-show-feedback-symbols", showFeedbackSymbols);
         list.classList.toggle("mc2-two-columns", optionLayout === 2);
         list.classList.toggle("mc2-no-labels", labelStyle === "none");
