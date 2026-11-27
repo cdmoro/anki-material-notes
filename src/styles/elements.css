@@ -144,6 +144,17 @@
   text-align: start;
 }
 
+.note.back.choice-answer-card > .body {
+  padding-block-start: 0;
+  text-align: start;
+  text-wrap: wrap;
+}
+
+.note.back.choice-answer-card:is(.note-centered, .Material\:\:note-centered) > .body {
+  text-align: center;
+  text-wrap: balance;
+}
+
 .note .question-options ol,
 .note .question-results ol {
   margin: 0;
@@ -209,6 +220,10 @@
 }
 
 .note .question-options ol.mc2-two-columns .mc2-option-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   flex: 1;
   min-width: 0;
   max-width: 100%;
@@ -524,7 +539,7 @@
 }
 
 .note .question-options ol.mc2-labeled.mc2-show-feedback-symbols:not(.mc2-two-columns) label {
-  padding-inline-end: 1.7em;
+  padding-inline-end: 2em;
 }
 
 .note .question-options .mc2-show-feedback-symbols .mc2-option-content {
@@ -534,7 +549,7 @@
 .mc2-feedback-symbol {
   position: absolute;
   inset-block-start: var(--mc2-control-center);
-  inset-inline-end: .5em;
+  inset-inline-end: .7em;
   display: grid;
   width: 1em;
   height: 1em;
@@ -546,8 +561,24 @@
 }
 
 .wrong-answer > .mc2-feedback-symbol::before {
-  content: "✕";
-  line-height: 1;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: .12em;
+  height: 1.1em;
+  background: currentColor;
+  transform: rotate(45deg);
+  content: "";
+}
+
+.wrong-answer > .mc2-feedback-symbol::after {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: .12em;
+  height: 1.1em;
+  background: currentColor;
+  transform: rotate(-45deg);
 }
 
 .correct-answer > .mc2-feedback-symbol::before {

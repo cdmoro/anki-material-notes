@@ -24,16 +24,18 @@
 <div class="note back choice-answer-card {{Tags}}" data-mc2-back>
     {{FrontSide}}
     <div id="choice-answer-key" hidden>{{text:Correct Answers}}</div>
-    <div class="body question-results" data-mc2-feedback hidden></div>
+    <div class="body">
+        <div class="question-results" data-mc2-feedback hidden></div>
     {{#Explanation}}
-    <div class="body question-results">
+    <div class="text-block">
         <div class="subtitle text-sm">Explanation</div>
         <div class="text-md">{{Explanation}}</div>
     </div>
     {{/Explanation}}
     {{#Source}}
-    <div class="body question-results question-source small">{{Source}}</div>
+    <div class="text-block question-source small">Source: {{Source}}</div>
     {{/Source}}
+    </div>
     <script>
         (function () {
             const backs = document.querySelectorAll("[data-mc2-back]");
