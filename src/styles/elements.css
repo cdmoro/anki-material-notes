@@ -145,6 +145,7 @@
 }
 
 .note.back.choice-answer-card > .body {
+  padding-block-start: 0;
   text-align: start;
   text-wrap: wrap;
 }
