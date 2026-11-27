@@ -1,7 +1,7 @@
 {
   "name": "Material Notes",
   "package": "material_notes",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "min_point_version": 45,
   "author": "Carlos Bonadeo",
   "homepage": "https://github.com/cdmoro/anki-material-notes",
