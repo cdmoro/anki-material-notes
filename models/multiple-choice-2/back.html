@@ -38,7 +38,23 @@
         (function () {
             const backs = document.querySelectorAll("[data-mc2-back]");
             const back = backs[backs.length - 1];
-            if (!back) return;
+            if (!back || back.dataset.mc2FeedbackPalette) return;
+            const tagsRaw = "{{Tags}}";
+            const reservedConfig = /^note-(?:layout|label-option|label-options|answer-feedback|feedback-palette|feedback-symbols|shuffle-options)(?:-|$)/;
+            const tagTokens = Array.from(new Set([
+                ...back.classList,
+                ...tagsRaw.trim().split(/\s+/).filter(Boolean),
+            ].map(token => token.replace(/^Material::/, ""))));
+            const matches = tagTokens.map(token => /^note-answer-feedback-([1-3])$/.exec(token))
+                .filter(Boolean);
+            Array.from(back.classList).filter(token => reservedConfig.test(token.replace(/^Material::/, "")))
+                .forEach(token => back.classList.remove(token));
+            const defaultFeedbackPalette = "green-red";
+            const paletteTags = tagTokens.map(token => /^note-feedback-palette-(green-red|blue-orange|monochrome)$/.exec(token))
+                .filter(Boolean);
+            back.dataset.mc2FeedbackPalette = paletteTags.length === 1
+                ? paletteTags[0][1] : defaultFeedbackPalette;
+            const showFeedbackSymbols = Boolean(back.querySelector(".mc2-show-feedback-symbols"));
             const key = back.querySelector("#choice-answer-key");
             const options = Array.from(back.querySelectorAll(".question-options [data-choice]"));
             const raw = key.textContent;
@@ -51,7 +67,11 @@
                 return number >= 1 && number <= 10 ? String.fromCharCode(64 + number) : null;
             }).filter(choice => choice && options.some(option => option.dataset.choice === choice)));
             const feedback = back.querySelector("[data-mc2-feedback]");
-            const answerColoring = "all";
+            const defaultAnswerColoring = "correct-and-errors";
+            const feedbackModes = ["correct-and-errors", "all", "mistakes"];
+            const answerColoring = matches.length === 1
+                ? feedbackModes[Number(matches[0][1]) - 1]
+                : defaultAnswerColoring;
             if (!correct.size) {
                 feedback.hidden = false;
                 feedback.textContent = "Check Correct Answers. Enter letters (A or A,C) or option numbers (1 or 1,4), separated by commas or spaces.";
@@ -72,11 +92,18 @@
                 const letter = option.dataset.choice;
                 const isCorrect = correct.has(letter);
                 const wasSelected = selected.has(letter);
-                const highlightCorrect = isCorrect && (answerColoring === "all" || !wasSelected);
+                const highlightCorrect = isCorrect && (answerColoring !== "mistakes" || !wasSelected);
                 const highlightWrong = !isCorrect && (answerColoring === "all" || wasSelected);
                 option.classList.toggle("correct-answer", highlightCorrect);
                 option.classList.toggle("wrong-answer", highlightWrong);
                 option.classList.toggle("missed-answer", !wasSelected && isCorrect);
+                if (showFeedbackSymbols && (highlightCorrect || highlightWrong)) {
+                    const symbol = document.createElement("span");
+                    symbol.className = "mc2-feedback-symbol";
+                    symbol.setAttribute("role", "img");
+                    symbol.setAttribute("aria-label", highlightCorrect ? "Correct" : "Incorrect");
+                    option.append(symbol);
+                }
                 const input = option.querySelector("input");
                 if (input) {
                     input.checked = wasSelected;

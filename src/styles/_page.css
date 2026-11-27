@@ -272,6 +272,23 @@ h1 {
 
 .mc2-preset-field select {
   width: 100%;
+  border-radius: .25rem;
+}
+
+.mc2-preset-checkbox {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .9rem;
+}
+
+.mc2-preset-checkbox input {
+  margin: 0;
+}
+
+.mc2-preset-settings .mc2-preset-guide {
+  grid-column: 1 / -1;
+  font-size: .9rem;
 }
 
 .mc2-preset-field select:focus-visible {
