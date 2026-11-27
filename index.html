@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Material Notes — Anki Add-on</title>
     <link rel="icon" type="image/x-icon" href="./src/assets/favicon.ico">
-    <link rel="stylesheet" href="./src/styles/_page.css?v=12" />
-    <link id="card-styles" rel="stylesheet" href="./models/styles.css?v=59" />
+    <link rel="stylesheet" href="./src/styles/_page.css?v=14" />
+    <link id="card-styles" rel="stylesheet" href="./models/styles.css?v=83" />
 
 </head>
 
@@ -418,15 +418,21 @@
 
         <section class="card-example multiple-choice-js-example" id="multiple-choice-2" aria-labelledby="multiple-choice-2-title"
             data-template-directory="./models/multiple-choice-2"
-            data-fields-help="Option A and Option B are required. Correct Answers accepts letters (A C) or numbers (1 3), separated by spaces, commas, or both; 1 refers to Option A. Shuffle Options can override the add-on default. In copied templates, blank means no shuffling; enter true to shuffle.">
+            data-fields-help="Option A and Option B are required. Correct Answers accepts letters (A C) or numbers (1 3), separated by spaces, commas, or both; 1 refers to Option A. See the linked guide for per-note shuffle, layout, labels, and feedback tags.">
             <header class="example-intro">
                 <h2 id="multiple-choice-2-title">Multiple Choice — Multiple</h2>
-                <p>Select one or more answers, then use Show Answer to see correct, incorrect, and missed choices.</p>
+                <p>Choose your answers, then use Show Answer to see correct, incorrect, and missed choices.</p>
                 <div class="mc2-preset-settings">
-                    <h3>Preset settings</h3>
+                    <h3>Preset default settings</h3>
                     <label class="mc2-preset-field">Number of options
                         <select data-mc2-count-select aria-label="Number of options">
                             <option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+                        </select>
+                    </label>
+                    <label class="mc2-preset-field">Shuffle by default
+                        <select data-mc2-shuffle-select aria-label="Shuffle by default">
+                            <option value="false">Keep listed order</option>
+                            <option value="true">Shuffle answers</option>
                         </select>
                     </label>
                     <label class="mc2-preset-field">Option labels
@@ -446,10 +452,28 @@
                     </label>
                     <label class="mc2-preset-field">Answer feedback
                         <select data-mc2-feedback-select aria-label="Answer feedback">
-                            <option value="all">Show all correct answers</option>
-                            <option value="mistakes">Highlight only mistakes</option>
+                            <option value="correct-and-errors">Correct answers and wrong selections</option>
+                            <option value="all">All correct and incorrect options</option>
+                            <option value="mistakes">Missed correct answers and wrong selections</option>
                         </select>
                     </label>
+                    <label class="mc2-preset-field">Feedback palette
+                        <select data-mc2-feedback-palette-select>
+                            <option value="green-red">Green / red</option>
+                            <option value="blue-orange">Blue / orange</option>
+                            <option value="monochrome">Monochrome</option>
+                        </select>
+                    </label>
+                    <label class="mc2-preset-field">Option layout
+                        <select data-mc2-layout-select aria-label="Option layout">
+                            <option value="1">1 column</option>
+                            <option value="2">2 columns</option>
+                        </select>
+                    </label>
+                    <label class="mc2-preset-checkbox">
+                        <input type="checkbox" data-mc2-feedback-symbols-toggle> Show feedback symbols
+                    </label>
+                    <p class="mc2-preset-guide"><a href="https://github.com/cdmoro/anki-material-notes/blob/main/docs/multiple-choice-settings.md">See the full guide to per-note setting tags</a></p>
                 </div>
             </header>
             <div class="note back choice-answer-card">
@@ -457,16 +481,15 @@
                     <div class="body question" data-example-field="Question">Which planets in our solar system are classified as ice giants?</div>
                     <div class="body question-options">
                         <ol type="A">
-                            <li data-choice="A" data-example-field="Option A">Jupiter</li>
+                            <li data-choice="A" data-example-field="Option A">Neptune</li>
                             <li data-choice="B" data-example-field="Option B">Uranus</li>
                             <li data-choice="C" data-example-field="Option C" data-example-if="Option C">Saturn</li>
-                            <li data-choice="D" data-example-field="Option D" data-example-if="Option D">Neptune</li>
+                            <li data-choice="D" data-example-field="Option D" data-example-if="Option D">Jupiter</li>
                         </ol>
                     </div>
                 </div>
                 <hr class="answer-divider">
-                <div data-example-field="Correct Answers" hidden>B,D</div>
-                <div data-example-field="Shuffle Options" data-example-if="Shuffle Options" hidden>true</div>
+                <div data-example-field="Correct Answers" hidden>A,B</div>
                 <div class="body question-results small" data-mc2-feedback hidden></div>
                 <div class="body question-results" data-example-if="Explanation">
                     <div class="subtitle text-sm">Explanation</div>
@@ -477,15 +500,21 @@
         </section>
         <section class="card-example multiple-choice-js-example" id="multiple-choice-2-single" aria-labelledby="multiple-choice-2-single-title"
             data-template-directory="./models/multiple-choice-2"
-            data-fields-help="Option A and Option B are required. This example has one correct answer; enter its letter or number in Correct Answers. Shuffle Options can override the add-on default. In copied templates, blank means no shuffling; enter true to shuffle.">
+            data-fields-help="Option A and Option B are required. This example has one correct answer; enter its letter or number in Correct Answers. See the linked guide for per-note shuffle, layout, labels, and feedback tags.">
             <header class="example-intro">
                 <h2 id="multiple-choice-2-single-title">Multiple Choice — Single</h2>
                 <p>Choose one answer with a radio button, then use Show Answer to see which options were right or wrong.</p>
                 <div class="mc2-preset-settings">
-                    <h3>Preset settings</h3>
+                    <h3>Preset default settings</h3>
                     <label class="mc2-preset-field">Number of options
                         <select data-mc2-count-select aria-label="Number of options">
                             <option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+                        </select>
+                    </label>
+                    <label class="mc2-preset-field">Shuffle by default
+                        <select data-mc2-shuffle-select aria-label="Shuffle by default">
+                            <option value="false">Keep listed order</option>
+                            <option value="true">Shuffle answers</option>
                         </select>
                     </label>
                     <label class="mc2-preset-field">Option labels
@@ -505,10 +534,28 @@
                     </label>
                     <label class="mc2-preset-field">Answer feedback
                         <select data-mc2-feedback-select aria-label="Answer feedback">
-                            <option value="all">Show all correct answers</option>
-                            <option value="mistakes">Highlight only mistakes</option>
+                            <option value="correct-and-errors">Correct answers and wrong selections</option>
+                            <option value="all">All correct and incorrect options</option>
+                            <option value="mistakes">Missed correct answers and wrong selections</option>
                         </select>
                     </label>
+                    <label class="mc2-preset-field">Feedback palette
+                        <select data-mc2-feedback-palette-select>
+                            <option value="green-red">Green / red</option>
+                            <option value="blue-orange">Blue / orange</option>
+                            <option value="monochrome">Monochrome</option>
+                        </select>
+                    </label>
+                    <label class="mc2-preset-field">Option layout
+                        <select data-mc2-layout-select aria-label="Option layout">
+                            <option value="1">1 column</option>
+                            <option value="2">2 columns</option>
+                        </select>
+                    </label>
+                    <label class="mc2-preset-checkbox">
+                        <input type="checkbox" data-mc2-feedback-symbols-toggle> Show feedback symbols
+                    </label>
+                    <p class="mc2-preset-guide"><a href="https://github.com/cdmoro/anki-material-notes/blob/main/docs/multiple-choice-settings.md">See the full guide to per-note setting tags</a></p>
                 </div>
             </header>
             <div class="note back choice-answer-card">
@@ -525,7 +572,6 @@
                 </div>
                 <hr class="answer-divider">
                 <div data-example-field="Correct Answers" hidden>B</div>
-                <div data-example-field="Shuffle Options" data-example-if="Shuffle Options" hidden>false</div>
                 <div class="body question-results small" data-mc2-feedback hidden></div>
                 <div class="body question-results" data-example-if="Explanation">
                     <div class="subtitle text-sm">Explanation</div>
@@ -534,8 +580,8 @@
             </div>
         </section>
     </div>
-    <script src="./src/js/card-setup-sources.js?v=57"></script>
-    <script src="./src/js/main.js?v=25"></script>
+    <script src="./src/js/card-setup-sources.js?v=87"></script>
+    <script src="./src/js/main.js?v=46"></script>
 </body>
 
 </html>

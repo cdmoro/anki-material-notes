@@ -122,8 +122,9 @@ class AnkiStyleTests(unittest.TestCase):
                 with self.subTest(kind=kind, mode=mode):
                     templates = self.addon["template_content"](preset, appearance, mode)
                     for template in templates.values():
-                        self.assertIn(f' {expected}">', template)
-                        self.assertEqual(template.count("{{Tags}}"), int(mode == "tags"))
+                        self.assertRegex(template, rf'<div class="[^"]* {re.escape(expected)}"(?:\s|>)')
+                        config_tags = int(kind == "multiple-choice-2")
+                        self.assertEqual(template.count("{{Tags}}"), int(mode == "tags") + config_tags)
 
     def test_note_type_names(self):
         suggest = self.addon["suggest_note_type_name"]
@@ -131,14 +132,14 @@ class AnkiStyleTests(unittest.TestCase):
         self.assertEqual(suggest(self.models, "basic", "fixed", "blue", "filled"), "Basic - Blue Filled")
         self.assertEqual(
             suggest(self.models, "multiple-choice", "fixed", "green", "base"),
-            "Multiple Choice - Green Base",
+            "Multiple Choice (HTML) - Green Base",
         )
         for expected in ("Basic - Tags", "Basic - Tags (2)", "Basic - Tags (3)"):
             name = suggest(self.models, "basic", "tags", "pink", "outlined")
             self.assertEqual(name, expected)
             self.addon["create_note_type"](self.models, "basic", name, style_application="tags")
 
-    def test_multiple_choice_field_descriptions_are_added_and_preserved(self):
+    def test_multiple_choice_uses_tags_for_card_configuration(self):
         create = self.addon["create_note_type"]
         update = self.addon["update_note_type"]
         css = (ROOT / "models" / "styles.css").read_text(encoding="utf-8")
@@ -146,7 +147,14 @@ class AnkiStyleTests(unittest.TestCase):
         model = self.models.byName("Multiple Choice")
         field_descriptions = {field["name"]: field.get("description", "") for field in model["flds"]}
         self.assertIn("A or A,C", field_descriptions["Correct Answers"])
-        self.assertIn("true", field_descriptions["Shuffle Options"])
+        self.assertNotIn("Shuffle Options", field_descriptions)
+        self.assertNotIn("Option Layout", field_descriptions)
+        self.assertIn('validChoice("shuffle-options", 2)', model["tmpls"][0]["qfmt"])
+        self.assertIn('validChoice("layout", 2)', model["tmpls"][0]["qfmt"])
+        self.assertIn("note-label-option-", model["tmpls"][0]["qfmt"])
+        self.assertIn("note-answer-feedback", model["tmpls"][0]["afmt"])
+        self.assertIn('const tagsRaw = "{{Tags}}";', model["tmpls"][0]["qfmt"])
+        self.assertIn('const tagsRaw = "{{Tags}}";', model["tmpls"][0]["afmt"])
 
         # A pre-existing managed note type gains help text on update.
         for field in model["flds"]:
@@ -167,6 +175,74 @@ class AnkiStyleTests(unittest.TestCase):
             next(f["description"] for f in self.models.byName("Multiple Choice")["flds"] if f["name"] == "Correct Answers"),
             "My custom hint",
         )
+
+    def test_multiple_choice_feedback_preferences_are_saved_in_front_defaults(self):
+        name = "Multiple Choice"
+        self.addon["create_note_type"](self.models, "multiple-choice-2", name)
+        model = self.models.byName(name)
+        self.assertEqual(model["mfc_feedback_palette"], "green-red")
+        self.assertIs(model["mfc_feedback_symbols"], False)
+        self.assertIn('"feedbackPalette": "green-red"', model["tmpls"][0]["qfmt"])
+        self.assertIn('"showFeedbackSymbols": false', model["tmpls"][0]["qfmt"])
+
+        model["css"] = "/* Previously installed stylesheet */"
+        self.addon["record_installed_content"](model, "multiple-choice-2", model["css"], model["tmpls"][0])
+        self.models.save(model)
+        result = self.addon["edit_note_type_settings"](
+            self.models, model, None, "fixed", False, 4, "correct-and-errors",
+            "none", 2, lambda _: False, feedback_palette="blue-orange", feedback_symbols=True,
+        )
+        self.assertEqual(result, "updated")
+        model = self.models.byName(name)
+        self.assertEqual(model["mfc_feedback_palette"], "blue-orange")
+        self.assertIs(model["mfc_feedback_symbols"], True)
+        self.assertIn(".mc2-show-feedback-symbols", model["css"])
+
+        css = model["css"] + "\n/* Updated styling */"
+        self.assertEqual(self.addon["update_note_type"](self.models, model, css, lambda _: False), "updated")
+        template = self.models.byName(name)["tmpls"][0]
+        self.assertIn('"feedbackPalette": "blue-orange"', template["qfmt"])
+        self.assertIn('"showFeedbackSymbols": true', template["qfmt"])
+        self.assertIn("defaults.feedbackPalette", template["afmt"])
+
+    def test_multiple_choice_manual_defaults_survive_an_addon_update(self):
+        name = "Multiple Choice"
+        self.addon["create_note_type"](self.models, "multiple-choice-2", name)
+        model = self.models.byName(name)
+        template = model["tmpls"][0]
+        template["qfmt"] = template["qfmt"].replace('"optionLabels": "none"', '"optionLabels": "lower-roman"')
+        template["qfmt"] = template["qfmt"].replace('"feedbackPalette": "green-red"', '"feedbackPalette": "monochrome"')
+        self.models.save(model)
+
+        model = self.models.byName(name)
+        css = model["css"] + "\n/* Updated styling */"
+        self.assertEqual(self.addon["update_note_type"](self.models, model, css, lambda _: False), "updated")
+        model = self.models.byName(name)
+        note = self.collection.new_note(model)
+        note["Question"], note["Option A"], note["Option B"], note["Correct Answers"] = "Question", "A", "B", "A"
+        self.collection.add_note(note, 1)
+        card = note.cards()[0]
+        for side in (card.question(), card.answer()):
+            self.assertIn('"optionLabels": "lower-roman"', side)
+            self.assertIn('"feedbackPalette": "monochrome"', side)
+
+    def test_multiple_choice_invalid_defaults_use_project_fallbacks(self):
+        self.addon["create_note_type"](
+            self.models, "multiple-choice-2", "Multiple Choice", option_layout_default=2,
+            feedback_palette="blue-orange", feedback_symbols=True,
+        )
+        model = self.models.byName("Multiple Choice")
+        template = model["tmpls"][0]
+        template["qfmt"] = template["qfmt"].replace('"optionLayout": 2', '"optionLayout": "2"')
+        template["qfmt"] = template["qfmt"].replace('"feedbackPalette": "blue-orange"', '"feedbackPalette": "purple"')
+        read_settings = self.addon["multiple_choice_template_settings"]
+        settings = read_settings(model)
+        self.assertEqual(settings["mfc_option_layout_default"], 1)
+        self.assertEqual(settings["mfc_feedback_palette"], "green-red")
+        self.assertIs(settings["mfc_feedback_symbols"], True)
+
+        template["qfmt"] = template["qfmt"].replace('"showFeedbackSymbols": true', '"showFeedbackSymbols": true,')
+        self.assertIs(read_settings(model)["mfc_feedback_symbols"], False)
 
     def test_anki_renders_and_updates_all_style_modes(self):
         appearance = {"palette": "pink", "finish": "outlined"}
