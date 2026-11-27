@@ -747,7 +747,7 @@ body.card {
 }
 
 .note .question-options ol.mc2-labeled {
-  --mc2-row-padding-block: .8em;
+  --mc2-row-padding-block: 1em;
   --mc2-control-center: calc(var(--mc2-row-padding-block) + .5lh);
   list-style-type: upper-alpha;
   counter-reset: mc2-choice;
@@ -1145,9 +1145,24 @@ body.card {
   pointer-events: none;
 }
 
+.wrong-answer > .mc2-feedback-symbol::before,
+.wrong-answer > .mc2-feedback-symbol::after {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: .14em;
+  height: 1.1em;
+  border-radius: 1px;
+  background: currentColor;
+  content: "";
+}
+
 .wrong-answer > .mc2-feedback-symbol::before {
-  content: "✕";
-  line-height: 1;
+  transform: rotate(45deg);
+}
+
+.wrong-answer > .mc2-feedback-symbol::after {
+  transform: rotate(-45deg);
 }
 
 .correct-answer > .mc2-feedback-symbol::before {
