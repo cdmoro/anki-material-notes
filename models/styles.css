@@ -795,6 +795,10 @@ body.card {
 }
 
 .note .question-options ol.mc2-two-columns .mc2-option-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   flex: 1;
   min-width: 0;
   max-width: 100%;
