@@ -149,6 +149,11 @@
   text-wrap: wrap;
 }
 
+.note.back.choice-answer-card:is(.note-centered, .Material\:\:note-centered) > .body {
+  text-align: center;
+  text-wrap: balance;
+}
+
 .note .question-options ol,
 .note .question-results ol {
   margin: 0;
