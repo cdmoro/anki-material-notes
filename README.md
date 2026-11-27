@@ -13,8 +13,6 @@ Leave **Note type name** blank to use the suggestion, such as `Basic - Pink Outl
 
 **Update note types** refreshes the templates and CSS while keeping your appearance choices and the field values on existing notes. If you edited the templates or styling, the add-on asks before replacing your changes.
 
-If a card template stops working after a manual edit, select its note type and choose **Repair template…**. After you confirm, the add-on restores Front, Back, and Styling using the settings last saved by the add-on. This replaces manual template and CSS edits for that note type and keeps note content, tags, and review history.
-
 The managed note type list shows each type’s style and the decks containing its notes. For types styled using tags, **Change style…** can replace the style tag across all notes or notes that appear in one deck. Tags belong to notes, so cards from those notes in other decks change too. For Multiple Choice, the list shows the option count and the default shuffle, layout, labels, and feedback settings. Select a type and choose **Edit settings…** to change those defaults. Option counts can be increased; existing fields are retained.
 
 ## Copy a card into Anki

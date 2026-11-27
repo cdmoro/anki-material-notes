@@ -244,40 +244,6 @@ class AnkiStyleTests(unittest.TestCase):
         template["qfmt"] = template["qfmt"].replace('"showFeedbackSymbols": true', '"showFeedbackSymbols": true,')
         self.assertIs(read_settings(model)["mfc_feedback_symbols"], False)
 
-    def test_repair_restores_template_and_saved_settings_without_changing_cards(self):
-        name = "Multiple Choice"
-        self.addon["create_note_type"](
-            self.models, "multiple-choice-2", name, option_layout_default=2, feedback_palette="blue-orange",
-        )
-        model = self.models.byName(name)
-        note = self.collection.new_note(model)
-        note["Question"], note["Option A"], note["Option B"], note["Correct Answers"] = "Question", "A", "B", "A"
-        note.tags = ["note-shuffle-options-2"]
-        self.collection.add_note(note, 1)
-        card = note.cards()[0]
-        card.reps = 5
-        self.collection.update_card(card)
-
-        original = model["tmpls"][0].copy()
-        css = model["css"]
-        broken = model["tmpls"][0]
-        broken["qfmt"] = broken["qfmt"].replace('"feedbackPalette": "blue-orange"', '"feedbackPalette": "monochrome"')
-        broken["afmt"] = "{{FrontSide}}"
-        model["css"] = ".card { display: none; }"
-        self.models.save(model)
-
-        update = self.addon["update_note_type"]
-        self.assertEqual(update(self.models, model, css, lambda _: False, repair=True), "skipped")
-        model = self.models.byName(name)
-        self.assertEqual(model["tmpls"][0]["afmt"], "{{FrontSide}}")
-        self.assertEqual(update(self.models, model, css, lambda _: True, repair=True), "updated")
-        model = self.models.byName(name)
-        self.assertEqual(model["tmpls"][0], original)
-        self.assertEqual(model["css"], css)
-        self.assertEqual(self.collection.get_note(note.id)["Question"], "Question")
-        self.assertEqual(self.collection.get_note(note.id).tags, ["note-shuffle-options-2"])
-        self.assertEqual(self.collection.get_card(card.id).reps, 5)
-
     def test_anki_renders_and_updates_all_style_modes(self):
         appearance = {"palette": "pink", "finish": "outlined"}
         for mode, expected_class in (

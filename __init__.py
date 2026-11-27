@@ -350,7 +350,7 @@ def managed_note_types(models):
     )
 
 
-def update_note_type(models, model, css, confirm_overwrite, *, repair=False):
+def update_note_type(models, model, css, confirm_overwrite):
     kind = model.get("mfc_kind", "basic")
     if kind not in NOTE_TYPES or model["type"] != MODEL_STD:
         return "incompatible"
@@ -377,7 +377,7 @@ def update_note_type(models, model, css, confirm_overwrite, *, repair=False):
             fields_changed = True
 
     installed = model["tmpls"][0]
-    settings = model if repair else multiple_choice_template_settings(model)
+    settings = multiple_choice_template_settings(model)
     answer_coloring = settings.get("mfc_answer_coloring", ANSWER_COLORING_ALL)
     if answer_coloring not in ANSWER_COLORING_LABELS:
         answer_coloring = ANSWER_COLORING_ALL
@@ -406,7 +406,7 @@ def update_note_type(models, model, css, confirm_overwrite, *, repair=False):
     custom_template = template_changed and model.get("mfc_template_hash") != content_hash(
         installed["qfmt"], installed["afmt"]
     )
-    if (repair or custom_css or custom_template) and not confirm_overwrite(model["name"]):
+    if (custom_css or custom_template) and not confirm_overwrite(model["name"]):
         return "skipped"
 
     updated["css"] = css
@@ -997,24 +997,17 @@ class NoteTypesDialog(QDialog):
         self.edit_button.setEnabled(False)
         self.style_button = QPushButton("Change style…")
         self.style_button.setEnabled(False)
-        self.repair_button = QPushButton("Repair template…")
-        self.repair_button.setEnabled(False)
-
-        selected_actions = QHBoxLayout()
-        selected_actions.addWidget(self.edit_button)
-        selected_actions.addWidget(self.style_button)
-        selected_actions.addWidget(self.repair_button)
-        selected_actions.addStretch()
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
         create = QPushButton("Create note type…")
         self.update_button = QPushButton("Update note types")
         buttons.addButton(create, QDialogButtonBox.ButtonRole.ActionRole)
+        buttons.addButton(self.edit_button, QDialogButtonBox.ButtonRole.ActionRole)
+        buttons.addButton(self.style_button, QDialogButtonBox.ButtonRole.ActionRole)
         buttons.addButton(self.update_button, QDialogButtonBox.ButtonRole.ActionRole)
         create.clicked.connect(self.create)
         self.edit_button.clicked.connect(self.edit_selected)
         self.style_button.clicked.connect(self.change_style)
-        self.repair_button.clicked.connect(self.repair_selected)
         self.update_button.clicked.connect(self.update_note_types)
         buttons.rejected.connect(self.reject)
 
@@ -1023,7 +1016,6 @@ class NoteTypesDialog(QDialog):
         layout.addWidget(self.note_types)
         layout.addWidget(self.details)
         layout.addWidget(self.empty_message)
-        layout.addLayout(selected_actions)
         layout.addWidget(buttons)
         self.note_types.currentItemChanged.connect(self.show_selected_details)
         self.refresh()
@@ -1050,7 +1042,6 @@ class NoteTypesDialog(QDialog):
         name = item.data(Qt.ItemDataRole.UserRole) if item else None
         model = self.models.byName(name) if name else None
         self.edit_button.setEnabled(model is not None)
-        self.repair_button.setEnabled(model is not None)
         self.style_button.setEnabled(
             model is not None and model.get("mfc_style_application") == "tags"
         )
@@ -1139,41 +1130,6 @@ class NoteTypesDialog(QDialog):
             parent=self,
             defaultno=True,
         )
-
-    def repair_selected(self):
-        item = self.note_types.currentItem()
-        name = item.data(Qt.ItemDataRole.UserRole) if item else None
-        model = self.models.byName(name) if name else None
-        if model is None:
-            return
-
-        def confirm_repair(name):
-            return askUser(
-                f'Repair the card template for "{name}"?\n\n'
-                "This restores the Front, Back, and Styling from Material Notes using the "
-                "settings last saved by the add-on. Manual template and CSS edits will be replaced. "
-                "Your notes and review history will be kept.",
-                parent=self,
-                defaultno=True,
-            )
-
-        try:
-            css = read_model_file(MODEL_DIR / "styles.css")
-            status = update_note_type(self.models, model, css, confirm_repair, repair=True)
-        except (AnkiError, OSError) as error:
-            showInfo(str(error), parent=self, textFormat=Qt.TextFormat.PlainText)
-            return
-
-        if status == "updated":
-            row = self.note_types.currentRow()
-            self.refresh()
-            self.note_types.setCurrentRow(row)
-            mw.reset()
-            showInfo("Card template and styling restored.", parent=self)
-        elif status == "up to date":
-            showInfo("The card template and styling already match Material Notes.", parent=self)
-        elif status == "incompatible":
-            showInfo("This note type’s fields or card templates no longer match the preset.", parent=self)
 
     def update_note_types(self):
         try:
