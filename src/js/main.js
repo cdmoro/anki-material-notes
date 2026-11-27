@@ -278,7 +278,7 @@ function resetMultipleChoicePreview(example) {
     const list = example.querySelector(".question-options ol");
     const previousOrder = Array.from(list.querySelectorAll("[data-choice]"));
     const canonicalOrder = [...previousOrder].sort((a, b) => a.dataset.choice.localeCompare(b.dataset.choice));
-    // Both examples have a correct answer in required Option B. Trim before shuffling.
+    // Trim before shuffling so the required options and their correct answers stay visible.
     const count = selectedOptionCount();
     const options = canonicalOrder.slice(0, count);
     const available = new Set(options.map(option => option.dataset.choice));
@@ -289,7 +289,8 @@ function resetMultipleChoicePreview(example) {
             const other = Math.floor(Math.random() * (index + 1));
             [options[index], options[other]] = [options[other], options[index]];
         }
-        if (options.every((option, index) => option === previousOrder[index])) {
+        // With two choices, always forcing a different order would just alternate them.
+        if (options.length > 2 && options.every((option, index) => option === previousOrder[index])) {
             [options[0], options[1]] = [options[1], options[0]];
         }
     }
