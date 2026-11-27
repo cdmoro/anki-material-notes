@@ -730,6 +730,11 @@ body.card {
   text-align: start;
 }
 
+.note.back.choice-answer-card > .body {
+  text-align: start;
+  text-wrap: wrap;
+}
+
 .note .question-options ol,
 .note .question-results ol {
   margin: 0;
