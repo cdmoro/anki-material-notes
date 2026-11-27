@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0
+
+- Multiple Choice uses note tags for shuffle, layout, option labels, and answer feedback instead of configuration fields.
+- Adds numbered per-note tags for shuffle, layout, and answer feedback.
+- New Multiple Choice note types highlight all correct answers in green and wrong selections in red by default.
+- New Multiple Choice note types hide option labels by default.
+- Adds Green / red, Blue / orange, and Monochrome feedback palettes, plus optional ✓ and ✕ symbols with stable option wrapping when the answer is revealed. Palette and symbol settings can be overridden with note tags.
+
 ## 1.3.0
 
 - Adds bulk style changes for tag-styled note types, across all notes or notes appearing in a selected deck.

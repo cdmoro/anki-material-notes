@@ -151,11 +151,15 @@
 }
 
 .note .question-options ol.mc2-labeled {
+  --mc2-row-padding-block: .8em;
+  --mc2-control-center: calc(var(--mc2-row-padding-block) + .5lh);
   list-style-type: upper-alpha;
   counter-reset: mc2-choice;
+  padding-inline-start: 0;
 }
 
 .note .question-options ol.mc2-two-columns {
+  --mc2-control-center: 1.05em;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: .65em;
@@ -163,13 +167,22 @@
 }
 
 .note .question-options ol.mc2-two-columns > [data-choice] {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-height: 7em;
-  aspect-ratio: 1.4;
   margin: 0;
   padding: 0;
-  align-items: stretch;
   border-radius: .7em;
+}
+
+.note .question-options ol.mc2-two-columns > [data-choice]::after {
+  /* Set the default tile ratio while letting long answers make the row taller. */
+  grid-area: 1 / 1;
+  align-self: start;
+  width: 100%;
+  aspect-ratio: 1.4;
+  pointer-events: none;
+  content: "";
 }
 
 .note .question-options ol.mc2-two-columns > [data-choice][hidden] {
@@ -179,14 +192,15 @@
 .note .question-options ol.mc2-two-columns label {
   position: relative;
   display: flex;
-  flex: 1 1 0;
+  grid-area: 1 / 1;
   width: 100%;
   min-width: 0;
   align-self: stretch;
   align-items: center;
   justify-content: center;
   margin: 0;
-  padding: 1em;
+  /* Keep wrapped content clear of the corner controls without narrowing it. */
+  padding: calc(var(--mc2-control-center) + .5em + 2px) 1em;
   border-radius: inherit;
 }
 
@@ -195,6 +209,10 @@
 }
 
 .note .question-options ol.mc2-two-columns .mc2-option-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   flex: 1;
   min-width: 0;
   max-width: 100%;
@@ -207,8 +225,9 @@
 .note .question-options ol.mc2-two-columns input {
   position: absolute;
   z-index: 1;
-  top: .8em;
-  left: .8em;
+  inset-block-start: var(--mc2-control-center);
+  inset-inline-start: .6em;
+  transform: translateY(-50%);
 }
 
 .note .question-options ol.mc2-two-columns img {
@@ -226,18 +245,18 @@
 
 .note .question-options ol.mc2-labeled > [data-choice]::before {
   position: absolute;
-  top: .4em;
-  left: -2em;
-  width: 1.5em;
-  text-align: end;
+  inset-block-start: var(--mc2-control-center);
+  inset-inline-start: calc(.5em + .5rem);
+  width: 1em;
+  transform: translateY(-50%);
+  text-align: start;
+  pointer-events: none;
   content: counter(mc2-choice, var(--mc2-list-style, upper-alpha)) ".";
 }
 
 .note .question-options ol.mc2-two-columns.mc2-labeled > [data-choice]::before {
-  top: .38rem;
-  left: 2.2rem;
+  inset-inline-start: 2.2rem;
   width: 2rem;
-  text-align: start;
   content: counter(mc2-choice, var(--mc2-list-style, upper-alpha));
 }
 
@@ -251,6 +270,26 @@
   align-items: center;
   gap: .45em;
   cursor: pointer;
+}
+
+.note .question-options ol.mc2-labeled:not(.mc2-two-columns) > [data-choice] {
+  padding: 0;
+}
+
+.note .question-options ol.mc2-labeled:not(.mc2-two-columns) label {
+  width: 100%;
+  margin: 0;
+  padding: var(--mc2-row-padding-block) 1em;
+  align-items: flex-start;
+  border-radius: inherit;
+}
+
+.note .question-options ol.mc2-labeled:not(.mc2-two-columns):not(.mc2-no-labels) label {
+  padding-inline-start: 2.4em;
+}
+
+.note .question-options ol.mc2-labeled:not(.mc2-two-columns) input {
+  margin-block-start: calc(.5lh - var(--mc2-input-size) / 2);
 }
 
 .note .question-options ol.mc2-no-labels {
@@ -317,13 +356,15 @@
 }
 
 .note .question-options input {
+  --mc2-input-size: 18px;
   appearance: none;
   box-sizing: border-box;
   position: relative;
   display: flex;
-  width: 18px;
-  height: 18px;
+  width: var(--mc2-input-size);
+  height: var(--mc2-input-size);
   margin: 0;
+  font: inherit;
   align-items: center;
   justify-content: center;
   color: var(--palette-accent);
@@ -334,8 +375,7 @@
 }
 
 .note .question-options input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  --mc2-input-size: 16px;
   border-radius: 2px;
 }
 
@@ -437,22 +477,95 @@
   color: var(--font-color);
 }
 
+.choice-answer-card[data-mc2-feedback-palette="blue-orange"] {
+  --feedback-correct-background: #e0f2fe;
+  --feedback-correct-foreground: #0072b2;
+  --feedback-incorrect-background: #ffedd5;
+  --feedback-incorrect-foreground: #a84300;
+}
+
+.choice-answer-card[data-mc2-feedback-palette="monochrome"] {
+  --feedback-correct-background: #f4f4f5;
+  --feedback-correct-foreground: #18181b;
+  --feedback-incorrect-background: #fafafa;
+  --feedback-incorrect-foreground: #52525b;
+}
+
+:is(.nightMode, .night_mode) .choice-answer-card[data-mc2-feedback-palette="blue-orange"] {
+  --feedback-correct-background: #163a52;
+  --feedback-correct-foreground: #9cdaff;
+  --feedback-incorrect-background: #522c1b;
+  --feedback-incorrect-foreground: #ffbf91;
+}
+
+:is(.nightMode, .night_mode) .choice-answer-card[data-mc2-feedback-palette="monochrome"] {
+  --feedback-correct-background: #303034;
+  --feedback-correct-foreground: #f4f4f5;
+  --feedback-incorrect-background: #27272a;
+  --feedback-incorrect-foreground: #bcbcc4;
+}
+
 .note.back.choice-answer-card .question-options [data-choice].correct-answer {
+  --mc2-feedback-accent: var(--feedback-correct-foreground);
+  --mc2-feedback-outline: solid;
   background: var(--feedback-correct-background);
   color: inherit;
   font-weight: inherit;
 }
 
 .note.back.choice-answer-card .question-options [data-choice].wrong-answer {
+  --mc2-feedback-accent: var(--feedback-incorrect-foreground);
+  --mc2-feedback-outline: dashed;
   background: var(--feedback-incorrect-background);
   color: inherit;
   opacity: 1;
   text-decoration: none;
 }
 
+.choice-answer-card[data-mc2-feedback-palette="monochrome"] .question-options [data-choice]:is(.correct-answer, .wrong-answer) {
+  outline: 2px var(--mc2-feedback-outline) var(--mc2-feedback-accent);
+  outline-offset: -2px;
+}
+
+.note .question-options ol.mc2-labeled.mc2-show-feedback-symbols:not(.mc2-two-columns) label {
+  padding-inline-end: 1.7em;
+}
+
+.note .question-options .mc2-show-feedback-symbols .mc2-option-content {
+  min-width: 0;
+}
+
+.mc2-feedback-symbol {
+  position: absolute;
+  inset-block-start: var(--mc2-control-center);
+  inset-inline-end: .5em;
+  display: grid;
+  width: 1em;
+  height: 1em;
+  place-items: center;
+  transform: translateY(-50%);
+  color: var(--mc2-feedback-accent);
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.wrong-answer > .mc2-feedback-symbol::before {
+  content: "✕";
+  line-height: 1;
+}
+
+.correct-answer > .mc2-feedback-symbol::before {
+  width: .85em;
+  height: .65em;
+  background: currentColor;
+  clip-path: polygon(0 47%, 13% 31%, 37% 65%, 87% 0, 100% 17%, 37% 100%);
+  content: "";
+}
+
 .choice-answer-card .question-options input:disabled {
   cursor: default;
   opacity: 1;
+  pointer-events: none;
 }
 
 .note .small {

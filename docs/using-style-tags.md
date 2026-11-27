@@ -42,7 +42,9 @@ For an add-on note type configured with **Style using tags**, select it in **Too
 
 Use the spellings below as shown. Each tag can be entered as written or with the `Material::` prefix. For example, `note-green-base` and `Material::note-green-base` produce the same appearance. The prefix groups the tags under **Material** in Anki.
 
-Use **one palette and finish tag per note**. If several match, the CSS cascade resolves each property according to the stylesheet’s rule order. Reordering tags in Anki has no effect. Mixing styles can combine properties, for example a filled background and an outline. The optional `note-centered` or `Material::note-centered` tag centers card content and can be used alongside a palette tag. Since the template puts Anki tags into its class list, keep organizational tags distinct from template class names such as `front` and `back`.
+Use **one palette and finish tag per note**. If several match, the CSS cascade resolves each property according to the stylesheet’s rule order. Reordering tags in Anki has no effect. Mixing styles can combine properties, for example a filled background and an outline. The optional `note-centered` or `Material::note-centered` tag centers card content and can be used alongside a palette tag. Multiple Choice also reserves `note-shuffle-options-*`, `note-layout-*`, `note-label-option-*`, `note-answer-feedback-*`, `note-feedback-palette-*`, and `note-feedback-symbols-*` tags for per-note configuration. The template removes those reserved tags from its CSS classes, so they can coexist with palette and centered tags. Keep other organizational tags distinct from template class names such as `front` and `back`.
+
+For the full Multiple Choice configuration tag list and examples, see the [Multiple Choice settings guide](multiple-choice-settings.md).
 
 Tags belong to the note, so style tags affect all cards generated from it, including forward and reverse cards. To give sibling cards different appearances, use card-specific templates with their own fixed classes. See the [Anki Manual on tags](https://docs.ankiweb.net/editing.html#using-tags).
 

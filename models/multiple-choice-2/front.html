@@ -1,3 +1,16 @@
+<!-- Edit these JSON defaults. Per-note tags take precedence.
+     Change only the values. Editing the HTML or scripts can break the card.
+     Supported values: https://github.com/cdmoro/anki-material-notes/blob/main/docs/multiple-choice-settings.md -->
+<template data-mc2-defaults>
+    {
+        "shuffleOptions": false,
+        "optionLabels": "none",
+        "optionLayout": 1,
+        "answerFeedback": "correct-and-errors",
+        "feedbackPalette": "green-red",
+        "showFeedbackSymbols": false
+    }
+</template>
 <div class="note front question-card {{Tags}}" data-mc2-front>
     <div class="body question">{{Question}}</div>
     <div id="answer" class="choice-answer-anchor" data-mc2-answer-anchor aria-hidden="true"></div>
@@ -16,8 +29,6 @@
         </ol>
     </div>
     <div data-mc2-answer-key hidden>{{text:Correct Answers}}</div>
-    <div data-mc2-config hidden>{{text:Shuffle Options}}</div>
-    <div data-mc2-option-layout hidden>{{text:Option Layout}}</div>
 </div>
     <script>
         if (typeof window.Persistence === "undefined") {
@@ -50,19 +61,38 @@
         root.dataset.mc2Initialized = "true";
 
         const options = Array.from(root.querySelectorAll("[data-choice]"));
-        const config = root.querySelector("[data-mc2-config]");
-        const layoutConfig = root.querySelector("[data-mc2-option-layout]");
-        const defaults = false;
-        const shufflePolicy = "field";
-        const override = config.textContent.trim().toLowerCase();
-        const shuffle = shufflePolicy === "always" ? true
-            : shufflePolicy === "never" ? false
-            : override === "true" ? true : override === "false" ? false : defaults;
+        const tagsRaw = "{{Tags}}";
+        const reservedConfig = /^note-(?:layout|label-option|label-options|answer-feedback|feedback-palette|feedback-symbols|shuffle-options)(?:-|$)/;
+        const tagTokens = Array.from(new Set([
+            ...root.classList,
+            ...tagsRaw.trim().split(/\s+/).filter(Boolean),
+        ].map(token => token.replace(/^Material::/, ""))));
+        const validChoice = (family, max) => {
+            const matches = tagTokens.map(token => new RegExp(`^note-${family}-(\\d+)$`).exec(token))
+                .filter(match => match && Number(match[1]) >= 1 && Number(match[1]) <= max);
+            return matches.length === 1 ? Number(matches[0][1]) : null;
+        };
+        // Configuration tags must never participate in palette/visual CSS matching.
+        Array.from(root.classList).filter(token => reservedConfig.test(token.replace(/^Material::/, "")))
+            .forEach(token => root.classList.remove(token));
+        let defaults = {};
+        const config = root.previousElementSibling;
+        if (config?.hasAttribute("data-mc2-defaults")) {
+            try { defaults = JSON.parse(config.content.textContent) ?? {}; } catch (_) {}
+        }
+        root.mc2Defaults = defaults;
+        const shuffleTag = validChoice("shuffle-options", 2);
+        const shuffle = shuffleTag ? shuffleTag === 2 : defaults.shuffleOptions === true;
         const stateKey = "mc2";
-        const optionLabels = "";
-        const defaultOptionLayout = 1;
-        const labelStyle = optionLabels === "letters" ? "upper-alpha"
-            : optionLabels === "numbers" ? "decimal" : optionLabels || "none";
+        const symbolsTag = validChoice("feedback-symbols", 2);
+        const showFeedbackSymbols = symbolsTag ? symbolsTag === 2 : defaults.showFeedbackSymbols === true;
+        const labelStyles = ["upper-alpha", "decimal", "arabic-indic", "lower-roman", "lower-greek", "georgian", "armenian", "cjk-ideographic", "hebrew", "japanese-informal", "none"];
+        const labelTagMatches = tagTokens.map(token => /^note-label-option-(.+)$/.exec(token))
+            .filter(match => match && labelStyles.includes(match[1]));
+        const labelTag = labelTagMatches.length === 1 ? labelTagMatches[0][1] : null;
+        const { optionLabels } = defaults;
+        const labelStyle = labelTag || (optionLabels === "letters" ? "upper-alpha"
+            : optionLabels === "numbers" ? "decimal" : labelStyles.includes(optionLabels) ? optionLabels : "none");
         const isAnswerSide = Boolean(root.closest("[data-mc2-back]"));
         const signature = [
             root.querySelector(".question")?.textContent.trim() || "",
@@ -104,14 +134,16 @@
         const list = root.querySelector("ol");
         list.classList.add("mc2-labeled");
         list.style.setProperty("--mc2-list-style", labelStyle);
-        const rawLayout = layoutConfig.textContent.trim();
-        const optionLayout = rawLayout === "" ? defaultOptionLayout : rawLayout === "1" || rawLayout === "2" ? Number(rawLayout) : 1;
+        const optionLayout = validChoice("layout", 2) || defaults.optionLayout;
+        list.classList.toggle("mc2-show-feedback-symbols", showFeedbackSymbols);
         list.classList.toggle("mc2-two-columns", optionLayout === 2);
         list.classList.toggle("mc2-no-labels", labelStyle === "none");
         order.filter(letter => byLetter.has(letter)).forEach(letter => list.appendChild(byLetter.get(letter)));
-        // Keep taps on the options and the gaps between them from triggering
-        // AnkiMobile's card-level show-answer gesture.
-        list.addEventListener("touchend", event => event.stopPropagation(), { passive: true });
+        const stopReviewTap = event => event.stopPropagation();
+        if (!isAnswerSide) {
+            // Keep taps between options from showing the answer in AnkiMobile.
+            list.addEventListener("touchend", stopReviewTap, { passive: true });
+        }
         const answerKey = root.querySelector("[data-mc2-answer-key]").textContent;
         const available = new Set(options.map(option => option.dataset.choice));
         const answerPattern = /^\s*(?:[A-Z]|\d+)(?:(?:\s*,\s*|\s+)(?:[A-Z]|\d+))*\s*$/i;
@@ -133,22 +165,25 @@
             input.name = "mc2-answer";
             input.value = option.dataset.choice;
             input.checked = selected.has(input.value);
-            input.addEventListener("change", () => {
-                if (!multiple) selected.clear();
-                if (input.checked) selected.add(input.value); else selected.delete(input.value);
-                try { Persistence.setItem(stateKey, { order, selected: Array.from(selected) }); } catch (_) {}
-            });
-            // AnkiMobile treats taps anywhere in the card webview as show-answer.
-            // Stop the touch gesture at the actual form control while preserving
-            // its native click/change behavior.
-            input.addEventListener("touchend", event => event.stopPropagation(), { passive: true });
-            label.addEventListener("touchend", event => event.stopPropagation(), { passive: true });
+            input.disabled = isAnswerSide;
+            if (!isAnswerSide) {
+                input.addEventListener("change", () => {
+                    if (!multiple) selected.clear();
+                    if (input.checked) selected.add(input.value); else selected.delete(input.value);
+                    try { Persistence.setItem(stateKey, { order, selected: Array.from(selected) }); } catch (_) {}
+                });
+                // Preserve native selection while stopping AnkiMobile's show-answer gesture.
+                input.addEventListener("touchend", stopReviewTap, { passive: true });
+                label.addEventListener("touchend", stopReviewTap, { passive: true });
+            }
             const content = document.createElement("span");
             content.className = "mc2-option-content";
             content.append(...Array.from(option.childNodes));
             label.append(input, content);
             option.replaceChildren(label);
         });
-        try { Persistence.setItem(stateKey, { order, selected: Array.from(selected) }); } catch (_) {}
+        if (!isAnswerSide) {
+            try { Persistence.setItem(stateKey, { order, selected: Array.from(selected) }); } catch (_) {}
+        }
     })();
 </script>
